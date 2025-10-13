@@ -6,7 +6,7 @@
 
 ---
 
-## [X] GIAI ĐOẠN 1 – CẤU HÌNH CƠ BẢN & KHỞI TẠO DỰ ÁN - ĐÃ HOÀN THÀNH
+## GIAI ĐOẠN 1 – CẤU HÌNH CƠ BẢN & KHỞI TẠO DỰ ÁN - ĐÃ HOÀN THÀNH
 
 **Mục tiêu:** đầu tiên thì làm project chạy được đã, cấu trúc dự án thì đã theo template rồi.
 
@@ -37,7 +37,7 @@
 
 ---
 
-## [ ] GIAI ĐOẠN 2 – AUTH (ĐĂNG NHẬP / ĐĂNG KÝ / TOKEN / PROFILE)
+## GIAI ĐOẠN 2 – AUTH (ĐĂNG NHẬP / ĐĂNG KÝ / TOKEN / PROFILE)
 
 **Mục tiêu:** Người dùng có thể đăng nhập, lưu JWT token, xem profile, đăng xuất.
 
