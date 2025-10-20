@@ -1,8 +1,8 @@
 import * as React from "react";
 import { Box, Typography, Button, Avatar, Paper } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import MenuBar from "../../components/Layout/MenuBar";
-import Navbar from "../../components/Layout/Navbar";
+import MenuBar from "../../components/layout/MenuBar";
+import Navbar from "../../components/layout/Navbar";
 
 export default function Profile(): React.ReactElement {
   const navigate = useNavigate();

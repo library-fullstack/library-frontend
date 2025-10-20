@@ -30,7 +30,13 @@ export default function LoginForm(): React.ReactElement {
 
     try {
       await login(identifier, password);
-      navigate("/");
+      // After login we do a full page reload to ensure any components
+      // that read from localStorage (instead of context) get the fresh data.
+      // Use location.href to navigate to home and force reload.
+      // Small timeout ensures localStorage is written in AuthContext.
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 100);
     } catch (err: unknown) {
       const errorMessage =
         (

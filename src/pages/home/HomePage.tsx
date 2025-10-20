@@ -1,7 +1,7 @@
 import React from "react";
 import { Box } from "@mui/material";
-import Navbar from "../../components/Layout/Navbar";
-import MenuBar from "../../components/Layout/MenuBar";
+import Navbar from "../../components/layout/Navbar";
+import MenuBar from "../../components/layout/MenuBar";
 import HeroBanner from "../../components/HeroBanner";
 import FeaturedBooks from "../../components/FeaturedBooks";
 

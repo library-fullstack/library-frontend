@@ -1,26 +1,26 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
 // Features
-import HomePage from "../features/home/HomePage";
-import MainLayout from "../components/Layout/MainLayout";
-import AuthLayout from "../features/auth/AuthLayout";
-import LoginForm from "../features/auth/components/LoginForm";
-import RegisterForm from "../features/auth/components/RegisterForm";
-import ForgotPasswordForm from "../features/auth/components/ForgotPasswordForm";
-import BookList from "../features/books/pages/BookList";
-import BookDetail from "../features/books/pages/BookDetail";
-import Cart from "../features/borrow/pages/Cart";
-import Checkout from "../features/borrow/pages/Checkout";
-import BorrowList from "../features/borrow/pages/BorrowList";
-import OrderList from "../features/borrow/pages/OrderList";
-import Profile from "../features/user/pages/Profile";
-import AdminDashboard from "../features/admin/pages/AdminDashboard";
-import Services from "../features/common/pages/Services";
-import News from "../features/common/pages/News";
-import About from "../features/common/pages/About";
-import Contact from "../features/common/pages/Contact";
-import Forum from "../features/common/pages/Forum";
-import Favorites from "../features/common/pages/Favorites";
+import HomePage from "../pages/home/HomePage";
+import MainLayout from "../components/layout/MainLayout";
+import AuthLayout from "../pages/auth/AuthLayout";
+import LoginForm from "../components/forms/LoginForm";
+import RegisterForm from "../components/forms/RegisterForm";
+import ForgotPasswordForm from "../components/forms/ForgotPasswordForm";
+import BookList from "../pages/book/BookList";
+import BookDetail from "../pages/book/BookDetail";
+import Cart from "../pages/borrow/Cart";
+import Checkout from "../pages/borrow/Checkout";
+import BorrowList from "../pages/borrow/BorrowList";
+import OrderList from "../pages/borrow/OrderList";
+import Profile from "../pages/user/Profile";
+import AdminDashboard from "../pages/admin/AdminDashboard";
+import Services from "../pages/common/Services";
+import News from "../pages/common/News";
+import About from "../pages/common/About";
+import Contact from "../pages/common/Contact";
+import Forum from "../pages/common/Forum";
+import Favorites from "../pages/common/Favorites";
 import ProtectedRoute from "../components/ProtectedRoute";
 import PublicRoute from "../components/PublicRoute";
 
