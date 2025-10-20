@@ -1,13 +1,57 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="preload"
+      as="image"
+      href="/src/assets/img/background-login.jpg"
+    />
+    <style>
+      body {
+        margin: 0;
+        background-color: #3b2c24;
+        transition: opacity 0.4s ease;
+        opacity: 0;
+      }
+
+      body.ready {
+        opacity: 1;
+      }
+    </style>
     <title>library-ui</title>
   </head>
   <body>
     <div id="root"></div>
+    <div
+      id="splash-bg"
+      style="
+        position: fixed;
+        inset: 0;
+        background: #3b2c24;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-family: sans-serif;
+        font-size: 16px;
+        letter-spacing: 0.5px;
+      "
+    >
+      Đang tải...
+    </div>
+
+    <div id="root"></div>
+
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        document.body.classList.add("ready");
+        const splash = document.getElementById("splash-bg");
+        splash?.remove();
+      });
+    </script>
   </body>
 </html>
