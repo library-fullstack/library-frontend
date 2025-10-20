@@ -11,7 +11,7 @@ import {
 import { Search } from "@mui/icons-material";
 import { useNavigate } from "react-router";
 import useAuth from "../../hooks/useAuth";
-import Logo from "../Icons/Logo";
+import Logo from "../icons/Logo";
 import FavoriteBorderRoundedIcon from "@mui/icons-material/FavoriteBorderRounded";
 import LocalMallOutlinedIcon from "@mui/icons-material/LocalMallOutlined";
 import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
