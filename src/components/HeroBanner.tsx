@@ -2,9 +2,12 @@ import * as React from "react";
 import { Box, Container, Typography, Button } from "@mui/material";
 import { ArrowForward } from "@mui/icons-material";
 
+import { bannerConfig } from "../config/bannerConfig";
+
 export default function HeroBanner(): React.ReactElement {
   const [activeSlide, setActiveSlide] = React.useState(0);
 
+  // giả định tạm
   const books = [
     { src: "/assets/book-2020-war.png", alt: "2020 World of War" },
     { src: "/assets/book-gothic.png", alt: "War in the Gothic Line" },
@@ -16,60 +19,98 @@ export default function HeroBanner(): React.ReactElement {
   return (
     <Box
       sx={{
-        backgroundColor: "#FFF5F7",
-        py: 6,
-        minHeight: 400,
+        position: "relative",
+        backgroundImage: `url(${bannerConfig.image})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        py: { xs: 8, md: 10 },
+        minHeight: "calc(100vh - 125px)",
+        display: "flex",
+        alignItems: "center",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          inset: 0,
+          background:
+            bannerConfig.overlay === "dark"
+              ? "linear-gradient(to right, rgba(0,0,0,0.55), rgba(0,0,0,0.25))"
+              : "linear-gradient(to right, rgba(255,255,255,0.85), rgba(255,255,255,0.6))",
+          backdropFilter: "blur(2px)",
+          zIndex: 0,
+        },
       }}
     >
-      <Container maxWidth="lg">
+      <Container
+        maxWidth="lg"
+        sx={{
+          position: "relative",
+          zIndex: 1,
+          py: { xs: 6, md: 8 },
+        }}
+      >
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: 4,
+            gap: { xs: 4, md: 6 },
+            flexDirection: { xs: "column", md: "row" },
           }}
         >
           {/* nội dung bên trái */}
-          <Box sx={{ flex: 1, maxWidth: 500 }}>
+          <Box sx={{ flex: 1, maxWidth: 520, mb: { xs: 6, md: 0 } }}>
             <Typography
               variant="h2"
               sx={{
                 fontSize: { xs: "2rem", md: "3rem" },
                 fontWeight: 700,
-                color: "#393280",
+                color: bannerConfig.titleColor,
                 mb: 2,
+                lineHeight: 1.25,
+                textShadow:
+                  bannerConfig.overlay === "dark"
+                    ? "0 3px 6px rgba(0,0,0,0.4)"
+                    : "0 3px 6px rgba(255,255,255,0.3)",
               }}
             >
-              Xin chào các bạn
+              {bannerConfig.title}
             </Typography>
+
             <Typography
               sx={{
-                fontSize: "1rem",
-                color: "#666",
+                fontSize: { xs: "1rem", md: "1.1rem" },
+                color: bannerConfig.subtitleColor,
                 mb: 3,
                 lineHeight: 1.6,
+                textShadow:
+                  bannerConfig.overlay === "dark"
+                    ? "0 2px 4px rgba(0,0,0,0.3)"
+                    : "0 2px 4px rgba(255,255,255,0.4)",
               }}
             >
-              Cùng chào mừng sự kiện khai trương thư viện trực tuyến HBH...
+              {bannerConfig.subtitle}
             </Typography>
+
             <Button
-              variant="outlined"
+              variant="contained"
               endIcon={<ArrowForward />}
               sx={{
-                borderColor: "#393280",
-                color: "#393280",
+                backgroundColor: bannerConfig.buttonColor,
+                color: "#fff",
                 textTransform: "none",
                 px: 3,
                 py: 1,
                 fontSize: "0.95rem",
+                borderRadius: "24px",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
                 "&:hover": {
-                  borderColor: "#2e276a",
-                  backgroundColor: "rgba(57, 50, 128, 0.04)",
+                  backgroundColor: `${bannerConfig.buttonColor}cc`, // 80% opacity
+                  boxShadow: "0 6px 16px rgba(0,0,0,0.25)",
                 },
               }}
             >
-              Xem thêm
+              {bannerConfig.buttonText}
             </Button>
 
             {/* điều hướng bằng chấm tròn */}
@@ -82,11 +123,16 @@ export default function HeroBanner(): React.ReactElement {
                     width: 10,
                     height: 10,
                     borderRadius: "50%",
-                    backgroundColor: activeSlide === index ? "#FF6B6B" : "#DDD",
+                    backgroundColor:
+                      activeSlide === index
+                        ? bannerConfig.buttonColor
+                        : bannerConfig.overlay === "dark"
+                        ? "rgba(255,255,255,0.5)"
+                        : "rgba(0,0,0,0.2)",
                     cursor: "pointer",
                     transition: "all 0.3s ease",
                     "&:hover": {
-                      backgroundColor: "#FF6B6B",
+                      backgroundColor: bannerConfig.buttonColor,
                     },
                   }}
                 />
@@ -94,7 +140,7 @@ export default function HeroBanner(): React.ReactElement {
             </Box>
           </Box>
 
-          {/* sách */}
+          {/* sách minh họa */}
           <Box
             sx={{
               flex: 1,

@@ -13,6 +13,7 @@ export interface Favourite {
   };
 }
 
+// api cho phần yêu thích - chưa làm gì cả
 export const favouritesApi = {
   getAll: () => axiosClient.get<Favourite[]>("/favourites"),
 

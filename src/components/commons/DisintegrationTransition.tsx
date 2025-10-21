@@ -7,6 +7,7 @@ interface DisintegrationTransitionProps {
   uniqueKey: string;
 }
 
+// tạo hiệu ứng, làm cả tiếng đồng hồ xong nó chả hiện đếch biết bị gì. ảo đá ?
 const generateParticles = (count: number) => {
   return Array.from({ length: count }, (_, i) => ({
     id: i,

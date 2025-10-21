@@ -7,47 +7,66 @@ import {
   TextField,
   InputAdornment,
   Container,
+  IconButton,
+  Snackbar,
+  Alert,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
-import { Search } from "@mui/icons-material";
+import { Search, Menu as MenuIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router";
 import useAuth from "../../hooks/useAuth";
+import { useThemeMode } from "../../hooks/useThemeMode";
 import Logo from "../icons/Logo";
-import FavoriteBorderRoundedIcon from "@mui/icons-material/FavoriteBorderRounded";
-import LocalMallOutlinedIcon from "@mui/icons-material/LocalMallOutlined";
-import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
+import { Heart, ShoppingBag, UserRound, Moon, Sun } from "lucide-react";
 
 export default function Navbar(): React.ReactElement {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { mode, toggleTheme } = useThemeMode();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  React.useEffect(() => {
-    console.log("Navbar - Current user:", user);
-  }, [user]);
+  const [snack, setSnack] = React.useState<"cart" | "favorite" | null>(null);
+  const [openSnack, setOpenSnack] = React.useState(false);
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
 
-  // xử lí khi bấm vào tài khoản
-  const handleAccountClick = () => {
-    if (user) navigate("/user/profile");
-    else navigate("/auth/login");
+  const showSnack = (type: "cart" | "favorite") => {
+    setSnack(type);
+    setOpenSnack(true);
   };
 
-  // test!!!!!!!!!!!!! hiện cái snackbar để bảo đăng nhập cái đã.
-  const [openSnack, setOpenSnack] = React.useState(false);
-
-  // hiện cái snack
   const handleCloseSnack = (
-    _event?: React.SyntheticEvent | Event,
+    _?: React.SyntheticEvent | Event,
     reason?: string
   ) => {
     if (reason === "clickaway") return;
     setOpenSnack(false);
+    setTimeout(() => setSnack(null), 300);
   };
 
-  // xử lí khi nhấn vào giỏ mượn
+  const handleFavouriteClick = () => {
+    if (user) navigate("/favorites");
+    else showSnack("favorite");
+    setDrawerOpen(false);
+  };
+
   const handleCartClick = () => {
     if (user) navigate("/cart");
-    else setOpenSnack(true);
+    else showSnack("cart");
+    setDrawerOpen(false);
+  };
+
+  const handleAccountClick = () => {
+    if (user) navigate("/user/profile");
+    else navigate("/auth/login");
+    setDrawerOpen(false);
   };
 
   return (
@@ -56,8 +75,10 @@ export default function Navbar(): React.ReactElement {
         position="sticky"
         elevation={0}
         sx={{
-          backgroundColor: "#3F3D85",
-          borderBottom: "1px solid rgba(255,255,255,0.1)",
+          bgcolor: "background.paper",
+          borderBottom: 1,
+          borderColor: "divider",
+          transition: "all 0.3s ease",
         }}
       >
         <Container maxWidth="lg">
@@ -67,13 +88,12 @@ export default function Navbar(): React.ReactElement {
               px: { xs: 1, sm: 2 },
             }}
           >
-            {/* Logo */}
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
                 gap: 1,
-                mr: 4,
+                mr: { xs: 1, md: 3 },
                 cursor: "pointer",
               }}
               onClick={() => navigate("/")}
@@ -81,212 +101,259 @@ export default function Navbar(): React.ReactElement {
               <Logo />
               <Typography
                 sx={{
-                  color: "white",
-                  fontWeight: 600,
-                  fontSize: "1.1rem",
-                  display: { xs: "none", sm: "block" },
-                  marginLeft: 2,
-                  letterSpacing: "0.015em",
+                  color: "text.primary",
+                  fontWeight: 700,
+                  fontSize: {
+                    xs: "0.85rem",
+                    sm: "0.90rem",
+                    md: "0.95rem",
+                    lg: "1rem",
+                  },
+                  display: { xs: "none", md: "block" },
+                  marginLeft: 1,
+                  letterSpacing: "-0.01em",
+                  minWidth: 90,
+                  flexShrink: 0,
                 }}
               >
                 THƯ VIỆN TRỰC TUYẾN HBH
               </Typography>
             </Box>
 
-            {/* thanh tìm kiếm, chỗ này để tạm thế này đi */}
             <TextField
-              placeholder="Tìm kiếm sách"
+              placeholder="Tìm kiếm sách, tác giả..."
               size="small"
               sx={{
                 flexGrow: 1,
-                maxWidth: 400,
-                mr: 3,
+                maxWidth: { xs: "100%", md: 550 },
+                mr: { xs: 1, md: 2 },
                 "& .MuiOutlinedInput-root": {
-                  backgroundColor: "white",
-                  borderRadius: "4px",
+                  bgcolor: mode === "light" ? "#F8FAFC" : "#1E1F27",
+                  borderRadius: 2,
+                  transition: "all 0.2s ease",
                   "& fieldset": {
-                    borderColor: "transparent",
+                    borderColor: mode === "light" ? "#CBD5E1" : "#3F3F46",
                   },
                   "&:hover fieldset": {
-                    borderColor: "transparent",
+                    borderColor: mode === "light" ? "#6366F1" : "#818CF8",
                   },
                   "&.Mui-focused fieldset": {
-                    borderColor: "transparent",
+                    borderColor: "primary.main",
+                  },
+                  "&.Mui-focused": {
+                    boxShadow: `0 0 0 2px ${
+                      mode === "light"
+                        ? "rgba(99,102,241,0.1)"
+                        : "rgba(129,140,248,0.15)"
+                    }`,
+                  },
+                  "& input": {
+                    color: "text.primary",
                   },
                 },
                 "& .MuiOutlinedInput-input": {
-                  padding: "8px 12px",
+                  padding: "9px 14px",
                   fontSize: "0.9rem",
                 },
               }}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <Search sx={{ color: "#999", fontSize: 20 }} />
+                    <Search sx={{ color: "text.secondary", fontSize: 22 }} />
                   </InputAdornment>
                 ),
               }}
             />
 
-            {/* nav bên phải */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 2.5,
-              }}
-            >
-              {/* giỏ mượn */}
+            {isMobile ? (
+              <IconButton
+                onClick={() => setDrawerOpen(true)}
+                sx={{
+                  color: "text.primary",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    bgcolor:
+                      mode === "light"
+                        ? "rgba(99,102,241,0.08)"
+                        : "rgba(129,140,248,0.12)",
+                  },
+                }}
+              >
+                <MenuIcon />
+              </IconButton>
+            ) : (
               <Box
-                onClick={handleCartClick}
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 1,
-                  cursor: "pointer",
-                  "&:hover": { opacity: 0.9 },
+                  gap: 1.25,
+                  flexWrap: "nowrap",
+                  flexShrink: 0,
                 }}
               >
-                <Box
+                <IconButton
+                  onClick={toggleTheme}
                   sx={{
-                    height: "1em",
-                    display: "flex",
-                    alignItems: "center",
-                    transform: "translateY(1px)",
+                    color: "text.primary",
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      bgcolor:
+                        mode === "light"
+                          ? "rgba(99,102,241,0.08)"
+                          : "rgba(129,140,248,0.12)",
+                    },
                   }}
                 >
-                  <LocalMallOutlinedIcon
-                    sx={{ fontSize: 18, color: "white" }}
-                  />
-                </Box>
-                <Typography
-                  sx={{
-                    color: "white",
-                    fontSize: "0.85rem",
-                    fontWeight: 500,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.02em",
-                    display: { xs: "none", sm: "block" },
-                    position: "relative",
-                    top: "2px",
-                  }}
-                >
-                  GIỎ MƯỢN
-                </Typography>
+                  {mode === "light" ? <Moon size={22} /> : <Sun size={22} />}
+                </IconButton>
+
+                <Box sx={{ width: "1px", height: 18, bgcolor: "divider" }} />
+
+                {[
+                  {
+                    label: "Giỏ mượn",
+                    icon: <ShoppingBag size={19} />,
+                    onClick: handleCartClick,
+                  },
+                  {
+                    label: "Yêu thích",
+                    icon: <Heart size={20} />,
+                    onClick: handleFavouriteClick,
+                  },
+                  {
+                    label: user ? user.full_name : "Tài khoản",
+                    icon: <UserRound size={20} />,
+                    onClick: handleAccountClick,
+                    truncate: !!user,
+                  },
+                ].map((item, i) => (
+                  <React.Fragment key={i}>
+                    <Box
+                      onClick={item.onClick}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.75,
+                        px: 1,
+                        py: 0.6,
+                        borderRadius: 1.25,
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                        flexShrink: 0,
+                        "&:hover": {
+                          bgcolor:
+                            mode === "light"
+                              ? "rgba(99,102,241,0.08)"
+                              : "rgba(129,140,248,0.12)",
+                        },
+                      }}
+                    >
+                      {item.icon}
+                      <Typography
+                        sx={{
+                          color: "text.primary",
+                          fontSize: { xs: "0.9rem", sm: "0.95rem", md: "1rem" },
+                          fontWeight: 500,
+                          letterSpacing: "-0.01em",
+                          lineHeight: 1.4,
+                          ...(item.truncate && {
+                            maxWidth: { xs: 100, sm: 130, md: 160 },
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }),
+                        }}
+                      >
+                        {item.label}
+                      </Typography>
+                    </Box>
+                    {i < 2 && (
+                      <Box
+                        sx={{ width: "1px", height: 18, bgcolor: "divider" }}
+                      />
+                    )}
+                  </React.Fragment>
+                ))}
               </Box>
-
-              {/* chia mấy thằng này ra */}
-              <Box
-                sx={{
-                  width: "1px",
-                  height: "18px",
-                  backgroundColor: "rgba(255,255,255,0.3)",
-                }}
-              />
-
-              {/* yêu thích */}
-              <Box
-                onClick={() => navigate("/favorites")}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  cursor: "pointer",
-                  "&:hover": { opacity: 0.9 },
-                }}
-              >
-                <Box
-                  sx={{
-                    height: "1em",
-                    display: "flex",
-                    alignItems: "center",
-                    transform: "translateY(1px)",
-                  }}
-                >
-                  <FavoriteBorderRoundedIcon
-                    sx={{ fontSize: 18, color: "white" }}
-                  />
-                </Box>
-                <Typography
-                  sx={{
-                    color: "white",
-                    fontSize: "0.85rem",
-                    fontWeight: 500,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.02em",
-                    display: { xs: "none", sm: "block" },
-                    position: "relative",
-                    top: "1px",
-                  }}
-                >
-                  YÊU THÍCH
-                </Typography>
-              </Box>
-
-              {/* thanh chia */}
-              <Box
-                sx={{
-                  width: "1px",
-                  height: "18px",
-                  backgroundColor: "rgba(255,255,255,0.3)",
-                }}
-              />
-
-              {/* tài khoản */}
-              <Box
-                onClick={handleAccountClick}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  cursor: "pointer",
-                  "&:hover": { opacity: 0.9 },
-                }}
-              >
-                <Box
-                  sx={{
-                    height: "1em",
-                    display: "flex",
-                    alignItems: "center",
-                    transform: "translateY(1px)",
-                  }}
-                >
-                  <PersonOutlineRoundedIcon
-                    sx={{ fontSize: 18, color: "white" }}
-                  />
-                </Box>
-                <Typography
-                  sx={{
-                    color: "white",
-                    fontSize: "0.85rem",
-                    fontWeight: 500,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.02em",
-                    display: { xs: "none", sm: "block" },
-                    position: "relative",
-                    top: "2px",
-                  }}
-                >
-                  {user ? user.full_name : "TÀI KHOẢN"}
-                </Typography>
-              </Box>
-            </Box>
+            )}
           </Toolbar>
         </Container>
       </AppBar>
+
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        sx={{
+          "& .MuiDrawer-paper": {
+            width: 280,
+            bgcolor: mode === "light" ? "white" : "#2A2A2A",
+          },
+        }}
+      >
+        <List sx={{ pt: 2 }}>
+          <ListItem disablePadding>
+            <ListItemButton onClick={toggleTheme}>
+              <ListItemIcon>
+                {mode === "light" ? <Moon size={22} /> : <Sun size={22} />}
+              </ListItemIcon>
+              <ListItemText
+                primary={mode === "light" ? "Chế độ tối" : "Chế độ sáng"}
+              />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleCartClick}>
+              <ListItemIcon>
+                <ShoppingBag size={19} />
+              </ListItemIcon>
+              <ListItemText primary="Giỏ mượn" />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleFavouriteClick}>
+              <ListItemIcon>
+                <Heart size={20} />
+              </ListItemIcon>
+              <ListItemText primary="Yêu thích" />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleAccountClick}>
+              <ListItemIcon>
+                <UserRound size={20} />
+              </ListItemIcon>
+              <ListItemText primary={user ? user.full_name : "Tài khoản"} />
+            </ListItemButton>
+          </ListItem>
+        </List>
+      </Drawer>
+
       <Snackbar
         open={openSnack}
-        autoHideDuration={4000}
+        autoHideDuration={2000}
         onClose={handleCloseSnack}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        sx={{
+          "&.MuiSnackbar-root": {
+            left: "auto !important",
+            right: "24px !important",
+            transform: "none !important",
+            top: "20%",
+            bottom: "auto",
+            translate: "0 -50%",
+          },
+        }}
       >
-        <Alert
-          onClose={handleCloseSnack}
-          severity="warning"
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          Vui lòng đăng nhập để xem giỏ mượn!
+        <Alert severity="warning" variant="filled" sx={{ width: "100%" }}>
+          {snack === "cart"
+            ? "Vui lòng đăng nhập để xem giỏ mượn!"
+            : snack === "favorite"
+            ? "Vui lòng đăng nhập để xem các cuốn sách yêu thích!"
+            : ""}
         </Alert>
       </Snackbar>
     </>

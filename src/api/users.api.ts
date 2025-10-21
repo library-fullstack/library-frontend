@@ -14,6 +14,7 @@ export interface UpdateProfileRequest {
   email?: string;
 }
 
+// api cho phần user - làm một nửa. phần change/password có lẽ không cần route đi
 export const usersApi = {
   getProfile: () => axiosClient.get<User>("/users/profile"),
 

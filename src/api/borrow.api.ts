@@ -21,6 +21,7 @@ export interface BorrowRecord {
   };
 }
 
+// api cho mượn sách - chưa làm gì cả
 export const borrowApi = {
   create: (data: BorrowRequest) => axiosClient.post("/borrows", data),
 

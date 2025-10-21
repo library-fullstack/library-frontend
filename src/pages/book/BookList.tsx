@@ -1,5 +1,6 @@
 import * as React from "react";
+import Working from "../../components/commons/Working";
 
 export default function BookList(): React.ReactElement {
-  return <div>Book list (placeholder)</div>;
+  return <Working />;
 }

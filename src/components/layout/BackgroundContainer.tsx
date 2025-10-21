@@ -2,6 +2,8 @@ import * as React from "react";
 import { Box, CircularProgress } from "@mui/material";
 import bgBooks from "../../assets/img/background-login.jpg";
 
+// background container để cho nó không bị nháy với không bị load chậm background khi vừa mở login
+// hiện tại có vẻ không có tác dụng gì mấy
 export default function BackgroundContainer({
   children,
 }: {

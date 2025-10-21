@@ -15,6 +15,7 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// form đăng ký
 export default function RegisterForm(): React.ReactElement {
   const navigate = useNavigate();
 

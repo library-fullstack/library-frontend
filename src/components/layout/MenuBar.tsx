@@ -12,18 +12,16 @@ export default function MenuBar(): React.ReactElement {
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = lastScrollY.current;
 
-    // scroll xuống và đã scroll qua 100px thì ẩn menubar
     if (latest > previous && latest > 100) {
       setHidden(true);
-    }
-    // nếu scroll lên thì hiện lại menubar
-    else if (latest < previous) {
+    } else if (latest < previous) {
       setHidden(false);
     }
 
     lastScrollY.current = latest;
   });
 
+  // nav
   const menuItems = [
     { label: "TRANG CHỦ", path: "/" },
     { label: "DANH MỤC SÁCH", path: "/books" },
@@ -47,10 +45,12 @@ export default function MenuBar(): React.ReactElement {
       sx={{
         position: "sticky",
         top: 64,
-        backgroundColor: "white",
-        borderBottom: "1px solid #E0E0E0",
-        py: 1,
+        bgcolor: "background.paper",
+        borderBottom: 1,
+        borderColor: "divider",
+        py: { xs: 1, md: 1.6 },
         zIndex: 999,
+        display: { xs: "none", md: "block" },
       }}
     >
       <Container maxWidth="lg">
@@ -59,7 +59,7 @@ export default function MenuBar(): React.ReactElement {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            gap: 0.5,
+            gap: 1,
           }}
         >
           {menuItems.map((item, index) => {
@@ -70,16 +70,26 @@ export default function MenuBar(): React.ReactElement {
                   component={Link}
                   to={item.path}
                   sx={{
-                    color: isActive ? "#FF6B6B" : "#333",
-                    fontWeight: isActive ? 700 : 500,
-                    fontSize: "0.85rem",
+                    color: isActive ? "primary.main" : "text.primary",
+                    fontWeight: isActive ? 600 : 500,
+                    fontSize: {
+                      xs: "0.75rem",
+                      sm: "0.80rem",
+                      md: "0.85rem",
+                      lg: "0.90rem",
+                    },
                     textTransform: "none",
-                    px: 2,
-                    py: 1,
+                    px: { xs: 2.2, sm: 2.6, md: 3.2 },
+                    py: { xs: 1, sm: 1.2 },
                     minWidth: "auto",
+                    borderRadius: 1.5,
+                    lineHeight: 1.5,
+                    letterSpacing: "-0.01em",
+                    transition: "all 0.2s ease",
                     "&:hover": {
-                      backgroundColor: "transparent",
-                      color: "#FF6B6B",
+                      bgcolor: "action.hover",
+                      color: "primary.main",
+                      transform: "translateY(-1px)",
                     },
                   }}
                 >
@@ -90,7 +100,7 @@ export default function MenuBar(): React.ReactElement {
                     sx={{
                       width: "1px",
                       height: "16px",
-                      backgroundColor: "#DDD",
+                      bgcolor: "divider",
                     }}
                   />
                 )}

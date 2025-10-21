@@ -1,5 +1,6 @@
 import * as React from "react";
+import Working from "../../components/commons/Working";
 
 export default function Services(): React.ReactElement {
-  return <div>Services (placeholder)</div>;
+  return <Working />;
 }

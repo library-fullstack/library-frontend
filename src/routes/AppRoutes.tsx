@@ -21,6 +21,7 @@ import About from "../pages/common/About";
 import Contact from "../pages/common/Contact";
 import Forum from "../pages/common/Forum";
 import Favorites from "../pages/common/Favorites";
+import NotFound from "../components/commons/NotFound";
 import ProtectedRoute from "../components/ProtectedRoute";
 import PublicRoute from "../components/PublicRoute";
 
@@ -113,6 +114,9 @@ export default function AppRoutes() {
         <Route path="/forum" element={<Forum />} />
         <Route path="/favorites" element={<Favorites />} />
       </Route>
+
+      {/* trang 404 */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 
+// form đăng nhập
 export default function LoginForm(): React.ReactElement {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -30,10 +31,7 @@ export default function LoginForm(): React.ReactElement {
 
     try {
       await login(identifier, password);
-      // After login we do a full page reload to ensure any components
-      // that read from localStorage (instead of context) get the fresh data.
-      // Use location.href to navigate to home and force reload.
-      // Small timeout ensures localStorage is written in AuthContext.
+
       setTimeout(() => {
         window.location.href = "/";
       }, 100);

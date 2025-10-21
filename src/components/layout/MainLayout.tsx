@@ -4,6 +4,7 @@ import Navbar from "./Navbar";
 import MenuBar from "./MenuBar";
 import { Box } from "@mui/material";
 
+// main layout
 export default function MainLayout() {
   const location = useLocation();
   const isAuthPage = location.pathname.startsWith("/auth");

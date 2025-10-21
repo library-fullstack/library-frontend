@@ -33,16 +33,19 @@ const getAllBooks = async (params?: {
   return res;
 };
 
+// get book by id
 const getBookById = (id: string) => {
   return axiosClient.get<Book>(`/books/${id}`);
 };
 
+// get hết book
 const searchBook = (query: string) => {
   return axiosClient.get<BooksListResponse>("/books/search", {
     params: { q: query },
   });
 };
 
+// get book theo danh mục
 const getBookByCategory = (category: string) => {
   return axiosClient.get<BooksListResponse>(`/books/category/${category}`);
 };

@@ -20,6 +20,7 @@ export interface LoginResponse {
   };
 }
 
+// lấy api đăng nhập đăng ký đăng xuất
 export const authApi = {
   login: (data: LoginRequest) =>
     axiosClient.post<LoginResponse>("/auth/login", data),

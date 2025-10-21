@@ -5,6 +5,7 @@ import { AnimatePresence } from "framer-motion";
 import DisintegrationTransition from "../../components/DisintegrationTransition";
 import bgBooks from "../../assets/img/background-login.jpg";
 
+// phần xử lí form đăng ký đăng nhập và quên mật khẩu
 export default function AuthLayout(): React.ReactElement {
   const location = useLocation();
 

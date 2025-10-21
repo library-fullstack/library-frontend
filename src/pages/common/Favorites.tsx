@@ -1,5 +1,6 @@
 import * as React from "react";
+import Working from "../../components/commons/Working";
 
 export default function Favorites(): React.ReactElement {
-  return <div>Favorites (placeholder)</div>;
+  return <Working />;
 }

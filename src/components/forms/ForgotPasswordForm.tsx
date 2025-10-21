@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+// form quên mật khẩu
 export default function ForgotPasswordForm(): React.ReactElement {
   const navigate = useNavigate();
 

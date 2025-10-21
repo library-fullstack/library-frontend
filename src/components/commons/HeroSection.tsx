@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Typography, Button } from "@mui/material";
 
+// phần banner đầu trang
 const HeroSection: React.FC = () => {
   return (
     <Box
@@ -10,7 +11,10 @@ const HeroSection: React.FC = () => {
         alignItems: "center",
         width: "100vw",
         height: "100vh",
-        background: "linear-gradient(90deg, #fff 0%, #fafafa 100%)",
+        backgroundImage: "url(/assets/banner.jpg)",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
         borderRadius: 0,
         p: 8,
         boxSizing: "border-box",
