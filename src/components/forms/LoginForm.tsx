@@ -7,80 +7,109 @@ import {
   InputAdornment,
   IconButton,
   Alert,
+  Divider,
+  useTheme,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
+import { parseApiError } from "../../utils/errorHandler";
 
-// form đăng nhập
 export default function LoginForm(): React.ReactElement {
   const navigate = useNavigate();
+  const theme = useTheme();
   const { login } = useAuth();
-
   const [identifier, setIdentifier] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [error, setError] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);
+  const [error, setError] = React.useState("");
+  const [success, setSuccess] = React.useState("");
 
-  async function handleLogin(
-    e: React.FormEvent<HTMLFormElement>
-  ): Promise<void> {
+  async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
-
+    setSuccess("");
     try {
       await login(identifier, password);
-
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 100);
-    } catch (err: unknown) {
-      const errorMessage =
-        (
-          err as {
-            response?: { data?: { message?: string } };
-            message?: string;
-          }
-        )?.response?.data?.message ||
-        (err as { message?: string })?.message ||
-        "Đăng nhập thất bại";
-      setError(errorMessage);
+      setSuccess("Đăng nhập thành công! Đang chuyển hướng...");
+      setTimeout(() => (window.location.href = "/"), 1200);
+    } catch (err) {
+      setError(parseApiError(err));
     }
   }
 
   return (
-    <Box>
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+    >
+      <Typography
+        variant="h4"
+        sx={{
+          fontWeight: 700,
+          textAlign: "center",
+          mb: 1,
+          color: theme.palette.text.primary,
+          fontSize: { xs: 28, sm: 32 },
+        }}
       >
-        <Typography
-          align="center"
-          sx={{
-            fontSize: 28,
-            fontWeight: 600,
-            color: "rgba(255,255,255,0.95)",
-            mb: 3,
-            textShadow: "0 2px 8px rgba(0,0,0,0.3)",
-          }}
-        >
-          Đăng nhập
-        </Typography>
-      </motion.div>
+        Đăng nhập
+      </Typography>
+      <Typography
+        textAlign="center"
+        sx={{
+          color: theme.palette.text.secondary,
+          mb: 4,
+          fontSize: 15,
+        }}
+      >
+        Truy cập hệ thống thư viện HBH
+      </Typography>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2, borderRadius: "10px" }}>
+        <Alert
+          severity="error"
+          variant="filled"
+          sx={{
+            mb: 3,
+            borderRadius: 1.5,
+            fontSize: 14,
+            py: 1.2,
+            alignItems: "center",
+          }}
+        >
           {error}
+        </Alert>
+      )}
+
+      {success && (
+        <Alert
+          severity="success"
+          variant="filled"
+          sx={{
+            mb: 3,
+            borderRadius: 1.5,
+            fontSize: 14,
+            py: 1.2,
+            alignItems: "center",
+          }}
+        >
+          {success}
         </Alert>
       )}
 
       <Box component="form" onSubmit={handleLogin}>
         <Typography
-          sx={{ fontSize: 13, color: "white", mb: 1, fontWeight: 500 }}
+          sx={{
+            fontSize: 14,
+            mb: 1,
+            fontWeight: 600,
+            color: theme.palette.text.primary,
+          }}
         >
-          Mã sinh viên hoặc email
+          Mã sinh viên hoặc Email
         </Typography>
         <TextField
           fullWidth
@@ -89,16 +118,20 @@ export default function LoginForm(): React.ReactElement {
           onChange={(e) => setIdentifier(e.target.value)}
           required
           sx={{
-            mb: 2,
+            mb: 3,
             "& .MuiOutlinedInput-root": {
-              background: "rgba(255,255,255,0.9)",
-              borderRadius: "10px",
+              borderRadius: 1.5,
             },
           }}
         />
 
         <Typography
-          sx={{ fontSize: 13, color: "white", mb: 1, fontWeight: 500 }}
+          sx={{
+            fontSize: 14,
+            mb: 1,
+            fontWeight: 600,
+            color: theme.palette.text.primary,
+          }}
         >
           Mật khẩu
         </Typography>
@@ -115,34 +148,38 @@ export default function LoginForm(): React.ReactElement {
                 <IconButton
                   onClick={() => setShowPassword((p) => !p)}
                   size="small"
-                  sx={{ color: "#777" }}
+                  edge="end"
                 >
-                  {showPassword ? <Visibility /> : <VisibilityOff />}
+                  {showPassword ? (
+                    <Visibility fontSize="small" />
+                  ) : (
+                    <VisibilityOff fontSize="small" />
+                  )}
                 </IconButton>
               </InputAdornment>
             ),
           }}
           sx={{
-            mb: 1,
+            mb: 2,
             "& .MuiOutlinedInput-root": {
-              background: "rgba(255,255,255,0.9)",
-              borderRadius: "10px",
+              borderRadius: 1.5,
             },
           }}
         />
 
-        <Box textAlign="right" mb={2}>
+        <Box textAlign="right" mb={3}>
           <Typography
             onClick={() => navigate("/auth/forgot-password")}
             sx={{
-              color: "rgba(255,255,255,0.9)",
-              fontSize: "13px",
+              color: theme.palette.primary.main,
+              fontSize: 14,
               cursor: "pointer",
-              display: "inline-block",
+              fontWeight: 500,
               "&:hover": {
                 textDecoration: "underline",
-                color: "#fff",
+                opacity: 0.8,
               },
+              transition: "opacity 0.2s ease",
             }}
           >
             Quên mật khẩu?
@@ -152,42 +189,39 @@ export default function LoginForm(): React.ReactElement {
         <Button
           fullWidth
           type="submit"
+          variant="contained"
           sx={{
-            py: "10px",
-            mb: 2,
-            borderRadius: "10px",
+            py: 1.5,
+            borderRadius: 1.5,
             fontWeight: 600,
-            background: "rgba(255,255,255,0.25)",
-            color: "white",
-            transition: "all 0.3s ease",
+            fontSize: 15,
+            textTransform: "none",
+            boxShadow: "none",
             "&:hover": {
-              background: "rgba(255,255,255,0.35)",
-              transform: "translateY(-2px)",
+              boxShadow: "none",
             },
           }}
         >
           Đăng nhập
         </Button>
-
-        <Typography
-          textAlign="center"
-          sx={{ color: "white", fontSize: "14px" }}
-        >
-          Chưa có tài khoản?{" "}
-          <Box
-            component="span"
-            onClick={() => navigate("/auth/register")}
-            sx={{
-              color: "#FFD8B0",
-              fontWeight: 600,
-              cursor: "pointer",
-              "&:hover": { textDecoration: "underline" },
-            }}
-          >
-            Đăng ký ngay
-          </Box>
-        </Typography>
       </Box>
-    </Box>
+
+      <Divider sx={{ my: 3 }} />
+      <Typography textAlign="center" sx={{ fontSize: 14 }}>
+        Chưa có tài khoản?{" "}
+        <Box
+          component="span"
+          onClick={() => navigate("/auth/register")}
+          sx={{
+            color: theme.palette.primary.main,
+            fontWeight: 600,
+            cursor: "pointer",
+            "&:hover": { textDecoration: "underline" },
+          }}
+        >
+          Đăng ký ngay
+        </Box>
+      </Typography>
+    </motion.div>
   );
 }

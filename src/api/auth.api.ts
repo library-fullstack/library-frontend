@@ -10,23 +10,37 @@ export interface RegisterRequest {
   password: string;
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  new_password: string;
+}
+
 export interface LoginResponse {
-  accessToken: string;
   user: {
     id: string;
     full_name: string;
     email: string;
     role: "STUDENT" | "LIBRARIAN" | "MODERATOR" | "ADMIN";
   };
+  token: string;
 }
 
-// lấy api đăng nhập đăng ký đăng xuất
+// call api
 export const authApi = {
   login: (data: LoginRequest) =>
     axiosClient.post<LoginResponse>("/auth/login", data),
 
-  register: (data: RegisterRequest) =>
-    axiosClient.post<LoginResponse>("/auth/register", data),
+  register: (data: RegisterRequest) => axiosClient.post("/auth/register", data),
+
+  forgotPassword: (data: ForgotPasswordRequest) =>
+    axiosClient.post("/auth/forgot-password", data),
+
+  resetPassword: (data: ResetPasswordRequest) =>
+    axiosClient.post("/auth/reset-password", data),
 
   logout: () => axiosClient.post("/auth/logout"),
 

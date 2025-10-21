@@ -25,7 +25,7 @@ export default function HeroBanner(): React.ReactElement {
       transition={{ duration: 0.6 }}
       sx={{
         bgcolor: mode === "light" ? "#FAFAFA" : "background.default",
-        minHeight: "calc(100vh - 64px)",
+        minHeight: "100vh",
         width: "100vw",
         display: "flex",
         alignItems: "center",

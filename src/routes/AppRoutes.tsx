@@ -7,6 +7,7 @@ import AuthLayout from "../pages/auth/AuthLayout";
 import LoginForm from "../components/forms/LoginForm";
 import RegisterForm from "../components/forms/RegisterForm";
 import ForgotPasswordForm from "../components/forms/ForgotPasswordForm";
+import ResetPasswordForm from "../components/forms/ResetPasswordForm";
 import BookList from "../pages/book/BookList";
 import BookDetail from "../pages/book/BookDetail";
 import Cart from "../pages/borrow/Cart";
@@ -43,6 +44,11 @@ export default function AppRoutes() {
         <Route path="login" element={<LoginForm />} />
         <Route path="register" element={<RegisterForm />} />
         <Route path="forgot-password" element={<ForgotPasswordForm />} />
+      </Route>
+
+      {/* reset-password - cho phép truy cập dù đã đăng nhập hay chưa */}
+      <Route path="/auth" element={<AuthLayout />}>
+        <Route path="reset-password" element={<ResetPasswordForm />} />
       </Route>
 
       {/* layout chính cho các route  */}

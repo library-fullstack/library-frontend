@@ -1,136 +1,294 @@
 import * as React from "react";
-import { Box, Typography, TextField, Button, Alert } from "@mui/material";
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Alert,
+  useTheme,
+} from "@mui/material";
+import { ArrowBack, CheckCircleOutline, Home } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { parseApiError } from "../../utils/errorHandler";
+import { authApi } from "../../api/auth.api";
 
-// form quên mật khẩu
 export default function ForgotPasswordForm(): React.ReactElement {
+  const theme = useTheme();
   const navigate = useNavigate();
 
-  const [identifier, setIdentifier] = React.useState("");
+  const [email, setEmail] = React.useState("");
   const [error, setError] = React.useState("");
-  const [success, setSuccess] = React.useState("");
+  const [emailSent, setEmailSent] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
 
-  async function handleForgotPassword(
-    e: React.FormEvent<HTMLFormElement>
-  ): Promise<void> {
+  const isEmailValid = email.includes("@") && email.includes(".");
+
+  async function handleForgotPassword(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
 
+    if (!isEmailValid) {
+      setError("Vui lòng nhập địa chỉ email hợp lệ.");
+      return;
+    }
+
     try {
-      await axios.post("http://localhost:4000/api/v1/auth/forgot-password", {
-        identifier,
-      });
-      setSuccess("Hướng dẫn đặt lại mật khẩu đã được gửi tới email của bạn!");
-      setTimeout(() => navigate("/auth/login"), 2000);
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || "Có lỗi xảy ra");
-      } else {
-        setError("Lỗi không xác định");
-      }
+      setLoading(true);
+      await authApi.forgotPassword({ email });
+      setEmailSent(true);
+    } catch (err) {
+      setError(parseApiError(err));
+    } finally {
+      setLoading(false);
     }
   }
 
-  return (
-    <Box>
+  // Success State - Hiển thị sau khi gửi email thành công
+  if (emailSent) {
+    return (
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
       >
-        <Typography
-          align="center"
+        <Box
           sx={{
-            fontSize: 28,
-            fontWeight: 600,
-            color: "rgba(255,255,255,0.95)",
-            mb: 2,
-            textShadow: "0 2px 8px rgba(0,0,0,0.3)",
+            textAlign: "center",
+            py: 2,
           }}
         >
-          Quên mật khẩu
-        </Typography>
-        <Typography
-          align="center"
-          sx={{ fontSize: 13, color: "rgba(255,255,255,0.8)", mb: 3 }}
-        >
-          Nhập email hoặc mã sinh viên để nhận hướng dẫn
-        </Typography>
+          {/* Success Icon */}
+          <Box
+            sx={{
+              width: 80,
+              height: 80,
+              borderRadius: "50%",
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? "rgba(34, 197, 94, 0.15)"
+                  : "rgba(34, 197, 94, 0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto",
+              mb: 3,
+            }}
+          >
+            <CheckCircleOutline
+              sx={{
+                fontSize: 48,
+                color: "#22c55e",
+              }}
+            />
+          </Box>
+
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 700,
+              mb: 2,
+              color: theme.palette.text.primary,
+              fontSize: { xs: 24, sm: 28 },
+            }}
+          >
+            Email đã được gửi!
+          </Typography>
+
+          <Typography
+            sx={{
+              color: theme.palette.text.secondary,
+              mb: 1,
+              fontSize: 15,
+              lineHeight: 1.6,
+            }}
+          >
+            Hướng dẫn đặt lại mật khẩu đã được gửi tới
+          </Typography>
+
+          <Typography
+            sx={{
+              color: theme.palette.primary.main,
+              fontWeight: 600,
+              mb: 4,
+              fontSize: 15,
+            }}
+          >
+            {email}
+          </Typography>
+
+          <Typography
+            sx={{
+              color: theme.palette.text.secondary,
+              fontSize: 14,
+              mb: 4,
+              px: 2,
+            }}
+          >
+            Vui lòng kiểm tra hộp thư đến (và cả thư rác) để tìm email chứa liên
+            kết đặt lại mật khẩu.
+          </Typography>
+
+          {/* Action Buttons */}
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => navigate("/auth/login")}
+              sx={{
+                py: 1.5,
+                borderRadius: 1.5,
+                fontWeight: 600,
+                fontSize: 15,
+                textTransform: "none",
+                boxShadow: "none",
+                "&:hover": { boxShadow: "none" },
+              }}
+            >
+              Quay về đăng nhập
+            </Button>
+
+            <Button
+              fullWidth
+              variant="text"
+              startIcon={<Home />}
+              onClick={() => navigate("/")}
+              sx={{
+                py: 1.5,
+                borderRadius: 1.5,
+                fontWeight: 500,
+                fontSize: 15,
+                textTransform: "none",
+                color: theme.palette.text.secondary,
+                "&:hover": {
+                  backgroundColor:
+                    theme.palette.mode === "dark"
+                      ? "rgba(255,255,255,0.05)"
+                      : "rgba(0,0,0,0.04)",
+                },
+              }}
+            >
+              Về trang chủ
+            </Button>
+          </Box>
+        </Box>
       </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+    >
+      <Typography
+        variant="h4"
+        sx={{
+          fontWeight: 700,
+          textAlign: "center",
+          mb: 1,
+          color: theme.palette.text.primary,
+          fontSize: { xs: 28, sm: 32 },
+        }}
+      >
+        Quên mật khẩu
+      </Typography>
+
+      <Typography
+        textAlign="center"
+        sx={{
+          color: theme.palette.text.secondary,
+          mb: 4,
+          fontSize: 15,
+        }}
+      >
+        Nhập email của bạn để nhận liên kết đặt lại mật khẩu
+      </Typography>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2, borderRadius: "10px" }}>
+        <Alert
+          severity="error"
+          variant="filled"
+          sx={{
+            mb: 3,
+            borderRadius: 1.5,
+            fontSize: 14,
+            py: 1.2,
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
           {error}
-        </Alert>
-      )}
-      {success && (
-        <Alert severity="success" sx={{ mb: 2, borderRadius: "10px" }}>
-          {success}
         </Alert>
       )}
 
       <Box component="form" onSubmit={handleForgotPassword}>
         <Typography
-          sx={{ fontSize: 13, color: "white", mb: 1, fontWeight: 500 }}
+          sx={{
+            fontSize: 14,
+            mb: 1,
+            fontWeight: 600,
+            color: theme.palette.text.primary,
+          }}
         >
-          Mã sinh viên hoặc email
+          Email
         </Typography>
         <TextField
           fullWidth
-          placeholder="VD: 231032xxx24"
-          value={identifier}
-          onChange={(e) => setIdentifier(e.target.value)}
+          placeholder="abc@student.uneti.edu.vn"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
+          type="email"
           sx={{
             mb: 3,
-            "& .MuiOutlinedInput-root": {
-              background: "rgba(255,255,255,0.9)",
-              borderRadius: "10px",
-            },
+            "& .MuiOutlinedInput-root": { borderRadius: 1.5 },
           }}
         />
 
         <Button
           fullWidth
           type="submit"
+          variant="contained"
+          disabled={!email.trim() || loading}
           sx={{
-            py: "10px",
-            mb: 2,
-            borderRadius: "10px",
+            py: 1.5,
+            borderRadius: 1.5,
             fontWeight: 600,
-            background: "rgba(255,255,255,0.25)",
-            color: "white",
-            transition: "all 0.3s ease",
+            fontSize: 15,
+            textTransform: "none",
+            boxShadow: "none",
+            "&:hover": { boxShadow: "none" },
+          }}
+        >
+          {loading ? "Đang gửi..." : "Gửi yêu cầu"}
+        </Button>
+
+        <Button
+          fullWidth
+          variant="text"
+          startIcon={<ArrowBack />}
+          onClick={() => navigate("/auth/login")}
+          sx={{
+            mt: 2,
+            py: 1.5,
+            borderRadius: 1.5,
+            fontWeight: 500,
+            fontSize: 15,
+            textTransform: "none",
+            color: theme.palette.text.secondary,
             "&:hover": {
-              background: "rgba(255,255,255,0.35)",
-              transform: "translateY(-2px)",
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? "rgba(255,255,255,0.05)"
+                  : "rgba(0,0,0,0.04)",
             },
           }}
         >
-          Gửi yêu cầu
+          Quay lại đăng nhập
         </Button>
-
-        <Typography
-          textAlign="center"
-          sx={{ color: "white", fontSize: "14px" }}
-        >
-          Nhớ lại mật khẩu?{" "}
-          <Box
-            component="span"
-            onClick={() => navigate("/auth/login")}
-            sx={{
-              color: "#FFD8B0",
-              fontWeight: 600,
-              cursor: "pointer",
-              "&:hover": { textDecoration: "underline" },
-            }}
-          >
-            Quay lại đăng nhập
-          </Box>
-        </Typography>
       </Box>
-    </Box>
+    </motion.div>
   );
 }
