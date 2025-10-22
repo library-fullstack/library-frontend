@@ -10,7 +10,13 @@ export default function MainLayout() {
   const isAuthPage = location.pathname.startsWith("/auth");
 
   return (
-    <Box sx={{ backgroundColor: "#FAFAFA", minHeight: "100vh" }}>
+    <Box
+      sx={{
+        backgroundColor: "#FAFAFA",
+        minHeight: "100vh",
+        width: "100%",
+      }}
+    >
       {!isAuthPage && <Navbar />}
       {!isAuthPage && <MenuBar />}
       <Outlet />
