@@ -17,7 +17,6 @@ import {
   ListItemIcon,
   ListItemText,
   useMediaQuery,
-  useTheme,
 } from "@mui/material";
 import { Search, Menu as MenuIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router";
@@ -30,8 +29,7 @@ export default function Navbar(): React.ReactElement {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { mode, toggleTheme } = useThemeMode();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isMobile = useMediaQuery("(max-width:700px)");
 
   const [snack, setSnack] = React.useState<"cart" | "favorite" | null>(null);
   const [openSnack, setOpenSnack] = React.useState(false);
@@ -86,6 +84,9 @@ export default function Navbar(): React.ReactElement {
             sx={{
               minHeight: { xs: 56, sm: 64 },
               px: { xs: 1, sm: 2 },
+              display: "flex",
+              alignItems: "center",
+              gap: { xs: 1, sm: 0 },
             }}
           >
             <Box
@@ -93,12 +94,23 @@ export default function Navbar(): React.ReactElement {
                 display: "flex",
                 alignItems: "center",
                 gap: 1,
-                mr: { xs: 1, md: 3 },
+                mr: { xs: 0, sm: 1, md: 3 },
                 cursor: "pointer",
+                flexShrink: 0,
               }}
               onClick={() => navigate("/")}
             >
-              <Logo />
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  // mt: { xs: 1, sm: 1, md: 0.7 },
+                  mr: { xs: 1 },
+                }}
+              >
+                <Logo sx={{ width: { xs: 40, sm: 40, md: 40 } }} />
+              </Box>
               <Typography
                 sx={{
                   color: "text.primary",
@@ -126,7 +138,7 @@ export default function Navbar(): React.ReactElement {
               sx={{
                 flexGrow: 1,
                 maxWidth: { xs: "100%", md: 550 },
-                mr: { xs: 1, md: 2 },
+                mr: { xs: 0, sm: 0, md: 2 },
                 "& .MuiOutlinedInput-root": {
                   bgcolor: mode === "light" ? "#F8FAFC" : "#1E1F27",
                   borderRadius: 2,
@@ -141,7 +153,7 @@ export default function Navbar(): React.ReactElement {
                     borderColor: "primary.main",
                   },
                   "&.Mui-focused": {
-                    boxShadow: `0 0 0 2px ${
+                    boxShadow: `0 0 0 px ${
                       mode === "light"
                         ? "rgba(99,102,241,0.1)"
                         : "rgba(129,140,248,0.15)"
@@ -152,14 +164,19 @@ export default function Navbar(): React.ReactElement {
                   },
                 },
                 "& .MuiOutlinedInput-input": {
-                  padding: "9px 14px",
-                  fontSize: "0.9rem",
+                  padding: { xs: "7px 10px", sm: "9px 14px" },
+                  fontSize: { xs: "0.85rem", sm: "0.9rem" },
                 },
               }}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <Search sx={{ color: "text.secondary", fontSize: 22 }} />
+                    <Search
+                      sx={{
+                        color: "text.secondary",
+                        fontSize: { xs: 20, sm: 22 },
+                      }}
+                    />
                   </InputAdornment>
                 ),
               }}
@@ -170,6 +187,8 @@ export default function Navbar(): React.ReactElement {
                 onClick={() => setDrawerOpen(true)}
                 sx={{
                   color: "text.primary",
+                  ml: "auto",
+                  pr: { xs: 0, sm: 0 },
                   transition: "all 0.2s ease",
                   "&:hover": {
                     bgcolor:
@@ -179,7 +198,7 @@ export default function Navbar(): React.ReactElement {
                   },
                 }}
               >
-                <MenuIcon />
+                <MenuIcon sx={{ fontSize: { xs: 32, sm: 34 } }} />{" "}
               </IconButton>
             ) : (
               <Box
@@ -285,51 +304,138 @@ export default function Navbar(): React.ReactElement {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         sx={{
+          display: isMobile ? "block" : "none",
           "& .MuiDrawer-paper": {
-            width: 280,
-            bgcolor: mode === "light" ? "white" : "#2A2A2A",
+            width: "70vw",
+            maxWidth: 260,
+            bgcolor: "background.paper",
           },
         }}
       >
-        <List sx={{ pt: 2 }}>
-          <ListItem disablePadding>
-            <ListItemButton onClick={toggleTheme}>
-              <ListItemIcon>
-                {mode === "light" ? <Moon size={22} /> : <Sun size={22} />}
-              </ListItemIcon>
-              <ListItemText
-                primary={mode === "light" ? "Chế độ tối" : "Chế độ sáng"}
-              />
-            </ListItemButton>
-          </ListItem>
+        <Box sx={{ pt: 2, pb: 2 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              px: 3,
+              pb: 1.5,
+              fontWeight: 700,
+              color: "text.primary",
+              fontSize: "1.1rem",
+              borderBottom: 1,
+              borderColor: "divider",
+              mb: 1,
+            }}
+          >
+            MENU
+          </Typography>
+          <List>
+            <ListItem disablePadding>
+              <ListItemButton onClick={toggleTheme}>
+                <ListItemIcon sx={{ color: "text.primary", minWidth: 40 }}>
+                  {mode === "light" ? <Moon size={20} /> : <Sun size={20} />}
+                </ListItemIcon>
+                <ListItemText
+                  primary={mode === "light" ? "Chế độ tối" : "Chế độ sáng"}
+                  sx={{
+                    "& .MuiTypography-root": {
+                      color: "text.primary",
+                      fontSize: "0.95rem",
+                    },
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
 
-          <ListItem disablePadding>
-            <ListItemButton onClick={handleCartClick}>
-              <ListItemIcon>
-                <ShoppingBag size={19} />
-              </ListItemIcon>
-              <ListItemText primary="Giỏ mượn" />
-            </ListItemButton>
-          </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={handleCartClick}>
+                <ListItemIcon sx={{ color: "text.primary", minWidth: 40 }}>
+                  <ShoppingBag size={19} />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Giỏ mượn"
+                  sx={{
+                    "& .MuiTypography-root": {
+                      color: "text.primary",
+                      fontSize: "0.95rem",
+                    },
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
 
-          <ListItem disablePadding>
-            <ListItemButton onClick={handleFavouriteClick}>
-              <ListItemIcon>
-                <Heart size={20} />
-              </ListItemIcon>
-              <ListItemText primary="Yêu thích" />
-            </ListItemButton>
-          </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={handleFavouriteClick}>
+                <ListItemIcon sx={{ color: "text.primary", minWidth: 40 }}>
+                  <Heart size={20} />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Yêu thích"
+                  sx={{
+                    "& .MuiTypography-root": {
+                      color: "text.primary",
+                      fontSize: "0.95rem",
+                    },
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
 
-          <ListItem disablePadding>
-            <ListItemButton onClick={handleAccountClick}>
-              <ListItemIcon>
-                <UserRound size={20} />
-              </ListItemIcon>
-              <ListItemText primary={user ? user.full_name : "Tài khoản"} />
-            </ListItemButton>
-          </ListItem>
-        </List>
+            <ListItem disablePadding>
+              <ListItemButton onClick={handleAccountClick}>
+                <ListItemIcon sx={{ color: "text.primary", minWidth: 40 }}>
+                  <UserRound size={20} />
+                </ListItemIcon>
+                <ListItemText
+                  primary={user ? user.full_name : "Tài khoản"}
+                  sx={{
+                    "& .MuiTypography-root": {
+                      color: "text.primary",
+                      fontSize: "0.95rem",
+                    },
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          </List>
+
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              py: 2,
+              px: 3,
+              borderTop: 1,
+              borderColor: "divider",
+              bgcolor: "background.paper",
+            }}
+          >
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+                fontSize: "0.75rem",
+                display: "block",
+                textAlign: "center",
+              }}
+            >
+              Thư viện trực tuyến HBH
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+                fontSize: "0.7rem",
+                display: "block",
+                textAlign: "center",
+                mt: 0.5,
+              }}
+            >
+              © 2025 All rights reserved
+            </Typography>
+          </Box>
+        </Box>
       </Drawer>
 
       <Snackbar
