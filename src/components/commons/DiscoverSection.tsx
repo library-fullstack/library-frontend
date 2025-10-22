@@ -200,6 +200,8 @@ export default function DiscoverSection(): React.ReactElement {
               display: "flex",
               flexDirection: "column",
               gap: 2,
+              alignItems: { xs: "center", md: "flex-start" },     // xs căn giữa, md căn phần tử về phía bắt đầu
+              textAlign: { xs: "center", md: "left" },            //xs can giữa, md căn trái
             }}
           >
             <Typography
@@ -209,6 +211,7 @@ export default function DiscoverSection(): React.ReactElement {
                 color: "text.primary",
               }}
             >
+              {/* căn giữa trên mobile và trái trên pc */}
               Tìm kiếm cuốn sách bạn yêu thích
             </Typography>
             <Typography
@@ -228,6 +231,7 @@ export default function DiscoverSection(): React.ReactElement {
                 gap: 3,
                 flexWrap: "wrap",
                 mt: 1,
+                justifyContent: { xs: "center", md: "flex-start" },  //xs căn giữa, md căn phần tử về phía
               }}
             >
               {[
@@ -235,7 +239,13 @@ export default function DiscoverSection(): React.ReactElement {
                 { value: "550+", label: "Sinh viên" },
                 { value: "1,200+", label: "Sách đã được mượn" },
               ].map((stat) => (
-                <Box key={stat.label} sx={{ minWidth: 96 }}>
+                <Box 
+                  key={stat.label} 
+                  sx={{ 
+                    minWidth: 96,
+                    textAlign: { xs: "center", md: "left" },  // xs căn giữa, md trái
+                  }}
+                >
                   <Typography
                     sx={{
                       fontWeight: 700,
@@ -252,7 +262,14 @@ export default function DiscoverSection(): React.ReactElement {
               ))}
             </Box>
 
-            <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+            <Box 
+              sx={{ 
+                display: "flex", 
+                gap: 2, 
+                mt: 2,
+                justifyContent: { xs: "center", md: "flex-start" },  // nút căn giữa trên mobile, trái trên pc
+              }}
+            >
               <Button
                 href="/book"
                 variant="contained"

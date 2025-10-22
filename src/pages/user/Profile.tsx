@@ -16,6 +16,7 @@ import {
   Switch,
   useTheme,
   Stack,
+  useMediaQuery,//Thêm import useMediaQuery để detect mobile
 } from "@mui/material";
 import { LogoutOutlined, BadgeOutlined } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -40,6 +41,7 @@ export default function Profile(): React.ReactElement {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md")); //Thêm biến detect mobile (< 900px)
   const [tab, setTab] = React.useState(0);
 
   const chipBg = theme.palette.mode === "dark" ? "#4F46E5" : "#6366F1";
@@ -58,37 +60,56 @@ export default function Profile(): React.ReactElement {
           elevation={0}
           sx={{
             p: { xs: 3, md: 5 },
-            borderRadius: 3,
+            borderRadius: 1,
             border: "1px solid",
             borderColor: "divider",
             bgcolor: "background.paper",
           }}
         >
-          {/* header */}
+          {/* header -  Layout mobile avatar bên trái */}
           <Box
             sx={{
               display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              alignItems: { xs: "center", sm: "flex-start" },
+              flexDirection: { xs: "row", md: "row" },  // Luôn row
+              alignItems: { xs: "flex-start", md: "center" },//mobile align top,desktop center
               justifyContent: "space-between",
-              gap: 3,
+              gap: { xs: 2, md: 3 }, //gap nhỏ hơn trên mobile
             }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+            {/* Avatar + Info */}
+            <Box 
+              sx={{ 
+                display: "flex", 
+                alignItems: { xs: "flex-start", md: "center" },//mobile ảnh đại diện, msv ,tên cho lên trái
+                gap: { xs: 2, md: 3 },
+                flex: 1,// Cho phép co giãn để button logout không bị đẩy xuống
+              }}
+            >
+              {/* avatar nhỏ hơn tren */}
               <Avatar
                 src={user?.avatar_url || ""}
                 sx={{
-                  width: 100,
-                  height: 100,
-                  fontSize: 40,
+                  width: { xs: 64, md: 100 },  // Nhỏ hơn trên mobile
+                  height: { xs: 64, md: 100 },
+                  fontSize: { xs: 28, md: 40 },
                   fontWeight: 700,
                   bgcolor: "primary.main",
+                  flexShrink: 0,  // Không cho avatar co lại
                 }}
               >
                 {user?.full_name?.charAt(0) || "?"}
               </Avatar>
-              <Box>
-                <Typography variant="h5" fontWeight={800}>
+              
+              <Box sx={{ minWidth: 0 }}>  {/* minWidth: 0 để text truncate hoạt động */}
+                <Typography 
+                  variant={isMobile ? "h6" : "h5"}
+                  fontWeight={800}
+                  sx={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: { xs: "nowrap", md: "normal" },
+                  }}
+                >
                   {user?.full_name || "Chưa cập nhật"}
                 </Typography>
                 <Chip
@@ -112,39 +133,47 @@ export default function Profile(): React.ReactElement {
                     mt: 1,
                     bgcolor: chipBg,
                     color: "white",
-                    width: 190,
+                    width: { xs: "auto", md: 190 },
                     height: 32,
-                    // borderRadius: 1,
                     px: 1.25,
                   }}
                 />
               </Box>
             </Box>
 
-            <Button
-              startIcon={<LogoutOutlined />}
-              onClick={handleLogout}
-              sx={{
-                borderRadius: 1,
-                textTransform: "none",
-                fontWeight: 700,
-                px: 3,
-                py: 1,
-                bgcolor: logoutBg,
-                color: logoutColor,
-                "&:hover": {
-                  bgcolor:
-                    theme.palette.mode === "dark" ? "#991B1B" : "#FCA5A5",
-                },
-              }}
-            >
-              Đăng xuất
-            </Button>
+          
+           {/* Logout Button */}
+<Button
+  startIcon={!isMobile ? <LogoutOutlined /> : undefined}  // ← SỬA: Chỉ hiện startIcon trên desktop
+  onClick={handleLogout}
+  sx={{
+    borderRadius: 1,
+    textTransform: "none",
+    fontWeight: 700,
+    px: { xs: 2, md: 3 },
+    py: 1,
+    bgcolor: logoutBg,
+    color: logoutColor,
+    flexShrink: 0,
+    minWidth: { xs: "auto", md: "auto" },
+    "&:hover": {
+      bgcolor:
+        theme.palette.mode === "dark" ? "#991B1B" : "#FCA5A5",
+    },
+  }}
+>
+  {isMobile ? <LogoutOutlined /> : "Đăng xuất"}  {/* ← SỬA: Mobile icon, Desktop text */}
+</Button>
+
           </Box>
 
+          {/* Tabs - Sửa responsive và scroll */}
           <Tabs
             value={tab}
             onChange={(_, v) => setTab(v)}
+            variant={isMobile ? "scrollable" : "standard"}  // Scrollable trên mobile
+            scrollButtons={isMobile ? "auto" : false}
+            allowScrollButtonsMobile
             sx={{
               mt: 4,
               borderBottom: 1,
@@ -154,8 +183,10 @@ export default function Profile(): React.ReactElement {
                 fontWeight: 700,
                 minHeight: 48,
                 borderRadius: "12px 12px 0 0",
-                px: 2.5,
-                transition: "background-color 0.2s ease",
+                px: { xs: 2, md: 2.5 },
+                fontSize: { xs: "0.875rem", md: "1rem" },
+                minWidth: { xs: "auto", md: 160 },
+                transition: "all 0.3s ease",  // Thêm transition
                 "&:hover": {
                   bgcolor: "action.hover",
                 },
@@ -163,17 +194,13 @@ export default function Profile(): React.ReactElement {
               "& .MuiTabs-indicator": {
                 height: 3,
                 borderRadius: "3px 3px 0 0",
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",  // Smooth transition
               },
               "& .Mui-selected": {
                 color: "primary.main",
               },
-              "& .MuiTouchRipple-root": {
-                overflow: "hidden",
-                borderRadius: 12,
-              },
-              "& .MuiTouchRipple-child": {
-                borderRadius: 12,
-                backgroundColor: "rgba(99, 102, 241, 0.18)",
+              "& .MuiTabs-scrollButtons": {
+                "&.Mui-disabled": { display: "none" },
               },
             }}
           >
@@ -196,7 +223,7 @@ export default function Profile(): React.ReactElement {
                 elevation={0}
                 sx={{
                   p: 3,
-                  borderRadius: 2,
+                  borderRadius: 1,
                   border: "1px solid",
                   borderColor: "divider",
                 }}
@@ -242,7 +269,7 @@ export default function Profile(): React.ReactElement {
                 elevation={0}
                 sx={{
                   p: 3,
-                  borderRadius: 2,
+                  borderRadius: 1,
                   border: "1px solid",
                   borderColor: "divider",
                 }}
@@ -316,7 +343,7 @@ export default function Profile(): React.ReactElement {
                   key={s.label}
                   elevation={0}
                   sx={{
-                    borderRadius: 2,
+                    borderRadius: 1,
                     border: "1px solid",
                     borderColor: "divider",
                     textAlign: "center",
@@ -355,7 +382,7 @@ export default function Profile(): React.ReactElement {
               elevation={0}
               sx={{
                 p: 3,
-                borderRadius: 2,
+                borderRadius: 1,
                 border: "1px solid",
                 borderColor: "divider",
               }}
@@ -378,12 +405,11 @@ export default function Profile(): React.ReactElement {
                 gap: 3,
               }}
             >
-              {/* thay đổi avatar */}
               <Paper
                 elevation={0}
                 sx={{
                   p: 3,
-                  borderRadius: 2,
+                  borderRadius: 1,
                   border: "1px solid",
                   borderColor: "divider",
                   display: "flex",
@@ -432,12 +458,11 @@ export default function Profile(): React.ReactElement {
                 </Typography>
               </Paper>
 
-              {/* thay đổi mật khẩu */}
               <Paper
                 elevation={0}
                 sx={{
                   p: 3,
-                  borderRadius: 2,
+                  borderRadius: 1,
                   border: "1px solid",
                   borderColor: "divider",
                 }}
@@ -494,7 +519,7 @@ export default function Profile(): React.ReactElement {
                 elevation={0}
                 sx={{
                   p: 3,
-                  borderRadius: 2,
+                  borderRadius: 1,
                   border: "1px solid",
                   borderColor: "divider",
                 }}
@@ -534,7 +559,7 @@ export default function Profile(): React.ReactElement {
                 elevation={0}
                 sx={{
                   p: 3,
-                  borderRadius: 2,
+                  borderRadius: 1,
                   border: "1px solid",
                   borderColor: "divider",
                 }}

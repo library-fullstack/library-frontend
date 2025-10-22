@@ -1,34 +1,45 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import * as React from "react";
 
-// các component
-import HomePage from "../pages/home/HomePage";
+// Layouts & small components (keep static)
 import MainLayout from "../components/layout/MainLayout";
 import AuthLayout from "../pages/auth/AuthLayout";
 import LoginForm from "../components/forms/LoginForm";
 import RegisterForm from "../components/forms/RegisterForm";
 import ForgotPasswordForm from "../components/forms/ForgotPasswordForm";
-import ResetPasswordForm from "../components/forms/ResetPasswordForm";
-import BookList from "../pages/book/BookList";
-import BookDetail from "../pages/book/BookDetail";
-import Cart from "../pages/borrow/Cart";
-import Checkout from "../pages/borrow/Checkout";
-import BorrowList from "../pages/borrow/BorrowList";
-import OrderList from "../pages/borrow/OrderList";
-import Profile from "../pages/user/Profile";
-import AdminDashboard from "../pages/admin/AdminDashboard";
-import Services from "../pages/common/Services";
-import News from "../pages/common/News";
-import About from "../pages/common/About";
-import Contact from "../pages/common/Contact";
-import Forum from "../pages/common/Forum";
-import Favorites from "../pages/common/Favorites";
-import NotFound from "../components/commons/NotFound";
 import ProtectedRoute from "../components/ProtectedRoute";
 import PublicRoute from "../components/PublicRoute";
+import ResetPasswordForm from "../components/forms/ResetPasswordForm";
+
+// Lazy-loaded pages to enable code-splitting
+const HomePage = React.lazy(() => import("../pages/home/HomePage"));
+const BookList = React.lazy(() => import("../pages/book/BookList"));
+const BookDetail = React.lazy(() => import("../pages/book/BookDetail"));
+const Cart = React.lazy(() => import("../pages/borrow/Cart"));
+const Checkout = React.lazy(() => import("../pages/borrow/Checkout"));
+const BorrowList = React.lazy(() => import("../pages/borrow/BorrowList"));
+const OrderList = React.lazy(() => import("../pages/borrow/OrderList"));
+const Profile = React.lazy(() => import("../pages/user/Profile"));
+const AdminDashboard = React.lazy(() => import("../pages/admin/AdminDashboard"));
+const Services = React.lazy(() => import("../pages/common/Services"));
+const News = React.lazy(() => import("../pages/common/News"));
+const About = React.lazy(() => import("../pages/common/About"));
+const Contact = React.lazy(() => import("../pages/common/Contact"));
+const Forum = React.lazy(() => import("../pages/common/Forum"));
+const Favorites = React.lazy(() => import("../pages/common/Favorites"));
+const NotFound = React.lazy(() => import("../components/commons/NotFound"));
 
 export default function AppRoutes() {
   return (
-    <Routes>
+    // ???? ?????
+    <React.Suspense
+      fallback={
+        <div style={{ padding: 24, textAlign: "center" }}>
+          <span>Đang tải...</span>
+        </div>
+      }
+    >
+      <Routes>
       {/* auth - redirect /auth to /auth/login */}
       <Route path="/auth" element={<Navigate to="/auth/login" replace />} />
 
@@ -123,6 +134,7 @@ export default function AppRoutes() {
 
       {/* trang 404 */}
       <Route path="*" element={<NotFound />} />
-    </Routes>
+      </Routes>
+    </React.Suspense>
   );
 }
