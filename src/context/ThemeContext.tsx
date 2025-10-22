@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { ThemeProvider, CssBaseline, GlobalStyles, Box } from "@mui/material";
 import { ThemeContext } from "./ThemeContext.context";
 import type { ThemeMode } from "./ThemeContext.types";
-import { lightTheme, darkTheme } from "../theme/palette";
+import { lightTheme, darkTheme } from "../app/theme/palette";
 
 export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,

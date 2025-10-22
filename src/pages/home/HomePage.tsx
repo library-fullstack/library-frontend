@@ -1,8 +1,8 @@
 import React from "react";
 import { Box } from "@mui/material";
-import HeroBanner from "../../components/HeroBanner";
-import FeaturedBooks from "../../components/FeaturedBooks";
-import DiscoverSection from "../../components/commons/DiscoverSection";
+import HeroBanner from "../../widgets/hero-banner/HeroBanner";
+import FeaturedBooks from "../../widgets/featured-books/FeaturedBooks";
+import DiscoverSection from "../../shared/ui/DiscoverSection";
 
 // homepage
 const HomePage: React.FC = () => {

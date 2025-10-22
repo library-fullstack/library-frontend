@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import { LogoutOutlined, BadgeOutlined } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import useAuth from "../../hooks/useAuth";
+import useAuth from "../../features/auth/hooks/useAuth";
 
 interface TabPanelProps {
   children?: React.ReactNode;

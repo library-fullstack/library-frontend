@@ -1,11 +1,5 @@
-import React, {
-  createContext,
-  useEffect,
-  useMemo,
-  useState,
-  ReactNode,
-} from "react";
-import axiosClient from "../api/axiosClient";
+import React, { createContext, useMemo, useState, ReactNode } from "react";
+import axiosClient from "../shared/api/axiosClient";
 
 export interface User {
   id: string;
@@ -41,21 +35,21 @@ interface Props {
 
 // lưu token đăng nhập
 export function AuthProvider({ children }: Props): ReactNode {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    const savedToken = localStorage.getItem("token");
+  const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem("user");
-    if (savedToken) setToken(savedToken);
     if (savedUser) {
       try {
-        setUser(JSON.parse(savedUser) as User);
+        return JSON.parse(savedUser) as User;
       } catch {
-        // pass
+        return null;
       }
     }
-  }, []);
+    return null;
+  });
+
+  const [token, setToken] = useState<string | null>(() => {
+    return localStorage.getItem("token");
+  });
 
   // đăng nhập
   async function login(identifier: string, password: string): Promise<void> {

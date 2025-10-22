@@ -3,7 +3,7 @@ import { Box, useTheme, IconButton, Tooltip } from "@mui/material";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Home } from "@mui/icons-material";
 import { AnimatePresence } from "framer-motion";
-import DisintegrationTransition from "../../components/DisintegrationTransition";
+import DisintegrationTransition from "../../shared/ui/DisintegrationTransition";
 
 export default function AuthLayout(): React.ReactElement {
   const location = useLocation();
