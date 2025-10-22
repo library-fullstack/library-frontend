@@ -26,7 +26,7 @@ const HeroSection: React.FC = () => {
           variant="h3"
           sx={{ fontWeight: 700, color: "#393280", mb: 2 }}
         >
-          Xin chào các bạn
+          Xin chào cộng đồng sinh viên HBH
         </Typography>
         <Typography sx={{ mb: 3, color: "#333" }}>
           Cùng chào mừng sự kiện khai trương thư viện trực tuyến HBH...

@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
-// Features
+// các component
 import HomePage from "../pages/home/HomePage";
 import MainLayout from "../components/layout/MainLayout";
 import AuthLayout from "../pages/auth/AuthLayout";
