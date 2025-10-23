@@ -125,7 +125,14 @@ export default function AppRoutes() {
         <Route path="/news" element={<News />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/forum" element={<Forum />} />
+        <Route
+          path="/forum"
+          element={
+            <ProtectedRoute>
+              <Forum />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/favorites" element={<Favorites />} />
       </Route>
 

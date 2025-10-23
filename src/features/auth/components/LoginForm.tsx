@@ -12,12 +12,13 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { parseApiError } from "../../../shared/lib/errorHandler";
 
 export default function LoginForm(): React.ReactElement {
   const navigate = useNavigate();
+  const location = useLocation();
   const theme = useTheme();
   const { login } = useAuth();
   const [identifier, setIdentifier] = React.useState("");
@@ -26,6 +27,10 @@ export default function LoginForm(): React.ReactElement {
   const [error, setError] = React.useState("");
   const [success, setSuccess] = React.useState("");
 
+  // lấy cái trang lúc bấm mà bị redirect về login
+  const from =
+    (location.state as { from?: { pathname: string } })?.from?.pathname || "/";
+
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
@@ -33,7 +38,11 @@ export default function LoginForm(): React.ReactElement {
     try {
       await login(identifier, password);
       setSuccess("Đăng nhập thành công! Đang chuyển hướng...");
-      setTimeout(() => (window.location.href = "/"), 1200);
+      setTimeout(() => {
+        // redirect về trang trước đấy hoặc trang chủ
+        // liệu có là thừa không nhỉ ?
+        window.location.href = from;
+      }, 1200);
     } catch (err) {
       setError(parseApiError(err));
     }
