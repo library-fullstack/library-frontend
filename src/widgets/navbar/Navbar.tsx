@@ -35,19 +35,19 @@ export default function Navbar(): React.ReactElement {
   const [openSnack, setOpenSnack] = React.useState(false);
   const [drawerOpen, setDrawerOpen] = React.useState(false);
 
-  const showSnack = (type: "cart" | "favorite") => {
+  const showSnack = React.useCallback((type: "cart" | "favorite") => {
     setSnack(type);
     setOpenSnack(true);
-  };
+  }, []);
 
-  const handleCloseSnack = (
-    _?: React.SyntheticEvent | Event,
-    reason?: string
-  ) => {
-    if (reason === "clickaway") return;
-    setOpenSnack(false);
-    setTimeout(() => setSnack(null), 300);
-  };
+  const handleCloseSnack = React.useCallback(
+    (_?: React.SyntheticEvent | Event, reason?: string) => {
+      if (reason === "clickaway") return;
+      setOpenSnack(false);
+      setTimeout(() => setSnack(null), 300);
+    },
+    []
+  );
 
   const handleFavouriteClick = () => {
     if (user) navigate("/favorites");

@@ -1,4 +1,10 @@
-import React, { createContext, useMemo, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useMemo,
+  useState,
+  ReactNode,
+  useCallback,
+} from "react";
 import axiosClient from "../shared/api/axiosClient";
 
 export interface User {
@@ -51,31 +57,34 @@ export function AuthProvider({ children }: Props): ReactNode {
     return localStorage.getItem("token");
   });
 
-  // đăng nhập
-  async function login(identifier: string, password: string): Promise<void> {
-    const res = await axiosClient.post<LoginResponse>("/auth/login", {
-      identifier,
-      password,
-    });
-    const { accessToken, user } = res.data;
+  // đăng nhập - useCallback để tránh tạo function mới mỗi lần render
+  const login = useCallback(
+    async (identifier: string, password: string): Promise<void> => {
+      const res = await axiosClient.post<LoginResponse>("/auth/login", {
+        identifier,
+        password,
+      });
+      const { accessToken, user } = res.data;
 
-    setUser(user);
-    setToken(accessToken);
-    localStorage.setItem("token", accessToken);
-    localStorage.setItem("user", JSON.stringify(user));
-  }
+      setUser(user);
+      setToken(accessToken);
+      localStorage.setItem("token", accessToken);
+      localStorage.setItem("user", JSON.stringify(user));
+    },
+    []
+  );
 
-  // đăng xuất
-  function logout(): void {
+  // đăng xuất - useCallback để tránh tạo function mới mỗi lần render
+  const logout = useCallback((): void => {
     setUser(null);
     setToken(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-  }
+  }, []);
 
   const value = useMemo<AuthContextValue>(
     () => ({ user, token, login, logout }),
-    [user, token]
+    [user, token, login, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

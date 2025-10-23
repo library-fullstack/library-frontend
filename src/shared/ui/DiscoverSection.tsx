@@ -12,15 +12,15 @@ import { motion } from "framer-motion";
 
 // giả định banner
 const bookImages = [
-  "/assets/book-2020-war.png",
-  "/assets/book-gothic.png",
-  "/assets/book-time-traveler.png",
-  "/assets/book-doctor-who.png",
-  "/assets/book-siloed.png",
-  "/assets/book-2020-war.png",
-  "/assets/book-gothic.png",
-  "/assets/book-time-traveler.png",
-  "/assets/book-doctor-who.png",
+  "/assets/img/book-2020-war.png",
+  "/assets/img/book-gothic.png",
+  "/assets/img/book-time-traveler.png",
+  "/assets/img/book-doctor-who.png",
+  "/assets/img/book-siloed.png",
+  "/assets/img/book-2020-war.png",
+  "/assets/img/book-gothic.png",
+  "/assets/img/book-time-traveler.png",
+  "/assets/img/book-doctor-who.png",
 ];
 
 export default function DiscoverSection(): React.ReactElement {

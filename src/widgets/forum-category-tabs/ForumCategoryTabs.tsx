@@ -3,7 +3,7 @@ import { Box, Tabs, Tab, useMediaQuery, useTheme } from "@mui/material";
 import { motion } from "framer-motion";
 import { ForumCategory } from "../../features/forum/types/forum.types";
 
-const MotionBox = motion(Box);
+const MotionBox = motion.create(Box);
 
 interface ForumCategoryTabsProps {
   categories: ForumCategory[];

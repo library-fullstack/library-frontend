@@ -4,7 +4,7 @@ import { Home, ArrowBack } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
-const MotionBox = motion(Box);
+const MotionBox = motion.create(Box);
 
 // sai đường dẫn thì hiện page notfound 404 này
 export default function NotFound(): React.ReactElement {
