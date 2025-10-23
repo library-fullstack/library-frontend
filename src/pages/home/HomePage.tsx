@@ -7,7 +7,9 @@ import DiscoverSection from "../../shared/ui/DiscoverSection";
 // homepage
 const HomePage: React.FC = () => {
   return (
-    <Box sx={{ backgroundColor: "#FAFAFA" }}>
+    <Box
+      sx={{ backgroundColor: "#FAFAFA", width: "100%", overflowX: "hidden" }}
+    >
       {/* cái banner đầu trang */}
       <HeroBanner />
       {/* cái danh sách sách tự chạy  */}

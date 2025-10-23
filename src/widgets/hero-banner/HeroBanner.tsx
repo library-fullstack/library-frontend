@@ -25,9 +25,13 @@ export default function HeroBanner(): React.ReactElement {
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
         py: { xs: 8, md: 10 },
-        minHeight: "calc(100vh - 125px)",
+        minHeight: { xs: "auto", md: "calc(100vh - 125px)" },
         display: "flex",
         alignItems: "center",
+        width: "100%",
+        maxWidth: "100vw",
+        overflow: "hidden",
+        backgroundAttachment: { xs: "scroll", md: "scroll" },
         "&::before": {
           content: '""',
           position: "absolute",
@@ -47,6 +51,7 @@ export default function HeroBanner(): React.ReactElement {
           position: "relative",
           zIndex: 1,
           py: { xs: 6, md: 8 },
+          px: { xs: 2, sm: 3 },
         }}
       >
         <Box
@@ -59,11 +64,18 @@ export default function HeroBanner(): React.ReactElement {
           }}
         >
           {/* nội dung bên trái */}
-          <Box sx={{ flex: 1, maxWidth: 520, mb: { xs: 6, md: 0 } }}>
+          <Box
+            sx={{
+              flex: 1,
+              maxWidth: { xs: "100%", md: 520 },
+              mb: { xs: 6, md: 0 },
+              width: "100%",
+            }}
+          >
             <Typography
               variant="h2"
               sx={{
-                fontSize: { xs: "2rem", md: "3rem" },
+                fontSize: { xs: "1.75rem", sm: "2rem", md: "3rem" },
                 fontWeight: 700,
                 color: bannerConfig.titleColor,
                 mb: 2,
@@ -79,7 +91,7 @@ export default function HeroBanner(): React.ReactElement {
 
             <Typography
               sx={{
-                fontSize: { xs: "1rem", md: "1.1rem" },
+                fontSize: { xs: "0.9rem", sm: "1rem", md: "1.1rem" },
                 color: bannerConfig.subtitleColor,
                 mb: 3,
                 lineHeight: 1.6,
@@ -101,11 +113,11 @@ export default function HeroBanner(): React.ReactElement {
                 textTransform: "none",
                 px: 3,
                 py: 1,
-                fontSize: "0.95rem",
-                borderRadius: "24px",
+                fontSize: { xs: "0.875rem", md: "0.95rem" },
+                borderRadius: 2,
                 boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
                 "&:hover": {
-                  backgroundColor: `${bannerConfig.buttonColor}cc`, // 80% opacity
+                  backgroundColor: `${bannerConfig.buttonColor}cc`,
                   boxShadow: "0 6px 16px rgba(0,0,0,0.25)",
                 },
               }}

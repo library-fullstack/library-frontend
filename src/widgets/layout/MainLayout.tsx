@@ -15,6 +15,7 @@ export default function MainLayout() {
         backgroundColor: "#FAFAFA",
         minHeight: "100vh",
         width: "100%",
+        position: "relative",
       }}
     >
       {!isAuthPage && <Navbar />}
