@@ -5,7 +5,7 @@ import FeaturedBooks from "../../widgets/featured-books/FeaturedBooks";
 import DiscoverSection from "../../shared/ui/DiscoverSection";
 
 // homepage
-const HomePage: React.FC = () => {
+const HomePage: React.FC = React.memo(() => {
   return (
     <Box
       sx={{ backgroundColor: "#FAFAFA", width: "100%", overflowX: "hidden" }}
@@ -18,6 +18,8 @@ const HomePage: React.FC = () => {
       <DiscoverSection />
     </Box>
   );
-};
+});
+
+HomePage.displayName = "HomePage";
 
 export default HomePage;

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { ThemeProvider, CssBaseline, GlobalStyles, Box } from "@mui/material";
+import React, { useState, useMemo } from "react";
+import { ThemeProvider, CssBaseline } from "@mui/material";
 import { ThemeContext } from "./ThemeContext.context";
 import type { ThemeMode } from "./ThemeContext.types";
 import { lightTheme, darkTheme } from "../app/theme/palette";
@@ -12,13 +12,7 @@ export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({
     return (saved as ThemeMode) || "light";
   });
 
-  const [isTransitioning, setIsTransitioning] = useState(false);
-
   const toggleTheme = () => {
-    // cho tí hiệu ứng
-    setIsTransitioning(true);
-    setTimeout(() => setIsTransitioning(false), 400);
-
     setMode((prev) => {
       const newMode = prev === "light" ? "dark" : "light";
       localStorage.setItem("themeMode", newMode);
@@ -26,37 +20,19 @@ export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   };
 
-  const theme = mode === "light" ? lightTheme : darkTheme;
+  // memoize theme để tránh re-create
+  const theme = useMemo(
+    () => (mode === "light" ? lightTheme : darkTheme),
+    [mode]
+  );
+
+  // memoize context value
+  const contextValue = useMemo(() => ({ mode, toggleTheme }), [mode]);
 
   return (
-    <ThemeContext.Provider value={{ mode, toggleTheme }}>
+    <ThemeContext.Provider value={contextValue}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <GlobalStyles
-          styles={{
-            "html, body, #root": {
-              transition:
-                "background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease",
-            },
-            "*": {
-              transition:
-                "background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease",
-            },
-          }}
-        />
-
-        <Box
-          sx={{
-            position: "fixed",
-            inset: 0,
-            bgcolor: theme.palette.background.default,
-            opacity: isTransitioning ? 1 : 0,
-            pointerEvents: "none",
-            transition: "opacity 0.4s ease",
-            zIndex: 1300,
-          }}
-        />
-
         {children}
       </ThemeProvider>
     </ThemeContext.Provider>

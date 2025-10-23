@@ -1,8 +1,6 @@
 import * as React from "react";
 import { Box, useTheme } from "@mui/material";
-import logo from "../../../assets/img/logo.png";
 
-// logo HBH
 export default function Logo({
   sx,
   width,
@@ -15,7 +13,7 @@ export default function Logo({
   return (
     <Box
       component="img"
-      src={logo}
+      src="/assets/img/logo.png"
       alt="Logo thư viện trực tuyến HBH"
       sx={{
         width: width || { xs: 80, sm: 90, md: 100 },

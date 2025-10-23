@@ -12,7 +12,7 @@ import {
 import { Forum as ForumIcon, Search, Add } from "@mui/icons-material";
 import { motion } from "framer-motion";
 
-const MotionBox = motion(Box);
+const MotionBox = motion.create(Box);
 
 interface ForumHeaderProps {
   onCreatePost?: () => void;

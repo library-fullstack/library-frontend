@@ -11,6 +11,7 @@ import {
   Stack,
   useTheme,
   IconButton,
+  useMediaQuery,
 } from "@mui/material";
 import {
   ShoppingCart,
@@ -26,7 +27,6 @@ import "swiper/css/pagination";
 import { useNavigate } from "react-router-dom";
 import { getAllBooks } from "../../features/books/api/books.api";
 import type { Book } from "../../features/books/api/books.api";
-import { motion } from "framer-motion";
 
 const FeaturedBooks: React.FC = () => {
   const [books, setBooks] = React.useState<Book[]>([]);
@@ -34,6 +34,7 @@ const FeaturedBooks: React.FC = () => {
   const [error, setError] = React.useState<string | null>(null);
   const theme = useTheme();
   const navigate = useNavigate();
+  const isMobile = useMediaQuery("(max-width:900px)");
 
   React.useEffect(() => {
     (async () => {
@@ -58,21 +59,7 @@ const FeaturedBooks: React.FC = () => {
             textAlign="center"
             mb={5}
             sx={{
-              color: (theme) =>
-                theme.palette.mode === "light"
-                  ? "#000000 !important"
-                  : "#FFFFFF !important",
-              opacity: "1 !important",
-              animation: "none !important",
-              WebkitAnimation: "none !important",
-              transition: "none !important",
-              WebkitTransition: "none !important",
-              willChange: "auto !important",
-            }}
-            style={{
-              color: theme.palette.mode === "light" ? "#000000" : "#FFFFFF",
-              transition: "none",
-              animation: "none",
+              color: "text.primary",
             }}
           >
             Sách nổi bật
@@ -129,6 +116,8 @@ const FeaturedBooks: React.FC = () => {
         position: "relative",
         width: "100%",
         overflow: "hidden",
+        contain: "layout style paint",
+        willChange: "auto",
       }}
     >
       <Container
@@ -146,21 +135,7 @@ const FeaturedBooks: React.FC = () => {
           textAlign="center"
           mb={1}
           sx={{
-            color: (theme) =>
-              theme.palette.mode === "light"
-                ? "#000000 !important"
-                : "#FFFFFF !important",
-            opacity: "1 !important",
-            animation: "none !important",
-            WebkitAnimation: "none !important",
-            transition: "none !important",
-            WebkitTransition: "none !important",
-            willChange: "auto !important",
-          }}
-          style={{
-            color: theme.palette.mode === "light" ? "#000000" : "#FFFFFF",
-            transition: "none",
-            animation: "none",
+            color: "text.primary",
           }}
         >
           Sách nổi bật
@@ -170,12 +145,6 @@ const FeaturedBooks: React.FC = () => {
           color="text.secondary"
           textAlign="center"
           mb={5}
-          sx={{
-            opacity: "1 !important",
-            animation: "none !important",
-            WebkitAnimation: "none !important",
-            transition: "none !important",
-          }}
         >
           Khám phá những đầu sách được yêu thích nhất
         </Typography>
@@ -276,16 +245,22 @@ const FeaturedBooks: React.FC = () => {
             nextEl: ".next-btn",
           }}
           pagination={{ clickable: true }}
-          autoplay={{ delay: 4000, disableOnInteraction: false }}
+          autoplay={
+            isMobile ? false : { delay: 4000, disableOnInteraction: false }
+          }
           spaceBetween={24}
           slidesPerView={4.5}
+          speed={isMobile ? 300 : 600}
+          touchRatio={isMobile ? 1.5 : 1}
+          resistance={true}
+          resistanceRatio={0.85}
           observer
           observeParents
           centeredSlides={false}
           breakpoints={{
             0: {
-              slidesPerView: 1,
-              spaceBetween: 16,
+              slidesPerView: 1.15,
+              spaceBetween: 12,
               centeredSlides: false,
               slidesOffsetBefore: 0,
               slidesOffsetAfter: 0,
@@ -311,10 +286,6 @@ const FeaturedBooks: React.FC = () => {
           {books.map((book) => (
             <SwiperSlide key={book.id}>
               <Card
-                component={motion.div}
-                layout={false}
-                whileHover={{ y: -6 }}
-                transition={{ duration: 0.3 }}
                 sx={{
                   borderRadius: 2,
                   border: 1,
@@ -323,7 +294,18 @@ const FeaturedBooks: React.FC = () => {
                   height: "100%",
                   display: "flex",
                   flexDirection: "column",
-                  "&:hover": { boxShadow: "0 8px 20px rgba(0,0,0,0.1)" },
+                  transform: "translateZ(0)",
+                  backfaceVisibility: "hidden",
+                  WebkitFontSmoothing: "antialiased",
+                  transition: isMobile
+                    ? "none"
+                    : "box-shadow 0.2s ease, transform 0.2s ease",
+                  "&:hover": isMobile
+                    ? {}
+                    : {
+                        boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
+                        transform: "translateY(-4px) translateZ(0)",
+                      },
                 }}
               >
                 <Box
@@ -335,10 +317,12 @@ const FeaturedBooks: React.FC = () => {
                     justifyContent: "center",
                     bgcolor:
                       theme.palette.mode === "light" ? "#F1F5F9" : "#2A2B33",
+                    willChange: "auto",
                   }}
                 >
                   <Box
                     component="img"
+                    loading="lazy"
                     src={
                       book.thumbnail_url
                         ? book.thumbnail_url.replace(
@@ -353,6 +337,7 @@ const FeaturedBooks: React.FC = () => {
                       height: "88%",
                       objectFit: "contain",
                       borderRadius: 1,
+                      transform: "translateZ(0)",
                     }}
                   />
                 </Box>
@@ -416,7 +401,9 @@ const FeaturedBooks: React.FC = () => {
                         fontWeight: 600,
                         fontSize: { xs: "0.8rem", sm: "0.875rem" },
                         py: { xs: 0.5, sm: 0.75 },
+                        transition: "background-color 0.2s ease",
                         "&:hover": { bgcolor: "action.hover" },
+                        "&:active": { transform: "scale(0.98)" },
                       }}
                     >
                       Xem chi tiết
@@ -430,7 +417,13 @@ const FeaturedBooks: React.FC = () => {
                         fontSize: { xs: "0.8rem", sm: "0.875rem" },
                         py: { xs: 0.5, sm: 0.75 },
                         boxShadow: "0 2px 6px rgba(99,102,241,0.25)",
-                        "&:hover": { transform: "translateY(-1px)" },
+                        transition: isMobile
+                          ? "background-color 0.2s ease"
+                          : "all 0.2s ease",
+                        "&:hover": isMobile
+                          ? {}
+                          : { transform: "translateY(-1px)" },
+                        "&:active": { transform: "scale(0.98)" },
                       }}
                     >
                       Thêm vào giỏ
@@ -470,7 +463,7 @@ const FeaturedBooks: React.FC = () => {
           .swiper-pagination-bullet {
             width: 8px;
             height: 8px;
-            margin: 0 4px !important;
+            margin: 0 4px;
             background: ${
               theme.palette.mode === "light"
                 ? "rgba(0,0,0,0.25)"
