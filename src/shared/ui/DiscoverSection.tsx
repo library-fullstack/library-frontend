@@ -38,21 +38,30 @@ export default function DiscoverSection(): React.ReactElement {
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
       sx={{
-        py: { xs: 6, md: 8 },
+        py: { xs: 4, md: 8 },
         bgcolor: "background.default",
+        width: "100%",
+        overflowX: "hidden",
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
         <Box
           sx={{
             display: "flex",
-            gap: { xs: 4, md: 6 },
+            gap: { xs: 0, sm: 3, md: 6 },
             alignItems: "center",
             justifyContent: "space-between",
-            flexWrap: "wrap",
+            flexDirection: { xs: "column", md: "row" },
           }}
         >
-          <Box sx={{ flex: "1 1 420px", minWidth: 260 }}>
+          <Box
+            sx={{
+              flex: "1 1 420px",
+              minWidth: { xs: "100%", md: 260 },
+              width: { xs: "100%", md: "auto" },
+              mb: { xs: 0, md: 0 },
+            }}
+          >
             <Box
               component={motion.div}
               initial={{ opacity: 0, x: -20 }}
@@ -61,8 +70,8 @@ export default function DiscoverSection(): React.ReactElement {
               transition={{ duration: 0.5, delay: 0.2 }}
               sx={{
                 position: "relative",
-                px: { xs: 2.5, sm: 3 },
-                py: { xs: 3, sm: 3.5 },
+                px: { xs: 2, sm: 3 },
+                py: { xs: 4, sm: 4, md: 5 },
                 borderRadius: 2,
                 background: (theme) =>
                   theme.palette.mode === "light"
@@ -70,6 +79,8 @@ export default function DiscoverSection(): React.ReactElement {
                     : "linear-gradient(180deg, rgba(129,140,248,0.08), rgba(129,140,248,0.04))",
                 boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
                 overflow: "visible",
+                mx: { xs: "auto", md: 0 },
+                maxWidth: { xs: "100%", sm: 500 },
               }}
             >
               <Box
@@ -108,8 +119,10 @@ export default function DiscoverSection(): React.ReactElement {
                   alignItems: "center",
                   justifyContent: "center",
                   zIndex: 2,
-                  minHeight: { xs: 280, sm: 400, md: 480 },
+                  minHeight: { xs: 280, sm: 340, md: 450 },
+                  height: { xs: 280, sm: 340, md: "auto" },
                   perspective: "1500px",
+                  overflow: "hidden",
                 }}
               >
                 {displayBooks.map((src, idx) => {
@@ -119,14 +132,14 @@ export default function DiscoverSection(): React.ReactElement {
 
                   const rotateY = downSm ? offset * 8 : offset * 12;
                   const translateX = downSm
-                    ? offset * 55
+                    ? offset * 45
                     : downMd
-                    ? offset * 70
-                    : offset * 85;
+                    ? offset * 60
+                    : offset * 70;
                   const translateZ = downSm
-                    ? -Math.abs(offset) * 20
-                    : -Math.abs(offset) * 35;
-                  const scale = 1 - Math.abs(offset) * 0.08;
+                    ? -Math.abs(offset) * 16
+                    : -Math.abs(offset) * 30;
+                  const scale = 1 - Math.abs(offset) * (downSm ? 0.1 : 0.08);
                   const zIndex = totalBooks - Math.abs(offset);
 
                   return (
@@ -134,8 +147,8 @@ export default function DiscoverSection(): React.ReactElement {
                       key={idx}
                       sx={{
                         position: "absolute",
-                        width: { xs: 180, sm: 220, md: 260 },
-                        height: { xs: 270, sm: 330, md: 390 },
+                        width: { xs: 165, sm: 210, md: 240 },
+                        height: { xs: 248, sm: 315, md: 360 },
                         transformStyle: "preserve-3d",
                         transform: `
                           translateX(${translateX}px)
@@ -174,7 +187,7 @@ export default function DiscoverSection(): React.ReactElement {
                           width: "100%",
                           height: "100%",
                           objectFit: "cover",
-                          borderRadius: 1.5,
+                          borderRadius: 1,
                           boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
                           transition: "all 0.3s ease",
                           border: 2,
@@ -196,10 +209,16 @@ export default function DiscoverSection(): React.ReactElement {
             transition={{ duration: 0.5, delay: 0.3 }}
             sx={{
               flex: "1 1 440px",
-              minWidth: 260,
+              minWidth: { xs: "100%", md: 260 },
+              width: { xs: "100%", md: "auto" },
               display: "flex",
               flexDirection: "column",
-              gap: 2,
+              alignItems: { xs: "center", md: "flex-start" },
+              justifyContent: "center",
+              gap: { xs: 1.5, md: 2 },
+              textAlign: { xs: "center", md: "left" },
+              px: { xs: 2, sm: 0 },
+              mt: { xs: -10, sm: 0 },
             }}
           >
             <Typography
@@ -207,6 +226,7 @@ export default function DiscoverSection(): React.ReactElement {
               sx={{
                 fontWeight: 700,
                 color: "text.primary",
+                fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem" },
               }}
             >
               Tìm kiếm cuốn sách bạn yêu thích
@@ -215,6 +235,8 @@ export default function DiscoverSection(): React.ReactElement {
               sx={{
                 color: "text.secondary",
                 lineHeight: 1.7,
+                fontSize: { xs: "0.9rem", md: "1rem" },
+                maxWidth: { xs: "100%", md: 540 },
               }}
             >
               Khám phá hàng nghìn cuốn sách được tuyển chọn theo thể loại, tác
@@ -228,6 +250,7 @@ export default function DiscoverSection(): React.ReactElement {
                 gap: 3,
                 flexWrap: "wrap",
                 mt: 1,
+                justifyContent: { xs: "center", md: "flex-start" },
               }}
             >
               {[
@@ -235,24 +258,40 @@ export default function DiscoverSection(): React.ReactElement {
                 { value: "550+", label: "Sinh viên" },
                 { value: "1,200+", label: "Sách đã được mượn" },
               ].map((stat) => (
-                <Box key={stat.label} sx={{ minWidth: 96 }}>
+                <Box
+                  key={stat.label}
+                  sx={{ minWidth: 96, textAlign: { xs: "center", md: "left" } }}
+                >
                   <Typography
                     sx={{
                       fontWeight: 700,
                       color: "primary.main",
-                      fontSize: "1.1rem",
+                      fontSize: { xs: "1rem", md: "1.1rem" },
                     }}
                   >
                     {stat.value}
                   </Typography>
-                  <Typography sx={{ color: "text.secondary", fontSize: 13 }}>
+                  <Typography
+                    sx={{
+                      color: "text.secondary",
+                      fontSize: { xs: 12, md: 13 },
+                    }}
+                  >
                     {stat.label}
                   </Typography>
                 </Box>
               ))}
             </Box>
 
-            <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                mt: 2,
+                flexWrap: "wrap",
+                justifyContent: { xs: "center", md: "flex-start" },
+              }}
+            >
               <Button
                 href="/book"
                 variant="contained"
@@ -263,6 +302,7 @@ export default function DiscoverSection(): React.ReactElement {
                   boxShadow: "0 4px 12px rgba(99,102,241,0.25)",
                   px: 3,
                   py: 1.2,
+                  fontSize: { xs: "0.875rem", md: "0.95rem" },
                   "&:hover": {
                     boxShadow: "0 6px 16px rgba(99,102,241,0.35)",
                     transform: "translateY(-1px)",
@@ -280,6 +320,7 @@ export default function DiscoverSection(): React.ReactElement {
                   fontWeight: 600,
                   px: 3,
                   py: 1.2,
+                  fontSize: { xs: "0.875rem", md: "0.95rem" },
                   "&:hover": {
                     transform: "translateY(-1px)",
                   },

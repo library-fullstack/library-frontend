@@ -51,8 +51,30 @@ const FeaturedBooks: React.FC = () => {
   if (loading || error)
     return (
       <Box sx={{ py: 8, bgcolor: "background.paper" }}>
-        <Container maxWidth="lg">
-          <Typography variant="h4" fontWeight={700} textAlign="center" mb={5}>
+        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
+          <Typography
+            variant="h4"
+            fontWeight={700}
+            textAlign="center"
+            mb={5}
+            sx={{
+              color: (theme) =>
+                theme.palette.mode === "light"
+                  ? "#000000 !important"
+                  : "#FFFFFF !important",
+              opacity: "1 !important",
+              animation: "none !important",
+              WebkitAnimation: "none !important",
+              transition: "none !important",
+              WebkitTransition: "none !important",
+              willChange: "auto !important",
+            }}
+            style={{
+              color: theme.palette.mode === "light" ? "#000000" : "#FFFFFF",
+              transition: "none",
+              animation: "none",
+            }}
+          >
             Sách nổi bật
           </Typography>
           <Box
@@ -60,37 +82,87 @@ const FeaturedBooks: React.FC = () => {
               display: "grid",
               gridTemplateColumns: {
                 xs: "1fr",
-                sm: "1fr 1fr",
+                sm: "repeat(2, 1fr)",
                 md: "repeat(4, 1fr)",
               },
-              gap: 3,
+              gap: { xs: 2, sm: 3 },
             }}
           >
-            {[...Array(4)].map((_, i) => (
-              <Card key={i}>
-                <Skeleton variant="rectangular" width="100%" height={320} />
-                <CardContent>
-                  <Skeleton height={24} width="80%" />
-                  <Skeleton height={18} width="60%" />
-                </CardContent>
-              </Card>
-            ))}
+            <Card sx={{ display: { xs: "block", sm: "block" } }}>
+              <Skeleton variant="rectangular" width="100%" height={320} />
+              <CardContent>
+                <Skeleton height={24} width="80%" />
+                <Skeleton height={18} width="60%" />
+              </CardContent>
+            </Card>
+            <Card sx={{ display: { xs: "none", sm: "block" } }}>
+              <Skeleton variant="rectangular" width="100%" height={320} />
+              <CardContent>
+                <Skeleton height={24} width="80%" />
+                <Skeleton height={18} width="60%" />
+              </CardContent>
+            </Card>
+            <Card sx={{ display: { xs: "none", md: "block" } }}>
+              <Skeleton variant="rectangular" width="100%" height={320} />
+              <CardContent>
+                <Skeleton height={24} width="80%" />
+                <Skeleton height={18} width="60%" />
+              </CardContent>
+            </Card>
+            <Card sx={{ display: { xs: "none", md: "block" } }}>
+              <Skeleton variant="rectangular" width="100%" height={320} />
+              <CardContent>
+                <Skeleton height={24} width="80%" />
+                <Skeleton height={18} width="60%" />
+              </CardContent>
+            </Card>
           </Box>
         </Container>
       </Box>
     );
 
   return (
-    <Box sx={{ py: 8, bgcolor: "background.paper", position: "relative" }}>
+    <Box
+      sx={{
+        py: 8,
+        bgcolor: "background.paper",
+        position: "relative",
+        width: "100%",
+        overflow: "hidden",
+      }}
+    >
       <Container
         maxWidth="lg"
         sx={{
           position: "relative",
+          px: { xs: 2, sm: 3 },
           "&:hover .nav-btn": { opacity: 1 },
           ".nav-btn": { opacity: 0, transition: "opacity 0.3s ease" },
         }}
       >
-        <Typography variant="h4" fontWeight={700} textAlign="center" mb={1}>
+        <Typography
+          variant="h4"
+          fontWeight={700}
+          textAlign="center"
+          mb={1}
+          sx={{
+            color: (theme) =>
+              theme.palette.mode === "light"
+                ? "#000000 !important"
+                : "#FFFFFF !important",
+            opacity: "1 !important",
+            animation: "none !important",
+            WebkitAnimation: "none !important",
+            transition: "none !important",
+            WebkitTransition: "none !important",
+            willChange: "auto !important",
+          }}
+          style={{
+            color: theme.palette.mode === "light" ? "#000000" : "#FFFFFF",
+            transition: "none",
+            animation: "none",
+          }}
+        >
           Sách nổi bật
         </Typography>
         <Typography
@@ -98,6 +170,12 @@ const FeaturedBooks: React.FC = () => {
           color="text.secondary"
           textAlign="center"
           mb={5}
+          sx={{
+            opacity: "1 !important",
+            animation: "none !important",
+            WebkitAnimation: "none !important",
+            transition: "none !important",
+          }}
         >
           Khám phá những đầu sách được yêu thích nhất
         </Typography>
@@ -109,7 +187,7 @@ const FeaturedBooks: React.FC = () => {
             position: "absolute",
             top: "50%",
             transform: "translateY(-50%)",
-            left: { xs: 4, sm: -20 },
+            left: { xs: 4, sm: -40 },
             zIndex: 15,
             width: 46,
             height: 46,
@@ -153,7 +231,7 @@ const FeaturedBooks: React.FC = () => {
             position: "absolute",
             top: "50%",
             transform: "translateY(-50%)",
-            right: { xs: 4, sm: -20 },
+            right: { xs: 4, sm: -40 },
             zIndex: 15,
             width: 46,
             height: 46,
@@ -200,21 +278,41 @@ const FeaturedBooks: React.FC = () => {
           pagination={{ clickable: true }}
           autoplay={{ delay: 4000, disableOnInteraction: false }}
           spaceBetween={24}
-          slidesPerView={4}
+          slidesPerView={4.5}
           observer
           observeParents
+          centeredSlides={false}
           breakpoints={{
-            0: { slidesPerView: 1.2, spaceBetween: 12 },
-            640: { slidesPerView: 2.2, spaceBetween: 16 },
-            900: { slidesPerView: 3.2, spaceBetween: 20 },
-            1280: { slidesPerView: 4.2, spaceBetween: 24 },
+            0: {
+              slidesPerView: 1,
+              spaceBetween: 16,
+              centeredSlides: false,
+              slidesOffsetBefore: 0,
+              slidesOffsetAfter: 0,
+            },
+            640: {
+              slidesPerView: 2.2,
+              spaceBetween: 16,
+              centeredSlides: false,
+            },
+            900: {
+              slidesPerView: 3.3,
+              spaceBetween: 20,
+              centeredSlides: false,
+            },
+            1280: {
+              slidesPerView: 4.5,
+              spaceBetween: 24,
+              centeredSlides: false,
+            },
           }}
-          style={{ paddingBottom: 50 }}
+          style={{ paddingBottom: 50, paddingLeft: 0, paddingRight: 0 }}
         >
           {books.map((book) => (
             <SwiperSlide key={book.id}>
               <Card
                 component={motion.div}
+                layout={false}
                 whileHover={{ y: -6 }}
                 transition={{ duration: 0.3 }}
                 sx={{
@@ -222,13 +320,16 @@ const FeaturedBooks: React.FC = () => {
                   border: 1,
                   borderColor: "divider",
                   boxShadow: "none",
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
                   "&:hover": { boxShadow: "0 8px 20px rgba(0,0,0,0.1)" },
                 }}
               >
                 <Box
                   sx={{
                     width: "100%",
-                    aspectRatio: "3/4",
+                    aspectRatio: { xs: "2.5/3.8", sm: "3/4" },
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -256,14 +357,14 @@ const FeaturedBooks: React.FC = () => {
                   />
                 </Box>
 
-                <CardContent sx={{ p: 2.5 }}>
+                <CardContent sx={{ p: { xs: 1.5, sm: 2.5 } }}>
                   <Typography
                     sx={{
                       fontWeight: 600,
-                      fontSize: "1rem",
+                      fontSize: { xs: "0.9rem", sm: "1rem" },
                       mb: 0.5,
                       lineHeight: 1.4,
-                      minHeight: 48,
+                      minHeight: { xs: 40, sm: 48 },
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       display: "-webkit-box",
@@ -277,7 +378,8 @@ const FeaturedBooks: React.FC = () => {
                     variant="body2"
                     color="text.secondary"
                     sx={{
-                      mb: 1,
+                      mb: { xs: 0.5, sm: 1 },
+                      fontSize: { xs: "0.8rem", sm: "0.875rem" },
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
@@ -285,17 +387,26 @@ const FeaturedBooks: React.FC = () => {
                   >
                     {book.author || "Chưa rõ tác giả"}
                   </Typography>
-                  <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      mb: { xs: 1, sm: 2 },
+                    }}
+                  >
                     <Rating value={4} readOnly size="small" precision={0.5} />
                     <Typography
                       variant="caption"
-                      sx={{ ml: 0.5 }}
+                      sx={{
+                        ml: 0.5,
+                        fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                      }}
                       color="text.secondary"
                     >
                       (4.0)
                     </Typography>
                   </Box>
-                  <Stack spacing={1}>
+                  <Stack spacing={{ xs: 0.75, sm: 1 }}>
                     <Button
                       variant="outlined"
                       startIcon={<InfoOutlined />}
@@ -303,6 +414,8 @@ const FeaturedBooks: React.FC = () => {
                       sx={{
                         textTransform: "none",
                         fontWeight: 600,
+                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                        py: { xs: 0.5, sm: 0.75 },
                         "&:hover": { bgcolor: "action.hover" },
                       }}
                     >
@@ -314,6 +427,8 @@ const FeaturedBooks: React.FC = () => {
                       sx={{
                         textTransform: "none",
                         fontWeight: 600,
+                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                        py: { xs: 0.5, sm: 0.75 },
                         boxShadow: "0 2px 6px rgba(99,102,241,0.25)",
                         "&:hover": { transform: "translateY(-1px)" },
                       }}
@@ -333,12 +448,13 @@ const FeaturedBooks: React.FC = () => {
             position: "absolute",
             top: 0,
             right: 0,
-            width: { xs: 80, md: 160 },
+            width: { xs: 0, sm: 80, md: 160 },
             height: "100%",
             background: (theme) =>
               `linear-gradient(to right, transparent 0%, ${theme.palette.background.paper} 100%)`,
             pointerEvents: "none",
             zIndex: 10,
+            display: { xs: "none", sm: "block" },
           }}
         />
 
