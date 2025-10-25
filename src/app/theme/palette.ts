@@ -1,11 +1,13 @@
 import { createTheme, Theme } from "@mui/material/styles";
 
-// light theme nhé
+// light theme
 export const lightTheme: Theme = createTheme({
   palette: {
     mode: "light",
     primary: { main: "#4F46E5", contrastText: "#FFFFFF" },
     secondary: { main: "#F59E0B" },
+    success: { main: "#10B981", contrastText: "#FFFFFF" },
+    error: { main: "#EF4444", contrastText: "#FFFFFF" },
     background: { default: "#F8FAFC", paper: "#FFFFFF" },
     text: {
       primary: "#0F172A",
@@ -121,12 +123,14 @@ export const lightTheme: Theme = createTheme({
   },
 });
 
-// dark theme đây
+// dark theme
 export const darkTheme: Theme = createTheme({
   palette: {
     mode: "dark",
     primary: { main: "#818CF8", contrastText: "#FFFFFF" },
     secondary: { main: "#FBBF24" },
+    success: { main: "#10B981", contrastText: "#FFFFFF" },
+    error: { main: "#F87171", contrastText: "#FFFFFF" },
     background: {
       default: "#1B1C22",
       paper: "#23242B",

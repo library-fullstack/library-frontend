@@ -16,7 +16,6 @@ body {
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
-/* Improve number rendering */
 input,
 .MuiInputBase-input {
   font-variant-numeric: tabular-nums;

@@ -1,6 +1,6 @@
 import { ForumPost, ForumCategory } from "../types/forum.types";
 
-// Mock data - sẽ thay bằng API call sau
+// giả lập post - chưa làm gì cả
 export const mockPosts: ForumPost[] = [
   {
     id: 1,

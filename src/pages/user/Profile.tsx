@@ -58,13 +58,13 @@ export default function Profile(): React.ReactElement {
           elevation={0}
           sx={{
             p: { xs: 3, md: 5 },
-            borderRadius: 3,
+            borderRadius: 2,
             border: "1px solid",
             borderColor: "divider",
             bgcolor: "background.paper",
           }}
         >
-          {/* header */}
+          {/* phần header */}
           <Box
             sx={{
               display: "flex",
@@ -140,7 +140,7 @@ export default function Profile(): React.ReactElement {
                 py: 1,
                 bgcolor: logoutBg,
                 color: logoutColor,
-                width: { xs: "100%", sm: "auto" },
+                width: { xs: "10rem", sm: "auto" },
                 "&:hover": {
                   bgcolor:
                     theme.palette.mode === "dark" ? "#991B1B" : "#FCA5A5",
@@ -176,17 +176,16 @@ export default function Profile(): React.ReactElement {
               },
               "& .MuiTabs-indicator": {
                 height: 3,
-                borderRadius: "3px 3px 0 0",
               },
               "& .Mui-selected": {
                 color: "primary.main",
               },
               "& .MuiTouchRipple-root": {
                 overflow: "hidden",
-                borderRadius: 12,
+                borderRadius: 2,
               },
               "& .MuiTouchRipple-child": {
-                borderRadius: 12,
+                borderRadius: 2,
                 backgroundColor: "rgba(99, 102, 241, 0.18)",
               },
               "& .MuiTabs-scrollButtons": {
@@ -437,7 +436,7 @@ export default function Profile(): React.ReactElement {
                   variant="outlined"
                   fullWidth
                   sx={{
-                    borderRadius: 1,
+                    borderRadius: 2,
                     textTransform: "none",
                     fontWeight: 700,
                     fontSize: { xs: "0.875rem", sm: "0.9375rem" },
@@ -473,39 +472,51 @@ export default function Profile(): React.ReactElement {
                 >
                   Đổi mật khẩu ( BETA )
                 </Typography>
-                <Stack spacing={2.5}>
-                  <TextField
-                    fullWidth
-                    type="password"
-                    label="Mật khẩu hiện tại"
-                    size="small"
-                  />
-                  <TextField
-                    fullWidth
-                    type="password"
-                    label="Mật khẩu mới"
-                    size="small"
-                  />
-                  <TextField
-                    fullWidth
-                    type="password"
-                    label="Xác nhận mật khẩu mới"
-                    size="small"
-                  />
-                  <Button
-                    variant="contained"
-                    sx={{
-                      borderRadius: 1,
-                      textTransform: "none",
-                      fontWeight: 700,
-                      py: 1,
-                      alignSelf: "flex-start",
-                      width: { xs: "100%", sm: "auto" },
-                    }}
-                  >
-                    Cập nhật mật khẩu
-                  </Button>
-                </Stack>
+                <Box component="form" onSubmit={(e) => e.preventDefault()}>
+                  <Stack spacing={2.5}>
+                    <TextField
+                      fullWidth
+                      type="password"
+                      label="Mật khẩu hiện tại"
+                      size="small"
+                      inputProps={{
+                        autoComplete: "current-password",
+                      }}
+                    />
+                    <TextField
+                      fullWidth
+                      type="password"
+                      label="Mật khẩu mới"
+                      size="small"
+                      inputProps={{
+                        autoComplete: "new-password",
+                      }}
+                    />
+                    <TextField
+                      fullWidth
+                      type="password"
+                      label="Xác nhận mật khẩu mới"
+                      size="small"
+                      inputProps={{
+                        autoComplete: "new-password",
+                      }}
+                    />
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      sx={{
+                        borderRadius: 2,
+                        textTransform: "none",
+                        fontWeight: 700,
+                        py: 1,
+                        alignSelf: "flex-start",
+                        width: { xs: "100%", sm: "auto" },
+                      }}
+                    >
+                      Cập nhật mật khẩu
+                    </Button>
+                  </Stack>
+                </Box>
               </Paper>
             </Box>
           </TabPanel>

@@ -40,7 +40,7 @@ export default function LoginForm(): React.ReactElement {
       setSuccess("Đăng nhập thành công! Đang chuyển hướng...");
       setTimeout(() => {
         // redirect về trang trước đấy hoặc trang chủ
-        // liệu có là thừa không nhỉ ?
+        // maybe thừa
         window.location.href = from;
       }, 1200);
     } catch (err) {

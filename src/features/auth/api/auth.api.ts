@@ -29,7 +29,7 @@ export interface LoginResponse {
   token: string;
 }
 
-// call api
+// gọi api auth
 export const authApi = {
   login: (data: LoginRequest) =>
     axiosClient.post<LoginResponse>("/auth/login", data),

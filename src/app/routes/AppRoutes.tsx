@@ -1,93 +1,57 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { lazy, Suspense } from "react";
-import { Box, CircularProgress } from "@mui/material";
-
-// để load ngay
 import MainLayout from "../../widgets/layout/MainLayout";
 
-// để load ngay
+// các component chức năng
+import HomePage from "../../pages/home/HomePage";
+import AuthLayout from "../../pages/auth/AuthLayout";
+import BookList from "../../pages/book/BookList";
+import BookDetail from "../../pages/book/BookDetail";
+import Cart from "../../pages/borrow/Cart";
+import Checkout from "../../pages/borrow/Checkout";
+import BorrowList from "../../pages/borrow/BorrowList";
+import OrderList from "../../pages/borrow/OrderList";
+import Profile from "../../pages/user/Profile";
+import AdminDashboard from "../../pages/admin/AdminDashboard";
+
+// các component liên quan đến auth
+import LoginForm from "../../features/auth/components/LoginForm";
+import RegisterForm from "../../features/auth/components/RegisterForm";
+import ForgotPasswordForm from "../../features/auth/components/ForgotPasswordForm";
+import ResetPasswordForm from "../../features/auth/components/ResetPasswordForm";
+
+// các component chung
+import Services from "../../pages/common/Services";
+import News from "../../pages/common/News";
+import About from "../../pages/common/About";
+import Contact from "../../pages/common/Contact";
+import Forum from "../../pages/common/Forum";
+import Favorites from "../../pages/common/Favorites";
+
+// lớp bảo vệ
+import NotFound from "../../shared/ui/NotFound";
 import ProtectedRoute from "../../widgets/routing/ProtectedRoute";
 import PublicRoute from "../../widgets/routing/PublicRoute";
 
-// lazy load pages
-const HomePage = lazy(() => import("../../pages/home/HomePage"));
-const AuthLayout = lazy(() => import("../../pages/auth/AuthLayout"));
-const BookList = lazy(() => import("../../pages/book/BookList"));
-const BookDetail = lazy(() => import("../../pages/book/BookDetail"));
-const Cart = lazy(() => import("../../pages/borrow/Cart"));
-const Checkout = lazy(() => import("../../pages/borrow/Checkout"));
-const BorrowList = lazy(() => import("../../pages/borrow/BorrowList"));
-const OrderList = lazy(() => import("../../pages/borrow/OrderList"));
-const Profile = lazy(() => import("../../pages/user/Profile"));
-const AdminDashboard = lazy(() => import("../../pages/admin/AdminDashboard"));
+export default function AppRoutes() {
+  return (
+    <Routes>
+      {/* redirect /auth đến /auth/login nếu người dùng bằng cách nào đấy lại gõ mỗi /auth thay vì /auth/login */}
+      <Route path="/auth" element={<Navigate to="/auth/login" replace />} />
 
-// auth components
-const LoginForm = lazy(
-  () => import("../../features/auth/components/LoginForm")
-);
-const RegisterForm = lazy(
-  () => import("../../features/auth/components/RegisterForm")
-);
-const ForgotPasswordForm = lazy(
-  () => import("../../features/auth/components/ForgotPasswordForm")
-);
-const ResetPasswordForm = lazy(
-  () => import("../../features/auth/components/ResetPasswordForm")
-);
-
-// common pages
-const Services = lazy(() => import("../../pages/common/Services"));
-const News = lazy(() => import("../../pages/common/News"));
-const About = lazy(() => import("../../pages/common/About"));
-const Contact = lazy(() => import("../../pages/common/Contact"));
-const Forum = lazy(() => import("../../pages/common/Forum"));
-const Favorites = lazy(() => import("../../pages/common/Favorites"));
-
-// UI
-const NotFound = lazy(() => import("../../shared/ui/NotFound"));
-
-// fallback
-const PageLoader = () => (
-  <Box
-    sx={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      alignItems: "center",
-      bgcolor: "background.default",
-      zIndex: 9999,
-    }}
-  >
-    <CircularProgress
-      size={50}
-      thickness={3.5}
-      sx={{
-        color: "primary.main",
-        mb: 2,
-      }}
-    />
-    <Box
-      sx={{
-        fontSize: "1rem",
-        color: "text.secondary",
-        fontWeight: 500,
-        letterSpacing: "0.5px",
-        animation: "pulse 1.5s ease-in-out infinite",
-        "@keyframes pulse": {
-          "0%, 100%": { opacity: 0.6 },
-          "50%": { opacity: 1 },
-        },
-      }}
-    >
-      Đang tải...
-    </Box>
-  </Box>
-);
+      {/* auth routes - chỉ cho phép truy cập khi chưa đăng nhập */}
+      {/* nếu chưa đăng nhập thì cho truy cập đến auth */}
+      <Route
+        path="/auth"
+        element={
+          <PublicRoute>
+            <AuthLayout />
+          </PublicRoute>
+        }
+      >
+        <Route path="login" element={<LoginForm />} />
+        <Route path="register" element={<RegisterForm />} />
+        <Route path="forgot-password" element={<ForgotPasswordForm />} />
+      </Route>
 
 export default function AppRoutes() {
   return (
@@ -96,7 +60,35 @@ export default function AppRoutes() {
         {/* auth - redirect /auth to /auth/login */}
         <Route path="/auth" element={<Navigate to="/auth/login" replace />} />
 
-        {/* auth routes - chỉ cho phép truy cập khi chưa đăng nhập */}
+      {/* layout chính cho các route  */}
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/catalog" element={<BookList />} />
+        <Route path="/books/:id" element={<BookDetail />} />
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <Cart />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute>
+              <Checkout />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/borrow"
+          element={
+            <ProtectedRoute>
+              <BorrowList />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/auth"
           element={

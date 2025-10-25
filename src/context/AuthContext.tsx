@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useMemo,
-  useState,
-  ReactNode,
-  useCallback,
-} from "react";
+import React, { createContext, useMemo, useState, ReactNode } from "react";
 import axiosClient from "../shared/api/axiosClient";
 
 export interface User {
@@ -39,7 +33,7 @@ interface Props {
   children: ReactNode;
 }
 
-// lưu token đăng nhập
+// hàm lưu token đăng nhập
 export function AuthProvider({ children }: Props): ReactNode {
   const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem("user");
@@ -57,34 +51,31 @@ export function AuthProvider({ children }: Props): ReactNode {
     return localStorage.getItem("token");
   });
 
-  // đăng nhập - useCallback để tránh tạo function mới mỗi lần render
-  const login = useCallback(
-    async (identifier: string, password: string): Promise<void> => {
-      const res = await axiosClient.post<LoginResponse>("/auth/login", {
-        identifier,
-        password,
-      });
-      const { accessToken, user } = res.data;
+  // hàm xử lí đăng nhập
+  async function login(identifier: string, password: string): Promise<void> {
+    const res = await axiosClient.post<LoginResponse>("/auth/login", {
+      identifier,
+      password,
+    });
+    const { accessToken, user } = res.data;
 
-      setUser(user);
-      setToken(accessToken);
-      localStorage.setItem("token", accessToken);
-      localStorage.setItem("user", JSON.stringify(user));
-    },
-    []
-  );
+    setUser(user);
+    setToken(accessToken);
+    localStorage.setItem("token", accessToken);
+    localStorage.setItem("user", JSON.stringify(user));
+  }
 
-  // đăng xuất - useCallback để tránh tạo function mới mỗi lần render
-  const logout = useCallback((): void => {
+  // đăng xuất
+  function logout(): void {
     setUser(null);
     setToken(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-  }, []);
+  }
 
   const value = useMemo<AuthContextValue>(
     () => ({ user, token, login, logout }),
-    [user, token, login, logout]
+    [user, token]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

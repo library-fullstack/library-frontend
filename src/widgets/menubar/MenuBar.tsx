@@ -39,7 +39,7 @@ export default function MenuBar(): React.ReactElement {
   // nav item đây
   const menuItems = [
     { label: "TRANG CHỦ", path: "/" },
-    { label: "DANH MỤC SÁCH", path: "/books" },
+    { label: "DANH MỤC SÁCH", path: "/catalog" },
     { label: "DỊCH VỤ", path: "/services" },
     { label: "TIN TỨC & SỰ KIỆN", path: "/news" },
     { label: "VỀ CHÚNG TÔI", path: "/about" },
@@ -144,8 +144,8 @@ export default function MenuBar(): React.ReactElement {
         disableRipple
         sx={{
           position: "fixed",
-          bottom: 30,
-          right: 30,
+          bottom: { xs: 16, md: 24 },
+          right: { xs: 16, md: 24 },
           display: isMobile ? "flex" : "none",
           zIndex: 1000,
           opacity: drawerOpen ? 0 : 1,
@@ -174,6 +174,8 @@ export default function MenuBar(): React.ReactElement {
         ModalProps={{
           keepMounted: true,
           disableScrollLock: true,
+          disableEnforceFocus: true,
+          disableAutoFocus: true,
         }}
         sx={{
           display: isMobile ? "block" : "none",
@@ -189,6 +191,13 @@ export default function MenuBar(): React.ReactElement {
           },
           "& .MuiModal-root": {
             position: "fixed",
+          },
+        }}
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(4px)",
+            },
           },
         }}
       >
@@ -210,6 +219,7 @@ export default function MenuBar(): React.ReactElement {
                 color: "text.primary",
                 fontSize: "1.1rem",
                 letterSpacing: "-0.01em",
+                ml: 0.5,
               }}
             >
               MENU

@@ -73,7 +73,7 @@ export default function ForumPostCard({
                 height: { xs: 40, md: 48 },
               }}
             />
-            {/* mobile: hiện author & category ngay bên avatar */}
+            {/* hiện author và category ngay bên avatar - mobile */}
             <Box sx={{ display: { xs: "block", sm: "none" }, flex: 1 }}>
               <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
                 {post.author}
@@ -100,7 +100,7 @@ export default function ForumPostCard({
 
           {/* content */}
           <Box sx={{ flex: 1, width: { xs: "100%", sm: "auto" } }}>
-            {/* header - desktop only */}
+            {/* phần header - chỉ desktop */}
             <Stack
               direction="row"
               alignItems="center"
