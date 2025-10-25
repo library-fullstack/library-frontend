@@ -15,6 +15,8 @@ export default function Logo({
       component="img"
       src="/assets/img/logo.png"
       alt="Logo thư viện trực tuyến HBH"
+      width="100"
+      height="100"
       sx={{
         width: width || { xs: 80, sm: 90, md: 100 },
         height: "auto",
