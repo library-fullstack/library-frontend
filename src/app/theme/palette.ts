@@ -48,11 +48,15 @@ export const lightTheme: Theme = createTheme({
   components: {
     MuiCssBaseline: {
       styleOverrides: {
+        html: {
+          scrollbarGutter: "stable",
+        },
         body: {
           backgroundColor: "#F8FAFC",
           transition: "0.3s ease",
           WebkitFontSmoothing: "antialiased",
           MozOsxFontSmoothing: "grayscale",
+          scrollbarGutter: "stable",
         },
       },
     },
@@ -120,6 +124,18 @@ export const lightTheme: Theme = createTheme({
         },
       },
     },
+    MuiModal: {
+      defaultProps: {
+        disableScrollLock: true,
+      },
+    },
+    MuiSelect: {
+      defaultProps: {
+        MenuProps: {
+          disableScrollLock: true,
+        },
+      },
+    },
   },
 });
 
@@ -174,11 +190,15 @@ export const darkTheme: Theme = createTheme({
   components: {
     MuiCssBaseline: {
       styleOverrides: {
+        html: {
+          scrollbarGutter: "stable",
+        },
         body: {
           backgroundColor: "#1B1C22",
           transition: "0.4s ease",
           WebkitFontSmoothing: "antialiased",
           MozOsxFontSmoothing: "grayscale",
+          scrollbarGutter: "stable",
         },
       },
     },
@@ -242,6 +262,18 @@ export const darkTheme: Theme = createTheme({
             color: "#F9FAFB",
             fontWeight: 400,
           },
+        },
+      },
+    },
+    MuiModal: {
+      defaultProps: {
+        disableScrollLock: true,
+      },
+    },
+    MuiSelect: {
+      defaultProps: {
+        MenuProps: {
+          disableScrollLock: true,
         },
       },
     },

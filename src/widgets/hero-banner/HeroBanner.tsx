@@ -7,13 +7,11 @@ import { bannerConfig } from "../../app/config/bannerConfig";
 export default function HeroBanner(): React.ReactElement {
   const [activeSlide, setActiveSlide] = React.useState(0);
 
-  // giả định tạm
+  // giảm số lượng sách xuống 3 để tối ưu hiệu suất
   const books = [
     { src: "/assets/img/book-2020-war.png", alt: "2020 World of War" },
     { src: "/assets/img/book-gothic.png", alt: "War in the Gothic Line" },
     { src: "/assets/img/book-time-traveler.png", alt: "Time Traveler" },
-    { src: "/assets/img/book-doctor-who.png", alt: "Doctor Who" },
-    { src: "/assets/img/book-siloed.png", alt: "Siloed" },
   ];
 
   return (
@@ -32,6 +30,7 @@ export default function HeroBanner(): React.ReactElement {
         maxWidth: "100vw",
         overflow: "hidden",
         backgroundAttachment: { xs: "scroll", md: "scroll" },
+        willChange: "auto",
         "&::before": {
           content: '""',
           position: "absolute",
@@ -127,7 +126,7 @@ export default function HeroBanner(): React.ReactElement {
 
             {/* điều hướng bằng chấm tròn */}
             <Box sx={{ display: "flex", gap: 1, mt: 4 }}>
-              {[0, 1, 2, 3].map((index) => (
+              {[0, 1, 2].map((index) => (
                 <Box
                   key={index}
                   onClick={() => setActiveSlide(index)}
@@ -161,6 +160,7 @@ export default function HeroBanner(): React.ReactElement {
               alignItems: "center",
               position: "relative",
               height: 400,
+              contain: "layout style paint",
             }}
           >
             {books.map((book, index) => (
@@ -169,6 +169,9 @@ export default function HeroBanner(): React.ReactElement {
                 component="img"
                 src={book.src}
                 alt={book.alt}
+                loading="lazy"
+                width="180"
+                height="260"
                 onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
                   e.currentTarget.src = `https://via.placeholder.com/180x260/667eea/white?text=Book+${
                     index + 1
@@ -181,15 +184,16 @@ export default function HeroBanner(): React.ReactElement {
                   objectFit: "cover",
                   borderRadius: "8px",
                   boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                  transform: `translateX(${(index - 2) * 40}px) translateY(${
-                    Math.abs(index - 2) * 10
-                  }px) rotate(${(index - 2) * 3}deg)`,
-                  zIndex: 5 - Math.abs(index - 2),
-                  transition: "all 0.3s ease",
+                  transform: `translateX(${(index - 1) * 60}px) translateY(${
+                    Math.abs(index - 1) * 15
+                  }px) rotate(${(index - 1) * 5}deg)`,
+                  zIndex: 3 - Math.abs(index - 1),
+                  transition: "transform 0.3s ease",
+                  willChange: "transform",
                   "&:hover": {
-                    transform: `translateX(${(index - 2) * 40}px) translateY(${
-                      Math.abs(index - 2) * 10 - 10
-                    }px) rotate(${(index - 2) * 3}deg) scale(1.05)`,
+                    transform: `translateX(${(index - 1) * 60}px) translateY(${
+                      Math.abs(index - 1) * 15 - 10
+                    }px) rotate(${(index - 1) * 5}deg) scale(1.05)`,
                     zIndex: 10,
                   },
                 }}

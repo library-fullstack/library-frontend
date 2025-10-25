@@ -8,7 +8,7 @@ export default defineConfig({
     port: 5173,
   },
   build: {
-    // tối ưu chunk size - thanks ChatGPT,Claude, Copilot
+    // tối ưu chunk size
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
@@ -22,6 +22,7 @@ export default defineConfig({
     },
     minify: "esbuild",
     sourcemap: false,
+    target: "es2015",
   },
   optimizeDeps: {
     include: [

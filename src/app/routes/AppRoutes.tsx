@@ -1,36 +1,52 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { Box, CircularProgress } from "@mui/material";
 import MainLayout from "../../widgets/layout/MainLayout";
 
-// các component chức năng
+// các component chức năng CRITICAL - load ngay
 import HomePage from "../../pages/home/HomePage";
 import AuthLayout from "../../pages/auth/AuthLayout";
 import BookList from "../../pages/book/BookList";
 import BookDetail from "../../pages/book/BookDetail";
-import Cart from "../../pages/borrow/Cart";
-import Checkout from "../../pages/borrow/Checkout";
-import BorrowList from "../../pages/borrow/BorrowList";
-import OrderList from "../../pages/borrow/OrderList";
-import Profile from "../../pages/user/Profile";
-import AdminDashboard from "../../pages/admin/AdminDashboard";
 
-// các component liên quan đến auth
+// các component auth CRITICAL
 import LoginForm from "../../features/auth/components/LoginForm";
 import RegisterForm from "../../features/auth/components/RegisterForm";
 import ForgotPasswordForm from "../../features/auth/components/ForgotPasswordForm";
 import ResetPasswordForm from "../../features/auth/components/ResetPasswordForm";
 
-// các component chung
-import Services from "../../pages/common/Services";
-import News from "../../pages/common/News";
-import About from "../../pages/common/About";
-import Contact from "../../pages/common/Contact";
-import Forum from "../../pages/common/Forum";
-import Favorites from "../../pages/common/Favorites";
-
-// lớp bảo vệ
-import NotFound from "../../shared/ui/NotFound";
+// lớp bảo vệ CRITICAL
 import ProtectedRoute from "../../widgets/routing/ProtectedRoute";
 import PublicRoute from "../../widgets/routing/PublicRoute";
+import NotFound from "../../shared/ui/NotFound";
+
+// LAZY LOAD - các component không critical
+const Cart = lazy(() => import("../../pages/borrow/Cart"));
+const Checkout = lazy(() => import("../../pages/borrow/Checkout"));
+const BorrowList = lazy(() => import("../../pages/borrow/BorrowList"));
+const OrderList = lazy(() => import("../../pages/borrow/OrderList"));
+const Profile = lazy(() => import("../../pages/user/Profile"));
+const AdminDashboard = lazy(() => import("../../pages/admin/AdminDashboard"));
+const Services = lazy(() => import("../../pages/common/Services"));
+const News = lazy(() => import("../../pages/common/News"));
+const About = lazy(() => import("../../pages/common/About"));
+const Contact = lazy(() => import("../../pages/common/Contact"));
+const Forum = lazy(() => import("../../pages/common/Forum"));
+const Favorites = lazy(() => import("../../pages/common/Favorites"));
+
+// loading fallback
+const PageLoader = () => (
+  <Box
+    sx={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      minHeight: "60vh",
+    }}
+  >
+    <CircularProgress />
+  </Box>
+);
 
 export default function AppRoutes() {
   return (
@@ -66,33 +82,41 @@ export default function AppRoutes() {
         <Route
           path="/cart"
           element={
-            <ProtectedRoute>
-              <Cart />
-            </ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ProtectedRoute>
+                <Cart />
+              </ProtectedRoute>
+            </Suspense>
           }
         />
         <Route
           path="/checkout"
           element={
-            <ProtectedRoute>
-              <Checkout />
-            </ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ProtectedRoute>
+                <Checkout />
+              </ProtectedRoute>
+            </Suspense>
           }
         />
         <Route
           path="/borrow"
           element={
-            <ProtectedRoute>
-              <BorrowList />
-            </ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ProtectedRoute>
+                <BorrowList />
+              </ProtectedRoute>
+            </Suspense>
           }
         />
         <Route
           path="/orders"
           element={
-            <ProtectedRoute>
-              <OrderList />
-            </ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ProtectedRoute>
+                <OrderList />
+              </ProtectedRoute>
+            </Suspense>
           }
         />
         {/* <Route
@@ -106,33 +130,74 @@ export default function AppRoutes() {
         <Route
           path="/user/profile"
           element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            </Suspense>
           }
         />
         <Route
           path="/admin"
           element={
-            <ProtectedRoute roles={["ADMIN", "LIBRARIAN"]}>
-              <AdminDashboard />
-            </ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ProtectedRoute roles={["ADMIN", "LIBRARIAN"]}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            </Suspense>
           }
         />
         {/* các page khác */}
-        <Route path="/services" element={<Services />} />
-        <Route path="/news" element={<News />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
+        <Route
+          path="/services"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Services />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/news"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <News />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <About />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/contact"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Contact />
+            </Suspense>
+          }
+        />
         <Route
           path="/forum"
           element={
-            <ProtectedRoute>
-              <Forum />
-            </ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ProtectedRoute>
+                <Forum />
+              </ProtectedRoute>
+            </Suspense>
           }
         />
-        <Route path="/favorites" element={<Favorites />} />
+        <Route
+          path="/favorites"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Favorites />
+            </Suspense>
+          }
+        />
       </Route>
 
       {/* trang 404 */}
