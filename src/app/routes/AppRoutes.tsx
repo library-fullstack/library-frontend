@@ -53,12 +53,10 @@ export default function AppRoutes() {
         <Route path="forgot-password" element={<ForgotPasswordForm />} />
       </Route>
 
-export default function AppRoutes() {
-  return (
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
-        {/* auth - redirect /auth to /auth/login */}
-        <Route path="/auth" element={<Navigate to="/auth/login" replace />} />
+      {/* reset-password - cho phép truy cập dù đã đăng nhập hay chưa */}
+      <Route path="/auth" element={<AuthLayout />}>
+        <Route path="reset-password" element={<ResetPasswordForm />} />
+      </Route>
 
       {/* layout chính cho các route  */}
       <Route element={<MainLayout />}>
@@ -90,61 +88,14 @@ export default function AppRoutes() {
           }
         />
         <Route
-          path="/auth"
+          path="/orders"
           element={
-            <PublicRoute>
-              <AuthLayout />
-            </PublicRoute>
+            <ProtectedRoute>
+              <OrderList />
+            </ProtectedRoute>
           }
-        >
-          <Route path="login" element={<LoginForm />} />
-          <Route path="register" element={<RegisterForm />} />
-          <Route path="forgot-password" element={<ForgotPasswordForm />} />
-        </Route>
-
-        {/* reset-password - cho phép truy cập dù đã đăng nhập hay chưa */}
-        <Route path="/auth" element={<AuthLayout />}>
-          <Route path="reset-password" element={<ResetPasswordForm />} />
-        </Route>
-
-        {/* layout chính cho các route  */}
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/books" element={<BookList />} />
-          <Route path="/books/:id" element={<BookDetail />} />
-          <Route
-            path="/cart"
-            element={
-              <ProtectedRoute>
-                <Cart />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/checkout"
-            element={
-              <ProtectedRoute>
-                <Checkout />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/borrow"
-            element={
-              <ProtectedRoute>
-                <BorrowList />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/orders"
-            element={
-              <ProtectedRoute>
-                <OrderList />
-              </ProtectedRoute>
-            }
-          />
-          {/* <Route
+        />
+        {/* <Route
           path="/profile"
           element={
             <ProtectedRoute>
@@ -152,41 +103,40 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         /> */}
-          <Route
-            path="/user/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute roles={["ADMIN", "LIBRARIAN"]}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-          {/* các page khác */}
-          <Route path="/services" element={<Services />} />
-          <Route path="/news" element={<News />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route
-            path="/forum"
-            element={
-              <ProtectedRoute>
-                <Forum />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/favorites" element={<Favorites />} />
-        </Route>
+        <Route
+          path="/user/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute roles={["ADMIN", "LIBRARIAN"]}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        {/* các page khác */}
+        <Route path="/services" element={<Services />} />
+        <Route path="/news" element={<News />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route
+          path="/forum"
+          element={
+            <ProtectedRoute>
+              <Forum />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/favorites" element={<Favorites />} />
+      </Route>
 
-        {/* trang 404 */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Suspense>
+      {/* trang 404 */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
