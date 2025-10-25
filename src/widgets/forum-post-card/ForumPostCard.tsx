@@ -18,7 +18,7 @@ import {
 import { motion } from "framer-motion";
 import { ForumPost } from "../../features/forum/types/forum.types";
 
-const MotionCard = motion(Card);
+const MotionCard = motion.create(Card);
 
 interface ForumPostCardProps {
   post: ForumPost;

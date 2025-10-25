@@ -13,29 +13,20 @@ export default function Forum(): React.ReactElement {
   const [selectedCategory, setSelectedCategory] =
     React.useState<ForumCategory>("Tất cả");
 
-  const handleCreatePost = () => {
+  const handleCreatePost = React.useCallback(() => {
     // chưa làm phần tạo bài viết khi bấm vào tạo bài viết
-    // TODO
-    // TODO
-    // TODO
-    console.log("Create post clicked");
-  };
+    // TODO: Implement create post functionality
+  }, []);
 
-  const handleSearch = (query: string) => {
-    // chưa làm xử lí login khi tìm kiếm
-    // TODO
-    // TODO
-    // TODO
-    console.log("Search:", query);
-  };
+  const handleSearch = React.useCallback((_query: string) => {
+    // chưa làm xử lí logic khi tìm kiếm
+    // TODO: Implement search functionality
+  }, []);
 
-  const handlePostClick = (postId: number) => {
+  const handlePostClick = React.useCallback((_postId: number) => {
     // chưa làm phần xem bài viết khi bấm vào bài viết
-    // TODO
-    // TODO
-    // TODO
-    console.log("Post clicked:", postId);
-  };
+    // TODO: Implement post detail navigation
+  }, []);
 
   // filter các bài viết với danh mục
   const filteredPosts = React.useMemo(() => {

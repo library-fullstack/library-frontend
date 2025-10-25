@@ -2,7 +2,6 @@ import * as React from "react";
 import { Box, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import HelmetIcon from "../../assets/img/working.png";
 
 const MotionBox = motion.create(Box);
 
@@ -67,7 +66,7 @@ export default function Working(): React.ReactElement {
         >
           <Box
             component="img"
-            src={HelmetIcon}
+            src="/assets/img/working.png"
             alt="Working Icon"
             sx={{
               width: { xs: 150, md: 200 },

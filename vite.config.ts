@@ -7,4 +7,30 @@ export default defineConfig({
   server: {
     port: 5173,
   },
+  build: {
+    // tối ưu chunk size - thanks ChatGPT,Claude, Copilot
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "react-core": ["react", "react-dom", "react-router-dom"],
+          "mui-core": ["@mui/material", "@mui/icons-material"],
+          "mui-emotion": ["@emotion/react", "@emotion/styled"],
+          animations: ["framer-motion", "swiper"],
+        },
+      },
+    },
+    minify: "esbuild",
+    sourcemap: false,
+  },
+  optimizeDeps: {
+    include: [
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "@mui/material",
+      "@emotion/react",
+      "@emotion/styled",
+    ],
+  },
 });

@@ -107,7 +107,9 @@ export default function MenuBar(): React.ReactElement {
                       borderRadius: 1.5,
                       lineHeight: 1.5,
                       letterSpacing: "-0.01em",
-                      transition: "all 0.2s ease",
+                      // Loại bỏ transition cho color để chuyển ngay lập tức
+                      transition:
+                        "background-color 0.2s ease, transform 0.2s ease",
                       "&:hover": {
                         bgcolor: "action.hover",
                         color: "primary.main",
@@ -238,7 +240,8 @@ export default function MenuBar(): React.ReactElement {
                       sx={{
                         py: 1.5,
                         px: 3,
-                        transition: "all 0.2s ease",
+                        // Loại bỏ transition cho color và borderColor
+                        transition: "background-color 0.2s ease",
                         bgcolor: isActive ? "action.hover" : "transparent",
                         borderLeft: 3,
                         borderColor: isActive ? "primary.main" : "transparent",
