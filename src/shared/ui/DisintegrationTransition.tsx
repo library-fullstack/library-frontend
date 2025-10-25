@@ -6,6 +6,7 @@ interface DisintegrationTransitionProps {
   uniqueKey: string;
 }
 
+// đống hiệu ứng
 export default function DisintegrationTransition({
   children,
   uniqueKey,

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import HelmetIcon from "../../assets/img/working.png";
 
-const MotionBox = motion(Box);
+const MotionBox = motion.create(Box);
 
 // trang working nếu đến page chưa làm
 export default function Working(): React.ReactElement {

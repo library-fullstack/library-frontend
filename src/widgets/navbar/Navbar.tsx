@@ -226,7 +226,13 @@ export default function Navbar(): React.ReactElement {
                   {mode === "light" ? <Moon size={22} /> : <Sun size={22} />}
                 </IconButton>
 
-                <Box sx={{ width: "1px", height: 18, bgcolor: "divider" }} />
+                <Box
+                  sx={{
+                    width: "1px",
+                    height: 18,
+                    bgcolor: "divider",
+                  }}
+                />
 
                 {[
                   {
@@ -303,12 +309,25 @@ export default function Navbar(): React.ReactElement {
         anchor="right"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
+        disableScrollLock
+        ModalProps={{
+          disableEnforceFocus: true,
+          disableAutoFocus: true,
+          disableScrollLock: true,
+        }}
         sx={{
           display: isMobile ? "block" : "none",
           "& .MuiDrawer-paper": {
             width: "70vw",
             maxWidth: 260,
             bgcolor: "background.paper",
+          },
+        }}
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(4px)",
+            },
           },
         }}
       >
@@ -328,7 +347,11 @@ export default function Navbar(): React.ReactElement {
           >
             MENU
           </Typography>
-          <List>
+          <List
+            sx={{
+              pl: "0.5rem",
+            }}
+          >
             <ListItem disablePadding>
               <ListItemButton onClick={toggleTheme}>
                 <ListItemIcon sx={{ color: "text.primary", minWidth: 40 }}>

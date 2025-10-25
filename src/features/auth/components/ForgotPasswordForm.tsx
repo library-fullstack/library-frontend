@@ -44,7 +44,7 @@ export default function ForgotPasswordForm(): React.ReactElement {
     }
   }
 
-  // Success State - Hiển thị sau khi gửi email thành công
+  // hiển thị trạng thái thành công khi quên mật khẩu thành công
   if (emailSent) {
     return (
       <motion.div
@@ -58,7 +58,7 @@ export default function ForgotPasswordForm(): React.ReactElement {
             py: 2,
           }}
         >
-          {/* Success Icon */}
+          {/* icon tick */}
           <Box
             sx={{
               width: 80,
@@ -129,7 +129,7 @@ export default function ForgotPasswordForm(): React.ReactElement {
             kết đặt lại mật khẩu.
           </Typography>
 
-          {/* Action Buttons */}
+          {/* nút quay về đăng nhập */}
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Button
               fullWidth
@@ -148,6 +148,7 @@ export default function ForgotPasswordForm(): React.ReactElement {
               Quay về đăng nhập
             </Button>
 
+            {/* nút quay về trang chủ */}
             <Button
               fullWidth
               variant="text"
@@ -265,6 +266,7 @@ export default function ForgotPasswordForm(): React.ReactElement {
           {loading ? "Đang gửi..." : "Gửi yêu cầu"}
         </Button>
 
+        {/* nút quay lại đăng nhập */}
         <Button
           fullWidth
           variant="text"

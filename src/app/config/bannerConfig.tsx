@@ -1,6 +1,6 @@
 export const bannerConfig = {
   image: "/assets/banner.jpg",
-  overlay: "dark", // hoặc "light"
+  overlay: "dark",
   title: "Xin chào các bạn",
   subtitle: "Cùng chào mừng sự kiện khai trương thư viện trực tuyến HBH...",
   titleColor: "#ffffff",

@@ -58,29 +58,38 @@ export default function Profile(): React.ReactElement {
           elevation={0}
           sx={{
             p: { xs: 3, md: 5 },
-            borderRadius: 3,
+            borderRadius: 2,
             border: "1px solid",
             borderColor: "divider",
             bgcolor: "background.paper",
           }}
         >
-          {/* header */}
+          {/* phần header */}
           <Box
             sx={{
               display: "flex",
               flexDirection: { xs: "column", sm: "row" },
-              alignItems: { xs: "center", sm: "flex-start" },
+              alignItems: "center",
               justifyContent: "space-between",
               gap: 3,
+              mb: 2,
             }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                alignItems: "center",
+                gap: { xs: 2, sm: 3 },
+                textAlign: { xs: "center", sm: "left" },
+              }}
+            >
               <Avatar
                 src={user?.avatar_url || ""}
                 sx={{
-                  width: 100,
-                  height: 100,
-                  fontSize: 40,
+                  width: { xs: 90, sm: 100 },
+                  height: { xs: 90, sm: 100 },
+                  fontSize: { xs: 36, sm: 40 },
                   fontWeight: 700,
                   bgcolor: "primary.main",
                 }}
@@ -112,9 +121,8 @@ export default function Profile(): React.ReactElement {
                     mt: 1,
                     bgcolor: chipBg,
                     color: "white",
-                    width: 190,
+                    width: { xs: "auto", sm: 190 },
                     height: 32,
-                    // borderRadius: 1,
                     px: 1.25,
                   }}
                 />
@@ -132,6 +140,7 @@ export default function Profile(): React.ReactElement {
                 py: 1,
                 bgcolor: logoutBg,
                 color: logoutColor,
+                width: { xs: "10rem", sm: "auto" },
                 "&:hover": {
                   bgcolor:
                     theme.palette.mode === "dark" ? "#991B1B" : "#FCA5A5",
@@ -145,6 +154,9 @@ export default function Profile(): React.ReactElement {
           <Tabs
             value={tab}
             onChange={(_, v) => setTab(v)}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
             sx={{
               mt: 4,
               borderBottom: 1,
@@ -156,24 +168,30 @@ export default function Profile(): React.ReactElement {
                 borderRadius: "12px 12px 0 0",
                 px: 2.5,
                 transition: "background-color 0.2s ease",
+                fontSize: { xs: "0.85rem", sm: "0.875rem" },
+                minWidth: { xs: "auto", sm: 90 },
                 "&:hover": {
                   bgcolor: "action.hover",
                 },
               },
               "& .MuiTabs-indicator": {
                 height: 3,
-                borderRadius: "3px 3px 0 0",
               },
               "& .Mui-selected": {
                 color: "primary.main",
               },
               "& .MuiTouchRipple-root": {
                 overflow: "hidden",
-                borderRadius: 12,
+                borderRadius: 2,
               },
               "& .MuiTouchRipple-child": {
-                borderRadius: 12,
+                borderRadius: 2,
                 backgroundColor: "rgba(99, 102, 241, 0.18)",
+              },
+              "& .MuiTabs-scrollButtons": {
+                "&.Mui-disabled": {
+                  opacity: 0.3,
+                },
               },
             }}
           >
@@ -390,21 +408,23 @@ export default function Profile(): React.ReactElement {
                   flexDirection: "column",
                   alignItems: "center",
                   gap: 2,
+                  height: "fit-content",
                 }}
               >
                 <Typography
                   variant="h6"
                   fontWeight={800}
                   alignSelf="flex-start"
+                  sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
                 >
                   Ảnh đại diện ( BETA )
                 </Typography>
                 <Avatar
                   src={user?.avatar_url || ""}
                   sx={{
-                    width: 120,
-                    height: 120,
-                    fontSize: 48,
+                    width: { xs: 100, sm: 120 },
+                    height: { xs: 100, sm: 120 },
+                    fontSize: { xs: 40, sm: 48 },
                     fontWeight: 700,
                     bgcolor: "primary.main",
                     mb: 1,
@@ -416,9 +436,10 @@ export default function Profile(): React.ReactElement {
                   variant="outlined"
                   fullWidth
                   sx={{
-                    borderRadius: 1,
+                    borderRadius: 2,
                     textTransform: "none",
                     fontWeight: 700,
+                    fontSize: { xs: "0.875rem", sm: "0.9375rem" },
                   }}
                 >
                   Tải ảnh lên
@@ -427,6 +448,7 @@ export default function Profile(): React.ReactElement {
                   variant="caption"
                   color="text.secondary"
                   textAlign="center"
+                  sx={{ fontSize: { xs: "0.7rem", sm: "0.75rem" } }}
                 >
                   Định dạng: JPG, PNG (tối đa 2MB)
                 </Typography>
@@ -442,41 +464,59 @@ export default function Profile(): React.ReactElement {
                   borderColor: "divider",
                 }}
               >
-                <Typography variant="h6" fontWeight={800} mb={3}>
+                <Typography
+                  variant="h6"
+                  fontWeight={800}
+                  mb={3}
+                  sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
+                >
                   Đổi mật khẩu ( BETA )
                 </Typography>
-                <Stack spacing={2.5}>
-                  <TextField
-                    fullWidth
-                    type="password"
-                    label="Mật khẩu hiện tại"
-                    size="small"
-                  />
-                  <TextField
-                    fullWidth
-                    type="password"
-                    label="Mật khẩu mới"
-                    size="small"
-                  />
-                  <TextField
-                    fullWidth
-                    type="password"
-                    label="Xác nhận mật khẩu mới"
-                    size="small"
-                  />
-                  <Button
-                    variant="contained"
-                    sx={{
-                      borderRadius: 1,
-                      textTransform: "none",
-                      fontWeight: 700,
-                      py: 1,
-                      alignSelf: "flex-start",
-                    }}
-                  >
-                    Cập nhật mật khẩu
-                  </Button>
-                </Stack>
+                <Box component="form" onSubmit={(e) => e.preventDefault()}>
+                  <Stack spacing={2.5}>
+                    <TextField
+                      fullWidth
+                      type="password"
+                      label="Mật khẩu hiện tại"
+                      size="small"
+                      inputProps={{
+                        autoComplete: "current-password",
+                      }}
+                    />
+                    <TextField
+                      fullWidth
+                      type="password"
+                      label="Mật khẩu mới"
+                      size="small"
+                      inputProps={{
+                        autoComplete: "new-password",
+                      }}
+                    />
+                    <TextField
+                      fullWidth
+                      type="password"
+                      label="Xác nhận mật khẩu mới"
+                      size="small"
+                      inputProps={{
+                        autoComplete: "new-password",
+                      }}
+                    />
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      sx={{
+                        borderRadius: 2,
+                        textTransform: "none",
+                        fontWeight: 700,
+                        py: 1,
+                        alignSelf: "flex-start",
+                        width: { xs: "100%", sm: "auto" },
+                      }}
+                    >
+                      Cập nhật mật khẩu
+                    </Button>
+                  </Stack>
+                </Box>
               </Paper>
             </Box>
           </TabPanel>

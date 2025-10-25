@@ -11,6 +11,7 @@ import {
   Stack,
   useTheme,
   IconButton,
+  useMediaQuery,
 } from "@mui/material";
 import {
   ShoppingCart,
@@ -24,9 +25,11 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { useNavigate } from "react-router-dom";
-import { getAllBooks } from "../../features/books/api/books.api";
-import type { Book } from "../../features/books/api/books.api";
+import { booksApi } from "../../features/books/api";
+import type { Book } from "../../features/books/types";
 import { motion } from "framer-motion";
+
+const MotionCard = motion.create(Card);
 
 const FeaturedBooks: React.FC = () => {
   const [books, setBooks] = React.useState<Book[]>([]);
@@ -34,18 +37,32 @@ const FeaturedBooks: React.FC = () => {
   const [error, setError] = React.useState<string | null>(null);
   const theme = useTheme();
   const navigate = useNavigate();
+  const isMobile = useMediaQuery("(max-width:900px)");
 
   React.useEffect(() => {
-    (async () => {
+    let isMounted = true;
+
+    const fetchBooks = async () => {
       try {
-        const res = await getAllBooks({ limit: 10 });
-        setBooks(Array.isArray(res.data) ? res.data : []);
-      } catch {
-        setError("Không thể tải danh sách sách nổi bật.");
+        const list = await booksApi.getAllBooks({ limit: 10 });
+        if (isMounted) {
+          setBooks(Array.isArray(list) ? list : []);
+        }
+      } catch (err) {
+        console.error("Lỗi tải sách:", err);
+        if (isMounted) {
+          setError("Không thể tải danh sách sách nổi bật.");
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
-    })();
+    };
+
+    fetchBooks();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (loading || error)
@@ -310,10 +327,9 @@ const FeaturedBooks: React.FC = () => {
         >
           {books.map((book) => (
             <SwiperSlide key={book.id}>
-              <Card
-                component={motion.div}
+              <MotionCard
                 layout={false}
-                whileHover={{ y: -6 }}
+                whileHover={isMobile ? undefined : { y: -6 }}
                 transition={{ duration: 0.3 }}
                 sx={{
                   borderRadius: 2,
@@ -385,7 +401,7 @@ const FeaturedBooks: React.FC = () => {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {book.author || "Chưa rõ tác giả"}
+                    {book.author_names || "Chưa rõ tác giả"}
                   </Typography>
                   <Box
                     sx={{
@@ -437,7 +453,7 @@ const FeaturedBooks: React.FC = () => {
                     </Button>
                   </Stack>
                 </CardContent>
-              </Card>
+              </MotionCard>
             </SwiperSlide>
           ))}
         </Swiper>

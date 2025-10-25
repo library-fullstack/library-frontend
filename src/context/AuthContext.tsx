@@ -33,7 +33,7 @@ interface Props {
   children: ReactNode;
 }
 
-// lưu token đăng nhập
+// hàm lưu token đăng nhập
 export function AuthProvider({ children }: Props): ReactNode {
   const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem("user");
@@ -51,7 +51,7 @@ export function AuthProvider({ children }: Props): ReactNode {
     return localStorage.getItem("token");
   });
 
-  // đăng nhập
+  // hàm xử lí đăng nhập
   async function login(identifier: string, password: string): Promise<void> {
     const res = await axiosClient.post<LoginResponse>("/auth/login", {
       identifier,
