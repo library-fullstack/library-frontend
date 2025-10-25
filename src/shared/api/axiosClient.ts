@@ -5,10 +5,16 @@ const axiosClient = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// lưu token vào trong localstorage
 axiosClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+
+  if (token) {
+    config.headers = config.headers || {};
+    (config.headers as Record<string, string>)[
+      "Authorization"
+    ] = `Bearer ${token}`;
+  }
+
   return config;
 });
 
