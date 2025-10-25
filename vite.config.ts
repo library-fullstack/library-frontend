@@ -7,6 +7,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       react({
+        jsxRuntime: "automatic",
         jsxImportSource: "@emotion/react",
         babel: {
           plugins: ["@emotion/babel-plugin"],
@@ -27,16 +28,14 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks: (id) => {
             if (id.includes("node_modules")) {
-              if (id.includes("@mui/material")) {
-                return "mui-material";
+              // Keep @emotion and @mui/material together to avoid initialization issues
+              if (id.includes("@emotion") || id.includes("@mui/material")) {
+                return "mui-core";
               }
               if (id.includes("@mui/icons-material")) {
                 return "mui-icons";
               }
-              if (id.includes("@emotion")) {
-                return "emotion";
-              }
-              if (id.includes("react") || id.includes("react-dom")) {
+              if (id.includes("react") || id.includes("react-dom") || id.includes("react-router")) {
                 return "react-vendor";
               }
               if (id.includes("framer-motion")) {
