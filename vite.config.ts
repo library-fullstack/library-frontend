@@ -5,7 +5,14 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
   return {
-    plugins: [react()],
+    plugins: [
+      react({
+        jsxImportSource: "@emotion/react",
+        babel: {
+          plugins: ["@emotion/babel-plugin"],
+        },
+      }),
+    ],
     server: {
       port: 5173,
       host: "0.0.0.0",
@@ -14,15 +21,32 @@ export default defineConfig(({ mode }) => {
       outDir: "dist",
       chunkSizeWarningLimit: 1000,
       sourcemap: env.VITE_SOURCEMAP === "true",
-      target: "es2017",
+      target: "es2020",
       minify: "esbuild",
       rollupOptions: {
         output: {
-          manualChunks: {
-            "react-core": ["react", "react-dom", "react-router-dom"],
-            "mui-core": ["@mui/material", "@mui/icons-material"],
-            "mui-emotion": ["@emotion/react", "@emotion/styled"],
-            animations: ["framer-motion", "swiper"],
+          manualChunks: (id) => {
+            if (id.includes("node_modules")) {
+              if (id.includes("@mui/material")) {
+                return "mui-material";
+              }
+              if (id.includes("@mui/icons-material")) {
+                return "mui-icons";
+              }
+              if (id.includes("@emotion")) {
+                return "emotion";
+              }
+              if (id.includes("react") || id.includes("react-dom")) {
+                return "react-vendor";
+              }
+              if (id.includes("framer-motion")) {
+                return "framer-motion";
+              }
+              if (id.includes("swiper")) {
+                return "swiper";
+              }
+              return "vendor";
+            }
           },
         },
       },
@@ -33,9 +57,14 @@ export default defineConfig(({ mode }) => {
         "react-dom",
         "react-router-dom",
         "@mui/material",
+        "@mui/icons-material",
         "@emotion/react",
         "@emotion/styled",
+        "framer-motion",
       ],
+      esbuildOptions: {
+        target: "es2020",
+      },
     },
     define: {
       __API_URL__: JSON.stringify(env.VITE_API_URL),
