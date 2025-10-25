@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       outDir: "dist",
-      chunkSizeWarningLimit: 1000,
+      chunkSizeWarningLimit: 2000,
       sourcemap: env.VITE_SOURCEMAP === "true",
       target: "es2020",
       minify: "esbuild",
@@ -28,22 +28,15 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks: (id) => {
             if (id.includes("node_modules")) {
-              // Keep @emotion and @mui/material together to avoid initialization issues
-              if (id.includes("@emotion") || id.includes("@mui/material")) {
-                return "mui-core";
-              }
-              if (id.includes("@mui/icons-material")) {
-                return "mui-icons";
-              }
-              if (id.includes("react") || id.includes("react-dom") || id.includes("react-router")) {
-                return "react-vendor";
-              }
+              // Split only large independent libraries
               if (id.includes("framer-motion")) {
                 return "framer-motion";
               }
               if (id.includes("swiper")) {
                 return "swiper";
               }
+              // Keep everything else together to avoid circular dependency issues
+              // This includes: react, react-dom, react-router, @mui, @emotion
               return "vendor";
             }
           },
