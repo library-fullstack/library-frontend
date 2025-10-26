@@ -67,7 +67,7 @@ export default function MenuBar(): React.ReactElement {
         sx={{
           position: "sticky",
           top: 64,
-          bgcolor: "background.paper",
+          bgcolor: "background.default",
           borderBottom: 1,
           borderColor: "divider",
           py: 0.5,

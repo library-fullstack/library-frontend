@@ -11,16 +11,20 @@ import Footer from "../../shared/ui/Footer";
 // homepage
 const HomePage: React.FC = React.memo(() => {
   return (
-    <Box sx={{ backgroundColor: "#FAFAFA", width: "100%" }}>
+    <Box sx={{ width: "100%" }}>
       {/* cái banner đầu trang */}
       <HeroBanner />
       {/* cái danh sách sách tự chạy  */}
       <FeaturedBooks />
       {/* section cho đặc sắc - hơi xấu, sửa sau*/}
       <DiscoverSection />
+      {/* giới thiệu  */}
       <GettingStartedSection />
+      {/* tin tức và sự kiện */}
       <NewsAndEventsSection />
+      {/* giới thiệu diễn đàn */}
       <CommunitySection />
+      {/* footer thôi */}
       <Footer />
     </Box>
   );

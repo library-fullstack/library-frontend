@@ -7,15 +7,10 @@ import {
   Avatar,
   Chip,
   Stack,
-  useTheme,
 } from "@mui/material";
 import { motion } from "framer-motion";
 import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
 
-// phần này cần xem xét việc xử lí gọi api và lấy ra bài viết trending thay vì static dữ liệu như này
-// tuy nhiên vấn đề lấy bài viết trending sẽ có vấn đề về sự nghiêm túc và lệch chuẩn do đôi khi bài
-// viết có thể sẽ không phù hợp. và vì thế nó không phù hợp nằm ở webpage.
-// có lẽ vẫn nên để static để thể hiện ví dụ về cộng đồng...
 const mockPosts = [
   {
     id: 1,
@@ -43,9 +38,11 @@ const mockPosts = [
   },
 ];
 
+// phần này cần xem xét việc xử lí gọi api và lấy ra bài viết trending thay vì static dữ liệu như này
+// tuy nhiên vấn đề lấy bài viết trending sẽ có vấn đề về sự nghiêm túc và lệch chuẩn do đôi khi bài
+// viết có thể sẽ không phù hợp. và vì thế nó không phù hợp nằm ở webpage.
+// có lẽ vẫn nên để static để thể hiện ví dụ về cộng đồng...
 export default function CommunitySection(): React.ReactElement {
-  const theme = useTheme();
-
   return (
     <Box
       component={motion.div}
@@ -54,16 +51,12 @@ export default function CommunitySection(): React.ReactElement {
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
       sx={{
-        bgcolor:
-          theme.palette.mode === "light"
-            ? "rgba(99,102,241,0.02)"
-            : "rgba(129,140,248,0.05)",
+        bgcolor: (theme) => theme.palette.background.default,
         py: { xs: 6, md: 10 },
-        width: "100%",
+        mb: { xs: 4, md: 6 },
       }}
     >
       <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
-        {/* Tiêu đề */}
         <Stack
           direction="row"
           alignItems="center"
@@ -75,7 +68,7 @@ export default function CommunitySection(): React.ReactElement {
           <Typography
             variant="h4"
             fontWeight={700}
-            sx={{ color: theme.palette.text.primary }}
+            sx={{ color: (theme) => theme.palette.text.primary }}
           >
             Góc cộng đồng sinh viên
           </Typography>
@@ -90,7 +83,6 @@ export default function CommunitySection(): React.ReactElement {
           Một vài chia sẻ nổi bật từ diễn đàn của Thư viện HBH.
         </Typography>
 
-        {/* danh sách bài viết */}
         <Stack
           direction={{ xs: "column", md: "row" }}
           spacing={{ xs: 3, md: 4 }}
@@ -107,19 +99,13 @@ export default function CommunitySection(): React.ReactElement {
                 flex: 1,
                 p: { xs: 2.5, sm: 3 },
                 borderRadius: 2,
-                bgcolor: theme.palette.background.paper,
-                border: `1px solid ${theme.palette.divider}`,
-                boxShadow:
-                  theme.palette.mode === "light"
-                    ? "0 6px 16px rgba(99,102,241,0.06)"
-                    : "0 6px 16px rgba(129,140,248,0.1)",
+                bgcolor: (theme) => theme.palette.background.paper,
+                border: (theme) => `1px solid ${theme.palette.divider}`,
+                boxShadow: (theme) => theme.shadows[1],
                 "&:hover": {
                   transform: "translateY(-4px)",
                   transition: "0.3s ease",
-                  boxShadow:
-                    theme.palette.mode === "light"
-                      ? "0 8px 20px rgba(99,102,241,0.15)"
-                      : "0 8px 20px rgba(129,140,248,0.25)",
+                  boxShadow: (theme) => theme.shadows[4],
                 },
               }}
             >
@@ -130,7 +116,6 @@ export default function CommunitySection(): React.ReactElement {
                 sx={{
                   mb: 1.2,
                   fontWeight: 500,
-                  letterSpacing: 0.1,
                   borderRadius: 2,
                 }}
               />
@@ -139,7 +124,7 @@ export default function CommunitySection(): React.ReactElement {
                 fontWeight={600}
                 sx={{
                   mb: 1,
-                  color: theme.palette.text.primary,
+                  color: (theme) => theme.palette.text.primary,
                   lineHeight: 1.4,
                 }}
               >
@@ -171,9 +156,9 @@ export default function CommunitySection(): React.ReactElement {
                   sx={{
                     width: 28,
                     height: 28,
-                    bgcolor: "primary.main",
+                    bgcolor: (theme) => theme.palette.primary.main,
                     fontSize: 13,
-                    color: "#fff",
+                    color: (theme) => theme.palette.primary.contrastText,
                   }}
                 >
                   {post.author.charAt(0)}
@@ -186,7 +171,7 @@ export default function CommunitySection(): React.ReactElement {
           ))}
         </Stack>
 
-        {/* button đi đến forum */}
+        {/* nút xem thêm */}
         <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
           <Box
             component={motion.div}
@@ -204,26 +189,23 @@ export default function CommunitySection(): React.ReactElement {
                 px: 3.5,
                 py: 1.2,
                 borderRadius: 2,
-                border: `1.5px solid ${theme.palette.primary.main}`,
-                color: theme.palette.primary.main,
+                border: (theme) => `1.5px solid ${theme.palette.primary.main}`,
+                color: (theme) => theme.palette.primary.main,
                 fontWeight: 600,
                 fontSize: "0.95rem",
                 textDecoration: "none",
                 transition: "all 0.25s ease",
                 "&:hover": {
-                  bgcolor:
-                    theme.palette.mode === "light"
-                      ? "rgba(99,102,241,0.08)"
-                      : "rgba(129,140,248,0.15)",
-                  boxShadow:
-                    theme.palette.mode === "light"
-                      ? "0 4px 12px rgba(99,102,241,0.2)"
-                      : "0 4px 12px rgba(129,140,248,0.25)",
+                  bgcolor: (theme) => theme.palette.action.hover,
+                  boxShadow: (theme) => theme.shadows[2],
                 },
               }}
             >
               <ForumOutlinedIcon
-                sx={{ fontSize: 20, color: theme.palette.primary.main }}
+                sx={{
+                  fontSize: 20,
+                  color: (theme) => theme.palette.primary.main,
+                }}
               />
               <span>Truy cập diễn đàn sinh viên</span>
             </Box>
