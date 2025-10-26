@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 
+// thanks to ChatGPT, Claude, and GitHub Copilot for helping me optimize the codebase.
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
@@ -28,15 +29,12 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks: (id) => {
             if (id.includes("node_modules")) {
-              // Split only large independent libraries
               if (id.includes("framer-motion")) {
                 return "framer-motion";
               }
               if (id.includes("swiper")) {
                 return "swiper";
               }
-              // Keep everything else together to avoid circular dependency issues
-              // This includes: react, react-dom, react-router, @mui, @emotion
               return "vendor";
             }
           },

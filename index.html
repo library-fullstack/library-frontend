@@ -23,16 +23,23 @@
     />
 
     <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
       html {
-        overflow-y: scroll;
-        scrollbar-gutter: stable;
+        overflow-x: hidden;
       }
 
       body {
         margin: 0;
         background-color: #fafafa;
-        scrollbar-gutter: stable;
-        overflow-y: auto;
+      }
+
+      #root {
+        min-height: 100vh;
       }
 
       @media (prefers-color-scheme: dark) {
