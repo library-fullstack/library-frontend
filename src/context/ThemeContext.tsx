@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { ThemeContext } from "./ThemeContext.context";
 import type { ThemeMode } from "./ThemeContext.types";
@@ -9,8 +9,19 @@ export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [mode, setMode] = useState<ThemeMode>(() => {
     const saved = localStorage.getItem("themeMode");
-    return (saved as ThemeMode) || "light";
+    if (saved) {
+      return saved as ThemeMode;
+    }
+    return "light";
   });
+
+  useEffect(() => {
+    if (mode === "dark") {
+      document.body.classList.add("dark-mode");
+    } else {
+      document.body.classList.remove("dark-mode");
+    }
+  }, [mode]);
 
   const toggleTheme = () => {
     setMode((prev) => {

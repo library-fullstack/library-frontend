@@ -73,7 +73,7 @@ export default function Navbar(): React.ReactElement {
         position="sticky"
         elevation={0}
         sx={{
-          bgcolor: "background.paper",
+          bgcolor: "background.default",
           borderBottom: 1,
           borderColor: "divider",
           transition: "all 0.3s ease",
@@ -140,24 +140,25 @@ export default function Navbar(): React.ReactElement {
                 maxWidth: { xs: "100%", md: 550 },
                 mr: { xs: 0, sm: 0, md: 2 },
                 "& .MuiOutlinedInput-root": {
-                  bgcolor: mode === "light" ? "#F8FAFC" : "#1E1F27",
+                  bgcolor: "background.default",
                   borderRadius: 2,
                   transition: "all 0.2s ease",
                   "& fieldset": {
-                    borderColor: mode === "light" ? "#CBD5E1" : "#3F3F46",
+                    borderColor: "divider",
                   },
                   "&:hover fieldset": {
-                    borderColor: mode === "light" ? "#6366F1" : "#818CF8",
+                    borderColor: "primary.main",
                   },
                   "&.Mui-focused fieldset": {
                     borderColor: "primary.main",
                   },
                   "&.Mui-focused": {
-                    boxShadow: `0 0 0 px ${
-                      mode === "light"
-                        ? "rgba(99,102,241,0.1)"
-                        : "rgba(129,140,248,0.15)"
-                    }`,
+                    boxShadow: (theme) =>
+                      `0 0 0 3px ${
+                        theme.palette.mode === "light"
+                          ? "rgba(99,102,241,0.1)"
+                          : "rgba(129,140,248,0.15)"
+                      }`,
                   },
                   "& input": {
                     color: "text.primary",

@@ -12,7 +12,6 @@ export default function MainLayout() {
   return (
     <Box
       sx={{
-        backgroundColor: "#FAFAFA",
         minHeight: "100vh",
         width: "100%",
         position: "relative",

@@ -6,7 +6,6 @@ import {
   Stack,
   Divider,
   Link,
-  useTheme,
   Grid,
 } from "@mui/material";
 import { motion } from "framer-motion";
@@ -15,20 +14,15 @@ import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 
 export default function Footer(): React.ReactElement {
-  const theme = useTheme();
-
   return (
     <Box
       component="footer"
       sx={{
-        bgcolor:
-          theme.palette.mode === "light"
-            ? "rgba(99,102,241,0.02)"
-            : "rgba(129,140,248,0.05)",
-        borderTop: `1px solid ${theme.palette.divider}`,
-        mt: { xs: 6, md: 10 },
-        py: { xs: 4, md: 6 },
-        color: theme.palette.text.secondary,
+        bgcolor: (theme) => theme.palette.background.default,
+        borderTop: (theme) => `1px solid ${theme.palette.divider}`,
+        pt: { xs: 6, md: 8 },
+        pb: { xs: 4, md: 6 },
+        color: (theme) => theme.palette.text.secondary,
       }}
     >
       <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
@@ -60,7 +54,7 @@ export default function Footer(): React.ReactElement {
                 variant="body2"
                 sx={{
                   lineHeight: 1.7,
-                  color: theme.palette.text.secondary,
+                  color: (theme) => theme.palette.text.secondary,
                 }}
               >
                 Hệ thống thư viện điện tử của Trường Đại học HBH. Nơi lưu trữ,
@@ -92,10 +86,10 @@ export default function Footer(): React.ReactElement {
                   href={item.href}
                   underline="none"
                   sx={{
-                    color: theme.palette.text.secondary,
+                    color: (theme) => theme.palette.text.secondary,
                     fontSize: "0.9rem",
                     transition: "0.25s",
-                    "&:hover": { color: theme.palette.primary.main },
+                    "&:hover": { color: (theme) => theme.palette.primary.main },
                   }}
                 >
                   {item.label}
@@ -124,8 +118,10 @@ export default function Footer(): React.ReactElement {
                     href="mailto:library@hbh.libsys.me"
                     underline="hover"
                     sx={{
-                      color: theme.palette.text.secondary,
-                      "&:hover": { color: theme.palette.primary.main },
+                      color: (theme) => theme.palette.text.secondary,
+                      "&:hover": {
+                        color: (theme) => theme.palette.primary.main,
+                      },
                     }}
                   >
                     library@hbh.libsys.me
@@ -153,7 +149,7 @@ export default function Footer(): React.ReactElement {
           variant="body2"
           textAlign="center"
           sx={{
-            color: theme.palette.text.secondary,
+            color: (theme) => theme.palette.text.secondary,
             fontSize: "0.8rem",
             lineHeight: 1.6,
           }}
@@ -164,7 +160,7 @@ export default function Footer(): React.ReactElement {
             href="https://github.com/hoaug-tran"
             target="_blank"
             sx={{
-              color: theme.palette.primary.main,
+              color: (theme) => theme.palette.primary.main,
               fontWeight: 600,
               textDecoration: "none",
               "&:hover": { textDecoration: "underline" },

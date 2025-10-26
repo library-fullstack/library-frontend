@@ -74,23 +74,7 @@ const FeaturedBooks: React.FC = () => {
             fontWeight={700}
             textAlign="center"
             mb={5}
-            sx={{
-              color: (theme) =>
-                theme.palette.mode === "light"
-                  ? "#000000 !important"
-                  : "#FFFFFF !important",
-              opacity: "1 !important",
-              animation: "none !important",
-              WebkitAnimation: "none !important",
-              transition: "none !important",
-              WebkitTransition: "none !important",
-              willChange: "auto !important",
-            }}
-            style={{
-              color: theme.palette.mode === "light" ? "#000000" : "#FFFFFF",
-              transition: "none",
-              animation: "none",
-            }}
+            color="text.primary"
           >
             Sách nổi bật
           </Typography>
@@ -142,7 +126,7 @@ const FeaturedBooks: React.FC = () => {
     <Box
       sx={{
         py: 8,
-        bgcolor: "background.paper",
+        bgcolor: "background.default",
         position: "relative",
         width: "100%",
         overflow: "hidden",
@@ -162,23 +146,7 @@ const FeaturedBooks: React.FC = () => {
           fontWeight={700}
           textAlign="center"
           mb={1}
-          sx={{
-            color: (theme) =>
-              theme.palette.mode === "light"
-                ? "#000000 !important"
-                : "#FFFFFF !important",
-            opacity: "1 !important",
-            animation: "none !important",
-            WebkitAnimation: "none !important",
-            transition: "none !important",
-            WebkitTransition: "none !important",
-            willChange: "auto !important",
-          }}
-          style={{
-            color: theme.palette.mode === "light" ? "#000000" : "#FFFFFF",
-            transition: "none",
-            animation: "none",
-          }}
+          color="text.primary"
         >
           Sách nổi bật
         </Typography>
@@ -187,12 +155,6 @@ const FeaturedBooks: React.FC = () => {
           color="text.secondary"
           textAlign="center"
           mb={5}
-          sx={{
-            opacity: "1 !important",
-            animation: "none !important",
-            WebkitAnimation: "none !important",
-            transition: "none !important",
-          }}
         >
           Khám phá những đầu sách được yêu thích nhất
         </Typography>
@@ -209,30 +171,15 @@ const FeaturedBooks: React.FC = () => {
             width: 46,
             height: 46,
             borderRadius: "50%",
-            backgroundColor:
-              theme.palette.mode === "light"
-                ? "rgba(255, 255, 255, 0.5)"
-                : "rgba(255, 255, 255, 0.1)",
-            color:
-              theme.palette.mode === "light"
-                ? "rgba(0,0,0,0.6)"
-                : "rgba(255,255,255,0.7)",
+            backgroundColor: theme.palette.action.hover,
+            color: theme.palette.text.primary,
             backdropFilter: "blur(8px)",
-            boxShadow:
-              theme.palette.mode === "light"
-                ? "0 0 20px rgba(99,102,241,0.2)"
-                : "0 0 20px rgba(255,255,255,0.15)",
+            boxShadow: theme.shadows[2],
             transition: "all 0.25s ease",
             "&:hover": {
-              backgroundColor:
-                theme.palette.mode === "light"
-                  ? "rgba(99,102,241,0.15)"
-                  : "rgba(255,255,255,0.15)",
+              backgroundColor: theme.palette.action.selected,
               color: theme.palette.primary.main,
-              boxShadow:
-                theme.palette.mode === "light"
-                  ? "0 0 25px rgba(99,102,241,0.35)"
-                  : "0 0 25px rgba(255,255,255,0.3)",
+              boxShadow: theme.shadows[4],
               transform: "translateY(-50%) scale(1.08)",
               opacity: 1,
             },
@@ -253,30 +200,15 @@ const FeaturedBooks: React.FC = () => {
             width: 46,
             height: 46,
             borderRadius: "50%",
-            backgroundColor:
-              theme.palette.mode === "light"
-                ? "rgba(255, 255, 255, 0.5)"
-                : "rgba(255, 255, 255, 0.1)",
-            color:
-              theme.palette.mode === "light"
-                ? "rgba(0,0,0,0.6)"
-                : "rgba(255,255,255,0.7)",
+            backgroundColor: theme.palette.action.hover,
+            color: theme.palette.text.primary,
             backdropFilter: "blur(8px)",
-            boxShadow:
-              theme.palette.mode === "light"
-                ? "0 0 20px rgba(99,102,241,0.2)"
-                : "0 0 20px rgba(255,255,255,0.15)",
+            boxShadow: theme.shadows[2],
             transition: "all 0.25s ease",
             "&:hover": {
-              backgroundColor:
-                theme.palette.mode === "light"
-                  ? "rgba(99,102,241,0.15)"
-                  : "rgba(255,255,255,0.15)",
+              backgroundColor: theme.palette.action.selected,
               color: theme.palette.primary.main,
-              boxShadow:
-                theme.palette.mode === "light"
-                  ? "0 0 25px rgba(99,102,241,0.35)"
-                  : "0 0 25px rgba(255,255,255,0.3)",
+              boxShadow: theme.shadows[4],
               transform: "translateY(-50%) scale(1.08)",
               opacity: 1,
             },
@@ -349,8 +281,7 @@ const FeaturedBooks: React.FC = () => {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    bgcolor:
-                      theme.palette.mode === "light" ? "#F1F5F9" : "#2A2B33",
+                    bgcolor: theme.palette.action.hover,
                   }}
                 >
                   <Box
@@ -467,7 +398,7 @@ const FeaturedBooks: React.FC = () => {
             width: { xs: 0, sm: 80, md: 160 },
             height: "100%",
             background: (theme) =>
-              `linear-gradient(to right, transparent 0%, ${theme.palette.background.paper} 100%)`,
+              `linear-gradient(to right, transparent 0%, ${theme.palette.background.default} 100%)`,
             pointerEvents: "none",
             zIndex: 10,
             display: { xs: "none", sm: "block" },
@@ -487,11 +418,7 @@ const FeaturedBooks: React.FC = () => {
             width: 8px;
             height: 8px;
             margin: 0 4px !important;
-            background: ${
-              theme.palette.mode === "light"
-                ? "rgba(0,0,0,0.25)"
-                : "rgba(255,255,255,0.25)"
-            };
+            background: ${theme.palette.action.disabled};
             opacity: 1;
             transition: all 0.3s ease;
           }
