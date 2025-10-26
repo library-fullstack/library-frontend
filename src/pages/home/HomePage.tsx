@@ -11,7 +11,13 @@ import Footer from "../../shared/ui/Footer";
 // homepage
 const HomePage: React.FC = React.memo(() => {
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box
+      sx={{
+        width: "100%",
+        bgcolor: "background.default",
+        minHeight: "100vh",
+      }}
+    >
       {/* cái banner đầu trang */}
       <HeroBanner />
       {/* cái danh sách sách tự chạy  */}

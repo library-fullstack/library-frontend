@@ -2,9 +2,11 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import viteCompression from "vite-plugin-compression";
 import { imagetools } from "vite-imagetools";
+import { injectPreloadTags } from "./vite-plugins/inject-preload";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
+  const isProduction = mode === "production";
 
   return {
     plugins: [
@@ -16,19 +18,27 @@ export default defineConfig(({ mode }) => {
         },
       }),
       imagetools(),
-      viteCompression({
-        algorithm: "gzip",
-        ext: ".gz",
-        threshold: 10240,
-        deleteOriginFile: false,
-      }),
-      viteCompression({
-        algorithm: "brotliCompress",
-        ext: ".br",
-        threshold: 10240,
-        deleteOriginFile: false,
-      }),
+      ...(isProduction
+        ? [
+            injectPreloadTags(),
+            viteCompression({
+              algorithm: "gzip",
+              ext: ".gz",
+              threshold: 10240,
+              deleteOriginFile: false,
+            }),
+            viteCompression({
+              algorithm: "brotliCompress",
+              ext: ".br",
+              threshold: 10240,
+              deleteOriginFile: false,
+            }),
+          ]
+        : []),
     ],
+    resolve: {
+      dedupe: ["react", "react-dom", "@emotion/react", "@emotion/styled"],
+    },
     server: {
       port: 5173,
       host: "0.0.0.0",
@@ -44,24 +54,10 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks: (id) => {
             if (id.includes("node_modules")) {
-              if (id.includes("framer-motion")) {
-                return "framer-motion";
-              }
               if (id.includes("swiper")) {
                 return "swiper";
               }
-              if (id.includes("@mui/material")) {
-                return "mui-material";
-              }
-              if (id.includes("@mui/icons-material")) {
-                return "mui-icons";
-              }
-              if (id.includes("@emotion")) {
-                return "emotion";
-              }
-              if (id.includes("react") || id.includes("react-dom")) {
-                return "react-vendor";
-              }
+             
               return "vendor";
             }
           },

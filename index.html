@@ -36,23 +36,7 @@
     <link rel="preconnect" href="https://res.cloudinary.com" />
     <link rel="preconnect" href="https://api.libsys.me" crossorigin />
 
-    <!-- preload critical assets -->
-    <link
-      rel="preload"
-      as="image"
-      href="/assets/img/banner.webp"
-      fetchpriority="high"
-    />
-    <link rel="preload" as="image" href="/assets/img/logo.webp" />
-    <link
-      rel="preload"
-      as="font"
-      type="font/woff2"
-      href="https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.woff2"
-      crossorigin
-    />
-
-    <!-- optimized fonts with display=swap -->
+    <!-- tối ưu fonts với display=swap -->
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
@@ -85,6 +69,7 @@
       html {
         overflow-x: hidden;
         scroll-behavior: smooth;
+        transition: background-color 0.3s ease;
       }
 
       body {
@@ -94,6 +79,8 @@
 
       #root {
         min-height: 100vh;
+        background-color: inherit;
+        transition: background-color 0.3s ease;
       }
 
       #initial-loader {

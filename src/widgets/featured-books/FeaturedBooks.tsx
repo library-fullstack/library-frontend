@@ -67,7 +67,7 @@ const FeaturedBooks: React.FC = () => {
 
   if (loading || error)
     return (
-      <Box sx={{ py: 8, bgcolor: "background.paper" }}>
+      <Box sx={{ py: 8, bgcolor: "background.default" }}>
         <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
           <Typography
             variant="h4"

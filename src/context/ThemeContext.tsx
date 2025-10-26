@@ -18,11 +18,17 @@ export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const bgColor = mode === "dark" ? "#1b1c22" : "#f8fafc";
 
-    // Update html background
     document.documentElement.style.backgroundColor = bgColor;
+    document.documentElement.style.transition = "background-color 0.3s ease";
 
-    // Update body background and class
     document.body.style.backgroundColor = bgColor;
+    document.body.style.transition = "background-color 0.3s ease";
+
+    const root = document.getElementById("root");
+    if (root) {
+      root.style.backgroundColor = bgColor;
+      root.style.transition = "background-color 0.3s ease";
+    }
 
     if (mode === "dark") {
       document.body.classList.add("dark-mode");
