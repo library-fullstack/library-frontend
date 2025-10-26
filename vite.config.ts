@@ -1,6 +1,5 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
-import viteCompression from "vite-plugin-compression";
 import { imagetools } from "vite-imagetools";
 import { injectPreloadTags } from "./vite-plugins/inject-preload";
 
@@ -21,18 +20,18 @@ export default defineConfig(({ mode }) => {
       ...(isProduction
         ? [
             injectPreloadTags(),
-            viteCompression({
-              algorithm: "gzip",
-              ext: ".gz",
-              threshold: 10240,
-              deleteOriginFile: false,
-            }),
-            viteCompression({
-              algorithm: "brotliCompress",
-              ext: ".br",
-              threshold: 10240,
-              deleteOriginFile: false,
-            }),
+            // viteCompression({
+            //   algorithm: "gzip",
+            //   ext: ".gz",
+            //   threshold: 10240,
+            //   deleteOriginFile: false,
+            // }),
+            // viteCompression({
+            //   algorithm: "brotliCompress",
+            //   ext: ".br",
+            //   threshold: 10240,
+            //   deleteOriginFile: false,
+            // }),
           ]
         : []),
     ],
@@ -57,7 +56,7 @@ export default defineConfig(({ mode }) => {
               if (id.includes("swiper")) {
                 return "swiper";
               }
-             
+
               return "vendor";
             }
           },
