@@ -1,7 +1,8 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
+import viteCompression from "vite-plugin-compression";
+import { imagetools } from "vite-imagetools";
 
-// thanks to ChatGPT, Claude, and GitHub Copilot for helping me optimize the codebase.
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
@@ -14,6 +15,19 @@ export default defineConfig(({ mode }) => {
           plugins: ["@emotion/babel-plugin"],
         },
       }),
+      imagetools(),
+      viteCompression({
+        algorithm: "gzip",
+        ext: ".gz",
+        threshold: 10240,
+        deleteOriginFile: false,
+      }),
+      viteCompression({
+        algorithm: "brotliCompress",
+        ext: ".br",
+        threshold: 10240,
+        deleteOriginFile: false,
+      }),
     ],
     server: {
       port: 5173,
@@ -25,6 +39,7 @@ export default defineConfig(({ mode }) => {
       sourcemap: env.VITE_SOURCEMAP === "true",
       target: "es2020",
       minify: "esbuild",
+      cssCodeSplit: true,
       rollupOptions: {
         output: {
           manualChunks: (id) => {
@@ -35,8 +50,35 @@ export default defineConfig(({ mode }) => {
               if (id.includes("swiper")) {
                 return "swiper";
               }
+              if (id.includes("@mui/material")) {
+                return "mui-material";
+              }
+              if (id.includes("@mui/icons-material")) {
+                return "mui-icons";
+              }
+              if (id.includes("@emotion")) {
+                return "emotion";
+              }
+              if (id.includes("react") || id.includes("react-dom")) {
+                return "react-vendor";
+              }
               return "vendor";
             }
+          },
+          assetFileNames: (assetInfo) => {
+            if (
+              assetInfo.name &&
+              /\.(woff2?|ttf|otf|eot)$/.test(assetInfo.name)
+            ) {
+              return "assets/fonts/[name]-[hash][extname]";
+            }
+            if (
+              assetInfo.name &&
+              /\.(png|jpe?g|svg|gif|webp|avif)$/.test(assetInfo.name)
+            ) {
+              return "assets/img/[name]-[hash][extname]";
+            }
+            return "assets/[name]-[hash][extname]";
           },
         },
       },

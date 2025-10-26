@@ -7,11 +7,10 @@ import { bannerConfig } from "../../app/config/bannerConfig";
 export default function HeroBanner(): React.ReactElement {
   const [activeSlide, setActiveSlide] = React.useState(0);
 
-  // giảm số lượng sách xuống 3 để tối ưu hiệu suất
   const books = [
-    { src: "/assets/img/book-2020-war.png", alt: "2020 World of War" },
-    { src: "/assets/img/book-gothic.png", alt: "War in the Gothic Line" },
-    { src: "/assets/img/book-time-traveler.png", alt: "Time Traveler" },
+    { src: "/assets/img/book-2020-war.webp", alt: "2020 World of War" },
+    { src: "/assets/img/book-gothic.webp", alt: "War in the Gothic Line" },
+    { src: "/assets/img/book-time-traveler.webp", alt: "Time Traveler" },
   ];
 
   return (

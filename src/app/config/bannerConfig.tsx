@@ -1,5 +1,5 @@
 export const bannerConfig = {
-  image: "/assets/img/banner.jpg",
+  image: "/assets/img/banner.webp",
   overlay: "dark",
   title: "Xin chào các bạn",
   subtitle: "Cùng chào mừng sự kiện khai trương thư viện trực tuyến HBH...",

@@ -10,17 +10,16 @@ import {
 import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
 
-// giả định banner
 const bookImages = [
-  "/assets/img/book-2020-war.png",
-  "/assets/img/book-gothic.png",
-  "/assets/img/book-time-traveler.png",
-  "/assets/img/book-doctor-who.png",
-  "/assets/img/book-siloed.png",
-  "/assets/img/book-2020-war.png",
-  "/assets/img/book-gothic.png",
-  "/assets/img/book-time-traveler.png",
-  "/assets/img/book-doctor-who.png",
+  "/assets/img/book-2020-war.webp",
+  "/assets/img/book-gothic.webp",
+  "/assets/img/book-time-traveler.webp",
+  "/assets/img/book-doctor-who.webp",
+  "/assets/img/book-siloed.webp",
+  "/assets/img/book-2020-war.webp",
+  "/assets/img/book-gothic.webp",
+  "/assets/img/book-time-traveler.webp",
+  "/assets/img/book-doctor-who.webp",
 ];
 
 export default function DiscoverSection(): React.ReactElement {

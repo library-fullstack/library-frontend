@@ -13,10 +13,10 @@ export default function Logo({
   return (
     <Box
       component="img"
-      src="/assets/img/logo.png"
+      src="/assets/img/logo.webp"
       alt="Logo thư viện trực tuyến HBH"
-      width="100"
-      height="100"
+      width="180"
+      height="60"
       sx={{
         width: width || { xs: 80, sm: 90, md: 100 },
         height: "auto",

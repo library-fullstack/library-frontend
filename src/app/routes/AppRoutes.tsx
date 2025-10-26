@@ -6,8 +6,6 @@ import MainLayout from "../../widgets/layout/MainLayout";
 // các component chức năng CRITICAL - load ngay
 import HomePage from "../../pages/home/HomePage";
 import AuthLayout from "../../pages/auth/AuthLayout";
-import BookList from "../../pages/book/BookList";
-import BookDetail from "../../pages/book/BookDetail";
 
 // các component auth CRITICAL
 import LoginForm from "../../features/auth/components/LoginForm";
@@ -21,6 +19,8 @@ import PublicRoute from "../../widgets/routing/PublicRoute";
 import NotFound from "../../shared/ui/NotFound";
 
 // LAZY LOAD - các component không critical
+const BookList = lazy(() => import("../../pages/book/BookList"));
+const BookDetail = lazy(() => import("../../pages/book/BookDetail"));
 const Cart = lazy(() => import("../../pages/borrow/Cart"));
 const Checkout = lazy(() => import("../../pages/borrow/Checkout"));
 const BorrowList = lazy(() => import("../../pages/borrow/BorrowList"));
@@ -77,8 +77,22 @@ export default function AppRoutes() {
       {/* layout chính cho các route  */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<HomePage />} />
-        <Route path="/catalog" element={<BookList />} />
-        <Route path="/books/:id" element={<BookDetail />} />
+        <Route
+          path="/catalog"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <BookList />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/books/:id"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <BookDetail />
+            </Suspense>
+          }
+        />
         <Route
           path="/cart"
           element={

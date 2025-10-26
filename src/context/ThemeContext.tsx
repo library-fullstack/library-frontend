@@ -16,10 +16,20 @@ export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({
   });
 
   useEffect(() => {
+    const bgColor = mode === "dark" ? "#1b1c22" : "#f8fafc";
+
+    // Update html background
+    document.documentElement.style.backgroundColor = bgColor;
+
+    // Update body background and class
+    document.body.style.backgroundColor = bgColor;
+
     if (mode === "dark") {
       document.body.classList.add("dark-mode");
+      document.documentElement.dataset.theme = "dark";
     } else {
       document.body.classList.remove("dark-mode");
+      document.documentElement.dataset.theme = "light";
     }
   }, [mode]);
 
