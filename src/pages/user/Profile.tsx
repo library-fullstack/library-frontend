@@ -16,10 +16,14 @@ import {
   Switch,
   useTheme,
   Stack,
+  Backdrop,
+  CircularProgress,
 } from "@mui/material";
 import { LogoutOutlined, BadgeOutlined } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../../features/auth/hooks/useAuth";
+import { usersApi } from "../../features/users/api/users.api";
+import AvatarCropDialog from "../../shared/ui/AvatarCropDialog";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -38,13 +42,81 @@ function TabPanel(props: TabPanelProps) {
 
 export default function Profile(): React.ReactElement {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, setUser, logout } = useAuth();
   const theme = useTheme();
   const [tab, setTab] = React.useState(0);
 
   const chipBg = theme.palette.mode === "dark" ? "#4F46E5" : "#6366F1";
   const logoutBg = theme.palette.mode === "dark" ? "#7F1D1D" : "#FEE2E2";
   const logoutColor = theme.palette.mode === "dark" ? "#FECACA" : "#991B1B";
+
+  const [uploading, setUploading] = React.useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const uploadingRef = React.useRef(false);
+  const [cropOpen, setCropOpen] = React.useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = React.useState<string>("");
+
+  const handleSelectAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // ngăn upload 2 lần
+    if (uploadingRef.current) {
+      console.log("[Upload Avatar] Upload already in progress, skipping...");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Ảnh vượt quá 5MB. Vui lòng chọn ảnh nhỏ hơn.");
+      // reset input
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+
+    const validTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      alert("Chỉ chấp nhận định dạng JPG, PNG hoặc WEBP.");
+      // reset input
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+
+    // mở dialog crop, dùng object URL để preview
+    const url = URL.createObjectURL(file);
+    setSelectedImageUrl(url);
+    setCropOpen(true);
+  };
+
+  const handleConfirmCropped = async (blob: Blob) => {
+    setCropOpen(false);
+    try {
+      uploadingRef.current = true;
+      setUploading(true);
+      const formData = new FormData();
+      formData.append("avatar", blob, "avatar.webp");
+      const res = await usersApi.updateAvatar(formData);
+      const newAvatarUrl = res.data.avatar_url;
+      setUser((prev) => {
+        if (!prev) return prev;
+        const updated = { ...prev, avatar_url: newAvatarUrl };
+        localStorage.setItem("user", JSON.stringify(updated));
+        return updated;
+      });
+    } catch (err) {
+      console.error("[Upload Avatar Error]", err);
+      const msg =
+        (err as { response?: { data?: { message?: string } } }).response?.data
+          ?.message || "Tải ảnh thất bại!";
+      alert(msg);
+    } finally {
+      uploadingRef.current = false;
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+      // thu hồi object URL
+      if (selectedImageUrl) URL.revokeObjectURL(selectedImageUrl);
+      setSelectedImageUrl("");
+    }
+  };
 
   function handleLogout(): void {
     logout();
@@ -91,7 +163,7 @@ export default function Profile(): React.ReactElement {
                   height: { xs: 90, sm: 100 },
                   fontSize: { xs: 36, sm: 40 },
                   fontWeight: 700,
-                  bgcolor: "primary.main",
+                  border: `2px solid ${theme.palette.primary.main}`,
                 }}
               >
                 {user?.full_name?.charAt(0) || "?"}
@@ -417,8 +489,9 @@ export default function Profile(): React.ReactElement {
                   alignSelf="flex-start"
                   sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
                 >
-                  Ảnh đại diện ( BETA )
+                  Ảnh đại diện
                 </Typography>
+
                 <Avatar
                   src={user?.avatar_url || ""}
                   sx={{
@@ -426,15 +499,27 @@ export default function Profile(): React.ReactElement {
                     height: { xs: 100, sm: 120 },
                     fontSize: { xs: 40, sm: 48 },
                     fontWeight: 700,
-                    bgcolor: "primary.main",
+                    border: `2px solid ${theme.palette.primary.main}`,
                     mb: 1,
                   }}
                 >
                   {user?.full_name?.charAt(0) || "?"}
                 </Avatar>
+
+                {/* input file ẩn */}
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  ref={inputRef}
+                  onChange={handleSelectAvatar}
+                />
+
                 <Button
                   variant="outlined"
                   fullWidth
+                  disabled={uploading}
+                  onClick={() => inputRef.current?.click()}
                   sx={{
                     borderRadius: 2,
                     textTransform: "none",
@@ -442,15 +527,16 @@ export default function Profile(): React.ReactElement {
                     fontSize: { xs: "0.875rem", sm: "0.9375rem" },
                   }}
                 >
-                  Tải ảnh lên
+                  {uploading ? "Đang cập nhật ảnh..." : "Tải ảnh lên"}
                 </Button>
+
                 <Typography
                   variant="caption"
                   color="text.secondary"
                   textAlign="center"
                   sx={{ fontSize: { xs: "0.7rem", sm: "0.75rem" } }}
                 >
-                  Định dạng: JPG, PNG (tối đa 2MB)
+                  Định dạng: JPG, PNG, WEBP (tối đa 5MB)
                 </Typography>
               </Paper>
 
@@ -605,6 +691,29 @@ export default function Profile(): React.ReactElement {
           </TabPanel>
         </Paper>
       </Container>
+      {/* Dialog crop avatar */}
+      <AvatarCropDialog
+        open={cropOpen}
+        imageSrc={selectedImageUrl}
+        onClose={() => {
+          setCropOpen(false);
+          if (selectedImageUrl) URL.revokeObjectURL(selectedImageUrl);
+          setSelectedImageUrl("");
+          if (inputRef.current) inputRef.current.value = "";
+        }}
+        onConfirm={handleConfirmCropped}
+      />
+      <Backdrop
+        open={uploading}
+        sx={{ color: "#fff", zIndex: (t) => t.zIndex.modal + 1 }}
+      >
+        <Stack alignItems="center" spacing={2}>
+          <CircularProgress color="inherit" />
+          <Typography sx={{ fontWeight: 600 }}>
+            Đang cập nhật ảnh đại diện...
+          </Typography>
+        </Stack>
+      </Backdrop>
     </Box>
   );
 }

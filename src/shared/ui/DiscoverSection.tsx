@@ -9,25 +9,46 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
+import { booksApi } from "../../features/books/api";
+import type { Book } from "../../features/books/types";
 
-const bookImages = [
-  "/assets/img/book-2020-war.webp",
-  "/assets/img/book-gothic.webp",
-  "/assets/img/book-time-traveler.webp",
-  "/assets/img/book-doctor-who.webp",
-  "/assets/img/book-siloed.webp",
-  "/assets/img/book-2020-war.webp",
-  "/assets/img/book-gothic.webp",
-  "/assets/img/book-time-traveler.webp",
-  "/assets/img/book-doctor-who.webp",
-];
-
+// lấy ảnh ngẫu nhiên từ danh sách sách popular trên database
 export default function DiscoverSection(): React.ReactElement {
   const theme = useTheme();
   const downMd = useMediaQuery(theme.breakpoints.down("md"));
   const downSm = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const displayBooks = bookImages.slice(0, 5);
+  const [displayBooks, setDisplayBooks] = React.useState<string[]>([]);
+
+  React.useEffect(() => {
+    let mounted = true;
+    const fetch = async () => {
+      try {
+        // random lấy 5 ảnh bìa để hiển thị
+        const data = await booksApi.getAllBooks({
+          limit: 40,
+          sort_by: "popular",
+        });
+        if (!mounted) return;
+        const list = (Array.isArray(data) ? data : []) as Book[];
+        const thumbnails = list
+          .map((b) => b.thumbnail_url)
+          .filter(Boolean) as string[];
+        const shuffled = thumbnails.sort(() => Math.random() - 0.5);
+        const chosen =
+          (shuffled.slice(0, 5).length
+            ? shuffled.slice(0, 5)
+            : thumbnails.slice(0, 5)) || [];
+        setDisplayBooks(chosen);
+      } catch {
+        setDisplayBooks([]);
+      }
+    };
+    fetch();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <Box
@@ -173,12 +194,42 @@ export default function DiscoverSection(): React.ReactElement {
                     >
                       <Box
                         component="img"
-                        src={src}
+                        src={
+                          src
+                            ? src.replace(
+                                "/upload/",
+                                "/upload/w_400,h_560,c_fill,q_auto,f_auto/"
+                              )
+                            : `https://via.placeholder.com/240x360/6366f1/ffffff?text=Book+${
+                                idx + 1
+                              }`
+                        }
+                        srcSet={
+                          src
+                            ? [
+                                `${src.replace(
+                                  "/upload/",
+                                  "/upload/w_280,h_390,c_fill,q_auto,f_auto/"
+                                )} 280w`,
+                                `${src.replace(
+                                  "/upload/",
+                                  "/upload/w_400,h_560,c_fill,q_auto,f_auto/"
+                                )} 400w`,
+                                `${src.replace(
+                                  "/upload/",
+                                  "/upload/w_520,h_730,c_fill,q_auto,f_auto/"
+                                )} 520w`,
+                              ].join(", ")
+                            : undefined
+                        }
+                        sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, 240px"
+                        loading="lazy"
+                        decoding="async"
                         alt={`Bìa sách ${idx + 1}`}
                         onError={(
                           e: React.SyntheticEvent<HTMLImageElement>
                         ) => {
-                          e.currentTarget.src = `https://via.placeholder.com/180x270/6366f1/ffffff?text=Book+${
+                          e.currentTarget.src = `https://via.placeholder.com/240x360/6366f1/ffffff?text=Book+${
                             idx + 1
                           }`;
                         }}

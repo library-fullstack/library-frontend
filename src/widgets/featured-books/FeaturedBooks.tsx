@@ -44,7 +44,10 @@ const FeaturedBooks: React.FC = () => {
 
     const fetchBooks = async () => {
       try {
-        const list = await booksApi.getAllBooks({ limit: 10 });
+        const list = await booksApi.getAllBooks({
+          limit: 10,
+          sort_by: "popular",
+        });
         if (isMounted) {
           setBooks(Array.isArray(list) ? list : []);
         }
@@ -294,6 +297,27 @@ const FeaturedBooks: React.FC = () => {
                           )
                         : "https://via.placeholder.com/280x370/eeeeee/777777?text=No+Cover"
                     }
+                    srcSet={
+                      book.thumbnail_url
+                        ? [
+                            `${book.thumbnail_url.replace(
+                              "/upload/",
+                              "/upload/w_300,h_390,c_fill,q_auto,f_auto/"
+                            )} 300w`,
+                            `${book.thumbnail_url.replace(
+                              "/upload/",
+                              "/upload/w_400,h_520,c_fill,q_auto,f_auto/"
+                            )} 400w`,
+                            `${book.thumbnail_url.replace(
+                              "/upload/",
+                              "/upload/w_600,h_780,c_fill,q_auto,f_auto/"
+                            )} 600w`,
+                          ].join(", ")
+                        : undefined
+                    }
+                    sizes="(max-width: 600px) 88vw, (max-width: 900px) 50vw, 25vw"
+                    loading="lazy"
+                    decoding="async"
                     alt={book.title}
                     sx={{
                       width: "88%",

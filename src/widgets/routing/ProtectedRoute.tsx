@@ -17,15 +17,25 @@ export default function ProtectedRoute({
 
   // chưa đăng nhập, chưa có token thì route đến đăng nhập
   // lưu location hiện tại để redirect về sau khi đăng nhập
-  // -> nhiều khi không hoạt động. không rõ tại sao ?
   if (!token || !user) {
+    console.log(
+      "[ProtectedRoute] No auth, redirecting to login. Current location:",
+      location.pathname
+    );
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
-  // ok thì route đến home
+  // kiểm tra role nếu có yêu cầu
   if (roles && !roles.includes(user.role)) {
+    console.log(
+      "[ProtectedRoute] Insufficient permissions. User role:",
+      user.role,
+      "Required:",
+      roles
+    );
     return <Navigate to="/" replace />;
   }
 
+  console.log("[ProtectedRoute] Access granted for:", location.pathname);
   return children;
 }

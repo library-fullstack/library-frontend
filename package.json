@@ -23,6 +23,7 @@
     "lucide-react": "^0.546.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-easy-crop": "^5.5.3",
     "react-router-dom": "^7.9.4",
     "swiper": "^12.0.2"
   },
@@ -32,6 +33,7 @@
     "@types/node": "^24.9.1",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
+    "@types/react-easy-crop": "^1.16.0",
     "@vitejs/plugin-react": "^5.0.4",
     "eslint": "^9.38.0",
     "eslint-plugin-react-hooks": "^7.0.0",

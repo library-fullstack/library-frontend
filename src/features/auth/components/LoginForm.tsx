@@ -25,7 +25,8 @@ export default function LoginForm(): React.ReactElement {
   const [password, setPassword] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);
   const [error, setError] = React.useState("");
-  const [success, setSuccess] = React.useState("");
+  // success hiển thị ở trang đích bằng Snackbar global
+  const [isLoggingIn, setIsLoggingIn] = React.useState(false);
 
   // lấy cái trang lúc bấm mà bị redirect về login
   const from =
@@ -33,18 +34,26 @@ export default function LoginForm(): React.ReactElement {
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    if (isLoggingIn) {
+      console.log("[Login] Already logging in, skipping...");
+      return;
+    }
+
     setError("");
-    setSuccess("");
+    // reset error
+    setIsLoggingIn(true);
+
     try {
+      console.log("[Login] Starting login...");
       await login(identifier, password);
-      setSuccess("Đăng nhập thành công! Đang chuyển hướng...");
-      setTimeout(() => {
-        // redirect về trang trước đấy hoặc trang chủ
-        // maybe thừa
-        window.location.href = from;
-      }, 1200);
+      console.log("[Login] Login successful, redirecting to:", from);
+      sessionStorage.setItem("loginSuccessOnce", "1");
+      navigate(from || "/", { replace: true, state: { loginSuccess: true } });
     } catch (err) {
+      console.error("[Login] Login failed:", err);
       setError(parseApiError(err));
+      setIsLoggingIn(false);
     }
   }
 
@@ -90,22 +99,6 @@ export default function LoginForm(): React.ReactElement {
           }}
         >
           {error}
-        </Alert>
-      )}
-
-      {success && (
-        <Alert
-          severity="success"
-          variant="filled"
-          sx={{
-            mb: 3,
-            borderRadius: 1.5,
-            fontSize: 14,
-            py: 1.2,
-            alignItems: "center",
-          }}
-        >
-          {success}
         </Alert>
       )}
 
@@ -199,6 +192,7 @@ export default function LoginForm(): React.ReactElement {
           fullWidth
           type="submit"
           variant="contained"
+          disabled={isLoggingIn}
           sx={{
             py: 1.5,
             borderRadius: 1.5,
@@ -211,7 +205,7 @@ export default function LoginForm(): React.ReactElement {
             },
           }}
         >
-          Đăng nhập
+          {isLoggingIn ? "Đang đăng nhập..." : "Đăng nhập"}
         </Button>
       </Box>
 

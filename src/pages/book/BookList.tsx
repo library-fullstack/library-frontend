@@ -55,7 +55,7 @@ export default function BookList(): React.ReactElement {
   });
   const [sortBy, setSortBy] = useState<SortOption>("newest-published");
 
-  // Initialize search keyword from URL params
+  // search keyword từ URL params
   useEffect(() => {
     const searchQuery = searchParams.get("search");
     if (searchQuery) {
@@ -128,7 +128,7 @@ export default function BookList(): React.ReactElement {
         // khá lag ở phần này. cần phải xử lí
         const params: {
           keyword?: string;
-          category_id?: number;
+          categoryId?: number;
           status?: string;
           limit: number;
           offset: number;
@@ -146,7 +146,7 @@ export default function BookList(): React.ReactElement {
         };
 
         if (filters.keyword?.trim()) params.keyword = filters.keyword.trim();
-        if (filters.category_id) params.category_id = filters.category_id;
+        if (filters.category_id) params.categoryId = filters.category_id;
         if (filters.status) params.status = filters.status;
 
         // sort bằng gì ...

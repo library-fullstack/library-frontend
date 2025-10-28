@@ -17,7 +17,9 @@ import {
   ListItemIcon,
   ListItemText,
   useMediaQuery,
+  Avatar,
 } from "@mui/material";
+
 import { Search, Menu as MenuIcon } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router";
 import useAuth from "../../features/auth/hooks/useAuth";
@@ -55,7 +57,7 @@ export default function Navbar(): React.ReactElement {
     if (searchInputRef.current) setAnchorEl(searchInputRef.current);
   }, []);
 
-  // Ẩn popper khi scroll (vấn đề 1)
+  // ẩn popper khi scroll
   React.useEffect(() => {
     const handleScroll = () => {
       if (isOpen) {
@@ -105,7 +107,7 @@ export default function Navbar(): React.ReactElement {
       handleSearch();
       setIsOpen(false);
       const searchQuery = query.trim();
-      // Clear navbar search (vấn đề 2)
+      // reset input
       setQuery("");
       navigate(`/catalog?search=${encodeURIComponent(searchQuery)}`);
     }
@@ -121,7 +123,7 @@ export default function Navbar(): React.ReactElement {
     if (query.trim().length >= 2) {
       setIsOpen(false);
       const searchQuery = query.trim();
-      // Clear navbar search (vấn đề 2)
+      // reset input
       setQuery("");
       navigate(`/catalog?search=${encodeURIComponent(searchQuery)}`);
     }
@@ -132,7 +134,7 @@ export default function Navbar(): React.ReactElement {
     setIsOpen(false);
   };
 
-  // Đóng popper khi navigate (vấn đề 3)
+  // đóng popper
   React.useEffect(() => {
     setIsOpen(false);
   }, [location.pathname, setIsOpen]);
@@ -159,7 +161,7 @@ export default function Navbar(): React.ReactElement {
               gap: { xs: 1, sm: 0 },
             }}
           >
-            {/* LOGO + TITLE */}
+            {/* logo và tên thư viện */}
             <Box
               sx={{
                 display: "flex",
@@ -202,7 +204,7 @@ export default function Navbar(): React.ReactElement {
               </Typography>
             </Box>
 
-            {/* SEARCH BAR */}
+            {/* thanh tìm kiếm */}
             <TextField
               placeholder="Tìm kiếm sách, tác giả..."
               size="small"
@@ -255,7 +257,7 @@ export default function Navbar(): React.ReactElement {
               }}
             />
 
-            {/* SEARCH DROPDOWN */}
+            {/* dropdown tìm kiếm */}
             <SearchResultsPanel
               results={results}
               isLoading={isLoading}
@@ -267,7 +269,7 @@ export default function Navbar(): React.ReactElement {
               anchorEl={anchorEl}
             />
 
-            {/* ACTION ICONS */}
+            {/* action icon */}
             {isMobile ? (
               <IconButton
                 onClick={() => setDrawerOpen(true)}
@@ -323,7 +325,7 @@ export default function Navbar(): React.ReactElement {
                 <Box sx={{ width: "1px", height: 18, bgcolor: "divider" }} />
 
                 {[
-                  // Buttons (cart, favorite, account)
+                  // giỏ mượn, yêu thích, tài khoản
                   {
                     label: "Giỏ mượn",
                     icon: <ShoppingBag size={19} />,
@@ -334,9 +336,25 @@ export default function Navbar(): React.ReactElement {
                     icon: <Heart size={20} />,
                     onClick: handleFavouriteClick,
                   },
+                  // avatar và tải khoản
                   {
                     label: user ? user.full_name : "Tài khoản",
-                    icon: <UserRound size={20} />,
+                    // icon: <UserRound size={20} />,
+                    icon: user ? (
+                      <Avatar
+                        src={user.avatar_url || ""}
+                        alt={user.full_name}
+                        sx={{
+                          width: 28,
+                          height: 28,
+                          fontSize: 13,
+                          fontWeight: 600,
+                          bgColor: "primary.main",
+                        }}
+                      ></Avatar>
+                    ) : (
+                      <UserRound size={20} />
+                    ),
                     onClick: handleAccountClick,
                     truncate: !!user,
                   },
@@ -551,7 +569,7 @@ export default function Navbar(): React.ReactElement {
         </Box>
       </Drawer>
 
-      {/* Snackbar notifications */}
+      {/* snackbar thông báo */}
       <Snackbar
         open={openSnack}
         autoHideDuration={2000}

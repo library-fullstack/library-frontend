@@ -13,6 +13,10 @@ import RegisterForm from "../../features/auth/components/RegisterForm";
 import ForgotPasswordForm from "../../features/auth/components/ForgotPasswordForm";
 import ResetPasswordForm from "../../features/auth/components/ResetPasswordForm";
 
+// User Profile - load ngay
+// fix lỗi loading 2 lần
+import Profile from "../../pages/user/Profile";
+
 // lớp bảo vệ CRITICAL
 import ProtectedRoute from "../../widgets/routing/ProtectedRoute";
 import PublicRoute from "../../widgets/routing/PublicRoute";
@@ -25,7 +29,7 @@ const Cart = lazy(() => import("../../pages/borrow/Cart"));
 const Checkout = lazy(() => import("../../pages/borrow/Checkout"));
 const BorrowList = lazy(() => import("../../pages/borrow/BorrowList"));
 const OrderList = lazy(() => import("../../pages/borrow/OrderList"));
-const Profile = lazy(() => import("../../pages/user/Profile"));
+// const Profile = lazy(() => import("../../pages/user/Profile"));
 const AdminDashboard = lazy(() => import("../../pages/admin/AdminDashboard"));
 const Services = lazy(() => import("../../pages/common/Services"));
 const News = lazy(() => import("../../pages/common/News"));
@@ -144,11 +148,9 @@ export default function AppRoutes() {
         <Route
           path="/user/profile"
           element={
-            <Suspense fallback={<PageLoader />}>
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            </Suspense>
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
           }
         />
         <Route

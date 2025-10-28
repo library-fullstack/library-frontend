@@ -18,7 +18,7 @@ export default function Footer(): React.ReactElement {
     <Box
       component="footer"
       sx={{
-        bgcolor: (theme) => theme.palette.background.default,
+        bgcolor: (theme) => theme.palette.background.paper,
         borderTop: (theme) => `1px solid ${theme.palette.divider}`,
         pt: { xs: 6, md: 8 },
         pb: { xs: 4, md: 6 },
