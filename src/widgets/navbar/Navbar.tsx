@@ -19,14 +19,17 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { Search, Menu as MenuIcon } from "@mui/icons-material";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import useAuth from "../../features/auth/hooks/useAuth";
 import { useThemeMode } from "../../shared/hooks/useThemeMode";
+import { useBookSearch } from "../../shared/hooks/useBookSearch";
+import SearchResultsPanel from "./SearchResultsPanel";
 import Logo from "../../shared/ui/icons/Logo";
-import { Heart, ShoppingBag, UserRound, Moon, Sun } from "lucide-react";
+import { Heart, ShoppingBag, UserRound, Moon, Sun, X } from "lucide-react";
 
 export default function Navbar(): React.ReactElement {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { mode, toggleTheme } = useThemeMode();
   const isMobile = useMediaQuery("(max-width:700px)");
@@ -34,6 +37,35 @@ export default function Navbar(): React.ReactElement {
   const [snack, setSnack] = React.useState<"cart" | "favorite" | null>(null);
   const [openSnack, setOpenSnack] = React.useState(false);
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+
+  const {
+    query,
+    setQuery,
+    results,
+    isLoading,
+    isOpen,
+    setIsOpen,
+    handleSearch,
+  } = useBookSearch();
+
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
+  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+
+  React.useEffect(() => {
+    if (searchInputRef.current) setAnchorEl(searchInputRef.current);
+  }, []);
+
+  // Ẩn popper khi scroll (vấn đề 1)
+  React.useEffect(() => {
+    const handleScroll = () => {
+      if (isOpen) {
+        setIsOpen(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isOpen, setIsOpen]);
 
   const showSnack = React.useCallback((type: "cart" | "favorite") => {
     setSnack(type);
@@ -67,6 +99,44 @@ export default function Navbar(): React.ReactElement {
     setDrawerOpen(false);
   };
 
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && query.trim().length >= 2) {
+      e.preventDefault();
+      handleSearch();
+      setIsOpen(false);
+      const searchQuery = query.trim();
+      // Clear navbar search (vấn đề 2)
+      setQuery("");
+      navigate(`/catalog?search=${encodeURIComponent(searchQuery)}`);
+    }
+  };
+
+  const handleSelectBook = (bookId: number) => {
+    setIsOpen(false);
+    setQuery("");
+    navigate(`/books/${bookId}`);
+  };
+
+  const handleViewAllResults = () => {
+    if (query.trim().length >= 2) {
+      setIsOpen(false);
+      const searchQuery = query.trim();
+      // Clear navbar search (vấn đề 2)
+      setQuery("");
+      navigate(`/catalog?search=${encodeURIComponent(searchQuery)}`);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setQuery("");
+    setIsOpen(false);
+  };
+
+  // Đóng popper khi navigate (vấn đề 3)
+  React.useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname, setIsOpen]);
+
   return (
     <>
       <AppBar
@@ -89,6 +159,7 @@ export default function Navbar(): React.ReactElement {
               gap: { xs: 1, sm: 0 },
             }}
           >
+            {/* LOGO + TITLE */}
             <Box
               sx={{
                 display: "flex",
@@ -105,7 +176,6 @@ export default function Navbar(): React.ReactElement {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  // mt: { xs: 1, sm: 1, md: 0.7 },
                   mr: { xs: 1 },
                 }}
               >
@@ -122,7 +192,7 @@ export default function Navbar(): React.ReactElement {
                     lg: "1rem",
                   },
                   display: { xs: "none", md: "block" },
-                  marginLeft: 1,
+                  ml: 1,
                   letterSpacing: "-0.01em",
                   minWidth: 90,
                   flexShrink: 0,
@@ -132,9 +202,14 @@ export default function Navbar(): React.ReactElement {
               </Typography>
             </Box>
 
+            {/* SEARCH BAR */}
             <TextField
               placeholder="Tìm kiếm sách, tác giả..."
               size="small"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+              inputRef={searchInputRef}
               sx={{
                 flexGrow: 1,
                 maxWidth: { xs: "100%", md: 550 },
@@ -143,15 +218,9 @@ export default function Navbar(): React.ReactElement {
                   bgcolor: "background.default",
                   borderRadius: 2,
                   transition: "all 0.2s ease",
-                  "& fieldset": {
-                    borderColor: "divider",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "primary.main",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "primary.main",
-                  },
+                  "& fieldset": { borderColor: "divider" },
+                  "&:hover fieldset": { borderColor: "primary.main" },
+                  "&.Mui-focused fieldset": { borderColor: "primary.main" },
                   "&.Mui-focused": {
                     boxShadow: (theme) =>
                       `0 0 0 3px ${
@@ -159,9 +228,6 @@ export default function Navbar(): React.ReactElement {
                           ? "rgba(99,102,241,0.1)"
                           : "rgba(129,140,248,0.15)"
                       }`,
-                  },
-                  "& input": {
-                    color: "text.primary",
                   },
                 },
                 "& .MuiOutlinedInput-input": {
@@ -172,24 +238,48 @@ export default function Navbar(): React.ReactElement {
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <Search
-                      sx={{
-                        color: "text.secondary",
-                        fontSize: { xs: 20, sm: 22 },
-                      }}
-                    />
+                    {query ? (
+                      <IconButton size="small" onClick={handleClearSearch}>
+                        <X size={18} />
+                      </IconButton>
+                    ) : (
+                      <Search
+                        sx={{
+                          color: "text.secondary",
+                          fontSize: { xs: 20, sm: 22 },
+                        }}
+                      />
+                    )}
                   </InputAdornment>
                 ),
               }}
             />
 
+            {/* SEARCH DROPDOWN */}
+            <SearchResultsPanel
+              results={results}
+              isLoading={isLoading}
+              isOpen={isOpen}
+              query={query}
+              onClose={() => setIsOpen(false)}
+              onSelectBook={handleSelectBook}
+              onViewAll={handleViewAllResults}
+              anchorEl={anchorEl}
+            />
+
+            {/* ACTION ICONS */}
             {isMobile ? (
               <IconButton
                 onClick={() => setDrawerOpen(true)}
+                disableRipple
+                disableFocusRipple
                 sx={{
                   color: "text.primary",
                   ml: "auto",
                   pr: { xs: 0, sm: 0 },
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                  WebkitTapHighlightColor: "transparent",
                   transition: "all 0.2s ease",
                   "&:hover": {
                     bgcolor:
@@ -197,9 +287,12 @@ export default function Navbar(): React.ReactElement {
                         ? "rgba(99,102,241,0.08)"
                         : "rgba(129,140,248,0.12)",
                   },
+                  "&:active": {
+                    bgcolor: "transparent",
+                  },
                 }}
               >
-                <MenuIcon sx={{ fontSize: { xs: 32, sm: 34 } }} />{" "}
+                <MenuIcon sx={{ fontSize: { xs: 32, sm: 34 } }} />
               </IconButton>
             ) : (
               <Box
@@ -227,15 +320,10 @@ export default function Navbar(): React.ReactElement {
                   {mode === "light" ? <Moon size={22} /> : <Sun size={22} />}
                 </IconButton>
 
-                <Box
-                  sx={{
-                    width: "1px",
-                    height: 18,
-                    bgcolor: "divider",
-                  }}
-                />
+                <Box sx={{ width: "1px", height: 18, bgcolor: "divider" }} />
 
                 {[
+                  // Buttons (cart, favorite, account)
                   {
                     label: "Giỏ mượn",
                     icon: <ShoppingBag size={19} />,
@@ -278,7 +366,7 @@ export default function Navbar(): React.ReactElement {
                       <Typography
                         sx={{
                           color: "text.primary",
-                          fontSize: { xs: "0.9rem", sm: "0.95rem", md: "1rem" },
+                          fontSize: "0.95rem",
                           fontWeight: 500,
                           letterSpacing: "-0.01em",
                           lineHeight: 1.4,
@@ -306,6 +394,7 @@ export default function Navbar(): React.ReactElement {
         </Container>
       </AppBar>
 
+      {/* Mobile Drawer */}
       <Drawer
         anchor="right"
         open={drawerOpen}
@@ -462,6 +551,7 @@ export default function Navbar(): React.ReactElement {
         </Box>
       </Drawer>
 
+      {/* Snackbar notifications */}
       <Snackbar
         open={openSnack}
         autoHideDuration={2000}

@@ -62,6 +62,27 @@ export default function BookCatalogFilters({
   // local state cho thanh tìm kiếm
   const [searchValue, setSearchValue] = useState(filters.keyword || "");
 
+  // ref cho search input (vấn đề 2)
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Sync searchValue với filters.keyword khi filters thay đổi từ bên ngoài (vấn đề 4)
+  useEffect(() => {
+    if (filters.keyword !== searchValue) {
+      setSearchValue(filters.keyword || "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.keyword]);
+
+  // Focus vào search input khi có keyword từ URL (vấn đề 2)
+  useEffect(() => {
+    if (filters.keyword && searchInputRef.current) {
+      // Delay để đảm bảo component đã render xong
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
+    }
+  }, [filters.keyword]);
+
   // gọi debounce
   const debouncedSearch = useDebounce(searchValue, 500);
 
@@ -138,6 +159,7 @@ export default function BookCatalogFilters({
             placeholder="Tìm kiếm sách..."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
+            inputRef={searchInputRef}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">

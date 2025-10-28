@@ -14,7 +14,7 @@ import {
   Alert,
 } from "@mui/material";
 import { TuneOutlined, Home, KeyboardArrowUp } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import BookCatalogFilters from "../../widgets/book-catalog-filters/BookCatalogFilters";
 import BookCatalogGrid from "../../widgets/book-catalog-grid/BookCatalogGrid";
 import { booksApi, categoriesApi } from "../../features/books/api";
@@ -29,6 +29,7 @@ export default function BookList(): React.ReactElement {
   const theme = useTheme();
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [searchParams] = useSearchParams();
 
   // states
   const [books, setBooks] = useState<Book[]>([]);
@@ -53,6 +54,17 @@ export default function BookList(): React.ReactElement {
     language_code: null,
   });
   const [sortBy, setSortBy] = useState<SortOption>("newest-published");
+
+  // Initialize search keyword from URL params
+  useEffect(() => {
+    const searchQuery = searchParams.get("search");
+    if (searchQuery) {
+      setFilters((prev) => ({
+        ...prev,
+        keyword: searchQuery,
+      }));
+    }
+  }, [searchParams]);
 
   // drawer mobile
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -382,7 +394,9 @@ export default function BookList(): React.ReactElement {
                 minWidth: 0,
               }}
             >
-              Thư viện sách
+              {filters.keyword
+                ? `Kết quả tìm kiếm: "${filters.keyword}"`
+                : "Thư viện sách"}
             </Typography>
 
             {isMobile && (
@@ -408,7 +422,9 @@ export default function BookList(): React.ReactElement {
               fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
             }}
           >
-            Khám phá kho tàng tri thức với hàng nghìn đầu sách phong phú
+            {filters.keyword
+              ? `Hiển thị ${books.length} kết quả`
+              : "Khám phá kho tàng tri thức với hàng nghìn đầu sách phong phú"}
           </Typography>
         </Box>
 
