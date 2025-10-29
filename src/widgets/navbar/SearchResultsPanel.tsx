@@ -138,7 +138,7 @@ export default function SearchResultsPanel({
             ref={dropdownRef}
             onKeyDown={handleKeyDown}
             sx={{
-              width: popperWidth,
+              width: popperWidth + 50,
               maxWidth: "90vw",
               maxHeight: 480,
               overflowY: "auto",
@@ -205,7 +205,7 @@ export default function SearchResultsPanel({
                                 book.thumbnail_url || "/placeholder-book.png"
                               }
                               alt={book.title}
-                              variant="rounded"
+                              variant="square"
                               sx={{
                                 width: 48,
                                 height: 64,

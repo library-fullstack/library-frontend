@@ -44,7 +44,7 @@ export function useBookSearch(): UseBookSearchReturn {
 
       const bookResults = Array.isArray(data) ? data : [];
       setResults(bookResults);
-      setIsOpen(bookResults.length > 0);
+      setIsOpen(true);
     } catch (error) {
       if (error instanceof Error && error.name !== "AbortError") {
         console.error("Search error:", error);
@@ -68,6 +68,8 @@ export function useBookSearch(): UseBookSearchReturn {
       setIsLoading(false);
       return;
     }
+
+    setIsOpen(true);
 
     debounceTimerRef.current = setTimeout(() => {
       fetchSearchResults(query);
@@ -93,7 +95,7 @@ export function useBookSearch(): UseBookSearchReturn {
 
   const handleSearch = useCallback(() => {
     if (query.trim().length >= MIN_SEARCH_LENGTH) {
-      setIsOpen(false);
+      setIsOpen(true);
     }
   }, [query]);
 
