@@ -11,7 +11,6 @@ import {
   Chip,
   Card,
   CardContent,
-  TextField,
   FormControlLabel,
   Switch,
   useTheme,
@@ -24,6 +23,7 @@ import { useNavigate } from "react-router-dom";
 import useAuth from "../../features/auth/hooks/useAuth";
 import { usersApi } from "../../features/users/api/users.api";
 import AvatarCropDialog from "../../shared/ui/AvatarCropDialog";
+import ChangePasswordSection from "../../features/auth/components/ChangePasswordSection";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -556,53 +556,9 @@ export default function Profile(): React.ReactElement {
                   mb={3}
                   sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
                 >
-                  Đổi mật khẩu ( BETA )
+                  Đổi mật khẩu
                 </Typography>
-                <Box component="form" onSubmit={(e) => e.preventDefault()}>
-                  <Stack spacing={2.5}>
-                    <TextField
-                      fullWidth
-                      type="password"
-                      label="Mật khẩu hiện tại"
-                      size="small"
-                      inputProps={{
-                        autoComplete: "current-password",
-                      }}
-                    />
-                    <TextField
-                      fullWidth
-                      type="password"
-                      label="Mật khẩu mới"
-                      size="small"
-                      inputProps={{
-                        autoComplete: "new-password",
-                      }}
-                    />
-                    <TextField
-                      fullWidth
-                      type="password"
-                      label="Xác nhận mật khẩu mới"
-                      size="small"
-                      inputProps={{
-                        autoComplete: "new-password",
-                      }}
-                    />
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      sx={{
-                        borderRadius: 2,
-                        textTransform: "none",
-                        fontWeight: 700,
-                        py: 1,
-                        alignSelf: "flex-start",
-                        width: { xs: "100%", sm: "auto" },
-                      }}
-                    >
-                      Cập nhật mật khẩu
-                    </Button>
-                  </Stack>
-                </Box>
+                <ChangePasswordSection />
               </Paper>
             </Box>
           </TabPanel>

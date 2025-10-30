@@ -45,4 +45,7 @@ export const authApi = {
   logout: () => axiosClient.post("/auth/logout"),
 
   refreshToken: () => axiosClient.post("/auth/refresh"),
+
+  sendOtp: (data: { type: "forgot_password" | "change_password" }) =>
+    axiosClient.post("/auth/send-otp", data),
 };

@@ -37,4 +37,16 @@ export const usersApi = {
         "Content-Type": "multipart/form-data",
       },
     }),
+
+  checkPassword: (password: string) =>
+    axiosClient.post("/users/check-password", { password }),
+
+  sendOtp: (type: "change_password" | "password_reset") =>
+    axiosClient.post("/auth/send-otp", { type }),
+
+  verifyChangePassword: (data: {
+    old_password: string;
+    new_password: string;
+    otp_code: string;
+  }) => axiosClient.post("/users/change-password/verify", data),
 };

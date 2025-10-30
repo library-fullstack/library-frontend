@@ -48,6 +48,7 @@ export default function Navbar(): React.ReactElement {
     isOpen,
     setIsOpen,
     handleSearch,
+    errorMessage,
   } = useBookSearch();
 
   const searchInputRef = React.useRef<HTMLInputElement>(null);
@@ -267,6 +268,7 @@ export default function Navbar(): React.ReactElement {
               onSelectBook={handleSelectBook}
               onViewAll={handleViewAllResults}
               anchorEl={anchorEl}
+              errorMessage={errorMessage}
             />
 
             {/* action icon */}

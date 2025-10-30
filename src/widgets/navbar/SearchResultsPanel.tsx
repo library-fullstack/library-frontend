@@ -28,6 +28,7 @@ interface SearchResultsPanelProps {
   onSelectBook: (bookId: number) => void;
   onViewAll: () => void;
   anchorEl: HTMLElement | null;
+  errorMessage?: string | null;
 }
 
 export default function SearchResultsPanel({
@@ -39,6 +40,7 @@ export default function SearchResultsPanel({
   onSelectBook,
   onViewAll,
   anchorEl,
+  errorMessage,
 }: SearchResultsPanelProps): React.ReactElement | null {
   const theme = useTheme();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -287,6 +289,35 @@ export default function SearchResultsPanel({
                   </Button>
                 </Box>
               </>
+            ) : errorMessage ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  py: 4,
+                  px: 2,
+                }}
+              >
+                <Search
+                  sx={{
+                    fontSize: 48,
+                    color: "error.main",
+                    mb: 1.5,
+                  }}
+                />
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "error.main",
+                    textAlign: "center",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  {errorMessage}
+                </Typography>
+              </Box>
             ) : (
               // empty
               <Box

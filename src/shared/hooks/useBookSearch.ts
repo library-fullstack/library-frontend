@@ -11,6 +11,7 @@ interface UseBookSearchReturn {
   setIsOpen: (open: boolean) => void;
   handleSearch: () => void;
   clearSearch: () => void;
+  errorMessage: string | null;
 }
 
 const DEBOUNCE_DELAY = 300;
@@ -23,6 +24,8 @@ export function useBookSearch(): UseBookSearchReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -34,6 +37,7 @@ export function useBookSearch(): UseBookSearchReturn {
     abortControllerRef.current = new AbortController();
 
     setIsLoading(true);
+    setErrorMessage(null);
 
     try {
       const data = await booksApi.getAllBooks({
@@ -45,11 +49,14 @@ export function useBookSearch(): UseBookSearchReturn {
       const bookResults = Array.isArray(data) ? data : [];
       setResults(bookResults);
       setIsOpen(true);
+      setErrorMessage(null);
     } catch (error) {
       if (error instanceof Error && error.name !== "AbortError") {
         console.error("Search error:", error);
         setResults([]);
-        setIsOpen(false);
+        setIsOpen(true);
+
+        setErrorMessage("Không thể kết nối máy chủ, thử lại sau.");
       }
     } finally {
       setIsLoading(false);
@@ -115,5 +122,6 @@ export function useBookSearch(): UseBookSearchReturn {
     setIsOpen,
     handleSearch,
     clearSearch,
+    errorMessage,
   };
 }
