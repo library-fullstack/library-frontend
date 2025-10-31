@@ -11,8 +11,10 @@ import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
 import { booksApi } from "../../features/books/api";
 import type { Book } from "../../features/books/types";
+import { Link as RouterLink } from "react-router-dom";
 
-// lấy ảnh ngẫu nhiên từ danh sách sách popular trên database
+const MotionBox = motion.create(Box);
+
 export default function DiscoverSection(): React.ReactElement {
   const theme = useTheme();
   const downMd = useMediaQuery(theme.breakpoints.down("md"));
@@ -24,7 +26,6 @@ export default function DiscoverSection(): React.ReactElement {
     let mounted = true;
     const fetch = async () => {
       try {
-        // random lấy 5 ảnh bìa để hiển thị
         const data = await booksApi.getAllBooks({
           limit: 40,
           sort_by: "popular",
@@ -50,13 +51,26 @@ export default function DiscoverSection(): React.ReactElement {
     };
   }, []);
 
+  const leftMotionProps = !downMd
+    ? ({
+        initial: { opacity: 0, x: -40 },
+        whileInView: { opacity: 1, x: 0 },
+        viewport: { once: true, amount: 0.3 },
+        transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] },
+      } as const)
+    : {};
+
+  const rightMotionProps = !downMd
+    ? ({
+        initial: { opacity: 0, x: 40 },
+        whileInView: { opacity: 1, x: 0 },
+        viewport: { once: true, amount: 0.3 },
+        transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] },
+      } as const)
+    : {};
+
   return (
     <Box
-      component={motion.div}
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6 }}
       sx={{
         py: { xs: 4, md: 8 },
         bgcolor: "background.default",
@@ -74,20 +88,16 @@ export default function DiscoverSection(): React.ReactElement {
             flexDirection: { xs: "column", md: "row" },
           }}
         >
-          <Box
+          {/* cột hình ảnh */}
+          <MotionBox
+            {...leftMotionProps}
             sx={{
               flex: "1 1 420px",
               minWidth: { xs: "100%", md: 260 },
               width: { xs: "100%", md: "auto" },
-              mb: { xs: 0, md: 0 },
             }}
           >
             <Box
-              component={motion.div}
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
               sx={{
                 position: "relative",
                 px: { xs: 2, sm: 3 },
@@ -140,16 +150,13 @@ export default function DiscoverSection(): React.ReactElement {
                   justifyContent: "center",
                   zIndex: 2,
                   minHeight: { xs: 280, sm: 340, md: 450 },
-                  height: { xs: 280, sm: 340, md: "auto" },
                   perspective: "1500px",
-                  overflow: "hidden",
                 }}
               >
                 {displayBooks.map((src, idx) => {
                   const totalBooks = displayBooks.length;
                   const centerIndex = Math.floor(totalBooks / 2);
                   const offset = idx - centerIndex;
-
                   const rotateY = downSm ? offset * 8 : offset * 12;
                   const translateX = downSm
                     ? offset * 45
@@ -176,7 +183,7 @@ export default function DiscoverSection(): React.ReactElement {
                           rotateY(${rotateY}deg)
                           scale(${scale})
                         `,
-                        transition: "all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)",
+                        transition: "all 0.3s ease",
                         zIndex,
                         "&:hover": {
                           transform: `
@@ -204,35 +211,9 @@ export default function DiscoverSection(): React.ReactElement {
                                 idx + 1
                               }`
                         }
-                        srcSet={
-                          src
-                            ? [
-                                `${src.replace(
-                                  "/upload/",
-                                  "/upload/w_280,h_390,c_fill,q_auto,f_auto/"
-                                )} 280w`,
-                                `${src.replace(
-                                  "/upload/",
-                                  "/upload/w_400,h_560,c_fill,q_auto,f_auto/"
-                                )} 400w`,
-                                `${src.replace(
-                                  "/upload/",
-                                  "/upload/w_520,h_730,c_fill,q_auto,f_auto/"
-                                )} 520w`,
-                              ].join(", ")
-                            : undefined
-                        }
-                        sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, 240px"
+                        alt={`Bìa sách ${idx + 1}`}
                         loading="lazy"
                         decoding="async"
-                        alt={`Bìa sách ${idx + 1}`}
-                        onError={(
-                          e: React.SyntheticEvent<HTMLImageElement>
-                        ) => {
-                          e.currentTarget.src = `https://via.placeholder.com/240x360/6366f1/ffffff?text=Book+${
-                            idx + 1
-                          }`;
-                        }}
                         sx={{
                           width: "100%",
                           height: "100%",
@@ -249,25 +230,19 @@ export default function DiscoverSection(): React.ReactElement {
                 })}
               </Box>
             </Box>
-          </Box>
+          </MotionBox>
 
-          <Box
-            component={motion.div}
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+          {/* cột text */}
+          <MotionBox
+            {...rightMotionProps}
             sx={{
               flex: "1 1 440px",
-              minWidth: { xs: "100%", md: 260 },
-              width: { xs: "100%", md: "auto" },
               display: "flex",
               flexDirection: "column",
               alignItems: { xs: "center", md: "flex-start" },
               justifyContent: "center",
               gap: { xs: 1.5, md: 2 },
               textAlign: { xs: "center", md: "left" },
-              px: { xs: 2, sm: 0 },
               mt: { xs: -10, sm: 0 },
             }}
           >
@@ -281,6 +256,7 @@ export default function DiscoverSection(): React.ReactElement {
             >
               Tìm kiếm cuốn sách bạn yêu thích
             </Typography>
+
             <Typography
               sx={{
                 color: "text.secondary",
@@ -343,7 +319,8 @@ export default function DiscoverSection(): React.ReactElement {
               }}
             >
               <Button
-                href="/book"
+                component={RouterLink}
+                to="/catalog"
                 variant="contained"
                 color="primary"
                 sx={{
@@ -361,25 +338,8 @@ export default function DiscoverSection(): React.ReactElement {
               >
                 Khám phá ngay
               </Button>
-              <Button
-                href="/about"
-                variant="outlined"
-                color="primary"
-                sx={{
-                  textTransform: "none",
-                  fontWeight: 600,
-                  px: 3,
-                  py: 1.2,
-                  fontSize: { xs: "0.875rem", md: "0.95rem" },
-                  "&:hover": {
-                    transform: "translateY(-1px)",
-                  },
-                }}
-              >
-                Tìm hiểu thêm
-              </Button>
             </Box>
-          </Box>
+          </MotionBox>
         </Box>
       </Container>
     </Box>

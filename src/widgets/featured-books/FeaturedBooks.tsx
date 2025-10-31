@@ -24,7 +24,7 @@ import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useNavigationType } from "react-router-dom";
 import { booksApi } from "../../features/books/api";
 import type { Book } from "../../features/books/types";
 import { motion } from "framer-motion";
@@ -37,32 +37,31 @@ const FeaturedBooks: React.FC = () => {
   const [error, setError] = React.useState<string | null>(null);
   const theme = useTheme();
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
   const isMobile = useMediaQuery("(max-width:900px)");
+
+  const isBackNavigation = navigationType === "POP";
+
+  const prevRef = React.useRef<HTMLButtonElement | null>(null);
+  const nextRef = React.useRef<HTMLButtonElement | null>(null);
 
   React.useEffect(() => {
     let isMounted = true;
-
     const fetchBooks = async () => {
       try {
         const list = await booksApi.getAllBooks({
           limit: 10,
           sort_by: "popular",
         });
-        if (isMounted) {
-          setBooks(Array.isArray(list) ? list : []);
-        }
+        if (isMounted) setBooks(Array.isArray(list) ? list : []);
       } catch (err) {
         console.error("Lỗi tải sách:", err);
-        if (isMounted) {
-          setError("Không thể tải danh sách sách nổi bật.");
-        }
+        if (isMounted) setError("Không thể tải danh sách sách nổi bật.");
       } finally {
         if (isMounted) setLoading(false);
       }
     };
-
     fetchBooks();
-
     return () => {
       isMounted = false;
     };
@@ -71,7 +70,13 @@ const FeaturedBooks: React.FC = () => {
   if (loading || error)
     return (
       <Box sx={{ py: 8, bgcolor: "background.default" }}>
-        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
+        <Container
+          maxWidth="lg"
+          sx={{
+            transform: { xs: "scale(0.9)", md: "scale(1)" },
+            transformOrigin: "top center",
+          }}
+        >
           <Typography
             variant="h4"
             fontWeight={700}
@@ -81,49 +86,182 @@ const FeaturedBooks: React.FC = () => {
           >
             Sách nổi bật
           </Typography>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "repeat(2, 1fr)",
-                md: "repeat(4, 1fr)",
-              },
-              gap: { xs: 2, sm: 3 },
-            }}
-          >
-            <Card sx={{ display: { xs: "block", sm: "block" } }}>
-              <Skeleton variant="rectangular" width="100%" height={320} />
-              <CardContent>
-                <Skeleton height={24} width="80%" />
-                <Skeleton height={18} width="60%" />
-              </CardContent>
-            </Card>
-            <Card sx={{ display: { xs: "none", sm: "block" } }}>
-              <Skeleton variant="rectangular" width="100%" height={320} />
-              <CardContent>
-                <Skeleton height={24} width="80%" />
-                <Skeleton height={18} width="60%" />
-              </CardContent>
-            </Card>
-            <Card sx={{ display: { xs: "none", md: "block" } }}>
-              <Skeleton variant="rectangular" width="100%" height={320} />
-              <CardContent>
-                <Skeleton height={24} width="80%" />
-                <Skeleton height={18} width="60%" />
-              </CardContent>
-            </Card>
-            <Card sx={{ display: { xs: "none", md: "block" } }}>
-              <Skeleton variant="rectangular" width="100%" height={320} />
-              <CardContent>
-                <Skeleton height={24} width="80%" />
-                <Skeleton height={18} width="60%" />
-              </CardContent>
-            </Card>
-          </Box>
+
+          {isMobile ? (
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr",
+                gap: 2,
+              }}
+            >
+              <Card>
+                <Skeleton variant="rectangular" width="100%" height={320} />
+                <CardContent>
+                  <Skeleton height={24} width="80%" />
+                  <Skeleton height={18} width="60%" />
+                </CardContent>
+              </Card>
+            </Box>
+          ) : (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              textAlign="center"
+            >
+              Đang tải dữ liệu...
+            </Typography>
+          )}
         </Container>
       </Box>
     );
+
+  // swiper
+  const CardItem = (book: Book) => {
+    const cardBase = (
+      <Card
+        sx={{
+          borderRadius: 2,
+          border: 1,
+          borderColor: "divider",
+          boxShadow: "none",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          transition: "none",
+          "&:hover": isMobile
+            ? {}
+            : { boxShadow: "0 8px 20px rgba(0,0,0,0.1)" },
+        }}
+      >
+        <Box
+          sx={{
+            position: "relative",
+            width: "100%",
+            aspectRatio: { xs: "3/4.5", sm: "3/4" },
+            overflow: "hidden",
+            borderTopLeftRadius: 8,
+            borderTopRightRadius: 8,
+          }}
+        >
+          <Box
+            component="img"
+            src={
+              book.thumbnail_url
+                ? book.thumbnail_url
+                : "https://via.placeholder.com/240x330"
+            }
+            alt={book.title}
+            sx={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+              transform: "scale(0.92)",
+              borderRadius: 1.5,
+            }}
+          />
+        </Box>
+
+        <CardContent sx={{ p: { xs: 1.5, sm: 2.5 } }}>
+          <Typography
+            sx={{
+              fontWeight: 600,
+              fontSize: { xs: "0.9rem", sm: "1rem" },
+              mb: 0.5,
+              lineHeight: 1.4,
+              minHeight: { xs: 40, sm: 48 },
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+            }}
+          >
+            {book.title}
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              mb: { xs: 0.5, sm: 1 },
+              fontSize: { xs: "0.8rem", sm: "0.875rem" },
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {book.author_names || "Chưa rõ tác giả"}
+          </Typography>
+          <Box
+            sx={{ display: "flex", alignItems: "center", mb: { xs: 1, sm: 2 } }}
+          >
+            <Rating value={4} readOnly size="small" precision={0.5} />
+            <Typography
+              variant="caption"
+              sx={{ ml: 0.5, fontSize: { xs: "0.7rem", sm: "0.75rem" } }}
+              color="text.secondary"
+            >
+              (4.0)
+            </Typography>
+          </Box>
+
+          <Stack spacing={{ xs: 0.75, sm: 1 }}>
+            <Button
+              variant="outlined"
+              startIcon={<InfoOutlined />}
+              onClick={() => navigate(`/books/${book.id}`)}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                py: { xs: 0.5, sm: 0.75 },
+                "&:hover": { bgcolor: "action.hover" },
+              }}
+            >
+              Xem chi tiết
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<ShoppingCart />}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                py: { xs: 0.5, sm: 0.75 },
+                boxShadow: "0 2px 6px rgba(99,102,241,0.25)",
+                "&:hover": { transform: "translateY(-1px)" },
+              }}
+            >
+              Thêm vào giỏ
+            </Button>
+          </Stack>
+        </CardContent>
+      </Card>
+    );
+
+    return isMobile || isBackNavigation ? (
+      cardBase
+    ) : (
+      <MotionCard
+        layout={false}
+        whileHover={{ y: -6 }}
+        transition={{ duration: 0.3 }}
+        sx={{
+          borderRadius: 2,
+          border: 1,
+          borderColor: "divider",
+          boxShadow: "none",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          "&:hover": { boxShadow: "0 8px 20px rgba(0,0,0,0.1)" },
+        }}
+      >
+        {cardBase.props.children}
+      </MotionCard>
+    );
+  };
 
   return (
     <Box
@@ -162,12 +300,14 @@ const FeaturedBooks: React.FC = () => {
           Khám phá những đầu sách được yêu thích nhất
         </Typography>
 
-        {/* nút sang trái */}
+        {/* Nút điều hướng */}
         <IconButton
-          className="prev-btn nav-btn"
+          ref={prevRef}
+          className="nav-btn"
           sx={{
             position: "absolute",
             top: "50%",
+            display: { xs: "none", sm: "flex" },
             transform: "translateY(-50%)",
             left: { xs: 4, sm: -40 },
             zIndex: 15,
@@ -178,25 +318,18 @@ const FeaturedBooks: React.FC = () => {
             color: theme.palette.text.primary,
             backdropFilter: "blur(8px)",
             boxShadow: theme.shadows[2],
-            transition: "all 0.25s ease",
-            "&:hover": {
-              backgroundColor: theme.palette.action.selected,
-              color: theme.palette.primary.main,
-              boxShadow: theme.shadows[4],
-              transform: "translateY(-50%) scale(1.08)",
-              opacity: 1,
-            },
           }}
         >
           <ArrowBack fontSize="small" />
         </IconButton>
 
-        {/* nút sang phải */}
         <IconButton
-          className="next-btn nav-btn"
+          ref={nextRef}
+          className="nav-btn"
           sx={{
             position: "absolute",
             top: "50%",
+            display: { xs: "none", sm: "flex" },
             transform: "translateY(-50%)",
             right: { xs: 4, sm: -40 },
             zIndex: 15,
@@ -207,213 +340,48 @@ const FeaturedBooks: React.FC = () => {
             color: theme.palette.text.primary,
             backdropFilter: "blur(8px)",
             boxShadow: theme.shadows[2],
-            transition: "all 0.25s ease",
-            "&:hover": {
-              backgroundColor: theme.palette.action.selected,
-              color: theme.palette.primary.main,
-              boxShadow: theme.shadows[4],
-              transform: "translateY(-50%) scale(1.08)",
-              opacity: 1,
-            },
           }}
         >
           <ArrowForward fontSize="small" />
         </IconButton>
 
-        {/* danh sách trượt */}
+        {/* Swiper */}
         <Swiper
           modules={[Navigation, Pagination, Autoplay]}
+          onBeforeInit={(swiper) => {
+            if (typeof swiper.params.navigation !== "boolean") {
+              const nav = swiper.params.navigation;
+              if (nav) {
+                nav.prevEl = prevRef.current;
+                nav.nextEl = nextRef.current;
+              }
+            }
+          }}
           navigation={{
-            prevEl: ".prev-btn",
-            nextEl: ".next-btn",
+            prevEl: prevRef.current,
+            nextEl: nextRef.current,
           }}
           pagination={{ clickable: true }}
-          autoplay={{ delay: 4000, disableOnInteraction: false }}
+          autoplay={{
+            delay: isMobile ? 6000 : 4000,
+            disableOnInteraction: false,
+          }}
           spaceBetween={24}
           slidesPerView={4.5}
-          observer
-          observeParents
-          centeredSlides={false}
           breakpoints={{
-            0: {
-              slidesPerView: 1,
-              spaceBetween: 16,
-              centeredSlides: false,
-              slidesOffsetBefore: 0,
-              slidesOffsetAfter: 0,
-            },
-            640: {
-              slidesPerView: 2.2,
-              spaceBetween: 16,
-              centeredSlides: false,
-            },
-            900: {
-              slidesPerView: 3.3,
-              spaceBetween: 20,
-              centeredSlides: false,
-            },
-            1280: {
-              slidesPerView: 4.5,
-              spaceBetween: 24,
-              centeredSlides: false,
-            },
+            0: { slidesPerView: 1.2, spaceBetween: 12 },
+            640: { slidesPerView: 2.2, spaceBetween: 16 },
+            900: { slidesPerView: 3.3, spaceBetween: 20 },
+            1280: { slidesPerView: 4.5, spaceBetween: 24 },
           }}
-          style={{ paddingBottom: 50, paddingLeft: 0, paddingRight: 0 }}
+          style={{ paddingBottom: 50 }}
         >
           {books.map((book) => (
-            <SwiperSlide key={book.id}>
-              <MotionCard
-                layout={false}
-                whileHover={isMobile ? undefined : { y: -6 }}
-                transition={{ duration: 0.3 }}
-                sx={{
-                  borderRadius: 2,
-                  border: 1,
-                  borderColor: "divider",
-                  boxShadow: "none",
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  "&:hover": { boxShadow: "0 8px 20px rgba(0,0,0,0.1)" },
-                }}
-              >
-                <Box
-                  sx={{
-                    width: "100%",
-                    aspectRatio: { xs: "2.5/3.8", sm: "3/4" },
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    bgcolor: theme.palette.action.hover,
-                  }}
-                >
-                  <Box
-                    component="img"
-                    src={
-                      book.thumbnail_url
-                        ? book.thumbnail_url.replace(
-                            "/upload/",
-                            "/upload/w_400,h_520,c_fill,q_auto,f_auto/"
-                          )
-                        : "https://via.placeholder.com/280x370/eeeeee/777777?text=No+Cover"
-                    }
-                    srcSet={
-                      book.thumbnail_url
-                        ? [
-                            `${book.thumbnail_url.replace(
-                              "/upload/",
-                              "/upload/w_300,h_390,c_fill,q_auto,f_auto/"
-                            )} 300w`,
-                            `${book.thumbnail_url.replace(
-                              "/upload/",
-                              "/upload/w_400,h_520,c_fill,q_auto,f_auto/"
-                            )} 400w`,
-                            `${book.thumbnail_url.replace(
-                              "/upload/",
-                              "/upload/w_600,h_780,c_fill,q_auto,f_auto/"
-                            )} 600w`,
-                          ].join(", ")
-                        : undefined
-                    }
-                    sizes="(max-width: 600px) 88vw, (max-width: 900px) 50vw, 25vw"
-                    loading="lazy"
-                    decoding="async"
-                    alt={book.title}
-                    sx={{
-                      width: "88%",
-                      height: "88%",
-                      objectFit: "contain",
-                      borderRadius: 1,
-                    }}
-                  />
-                </Box>
-
-                <CardContent sx={{ p: { xs: 1.5, sm: 2.5 } }}>
-                  <Typography
-                    sx={{
-                      fontWeight: 600,
-                      fontSize: { xs: "0.9rem", sm: "1rem" },
-                      mb: 0.5,
-                      lineHeight: 1.4,
-                      minHeight: { xs: 40, sm: 48 },
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                    }}
-                  >
-                    {book.title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      mb: { xs: 0.5, sm: 1 },
-                      fontSize: { xs: "0.8rem", sm: "0.875rem" },
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {book.author_names || "Chưa rõ tác giả"}
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      mb: { xs: 1, sm: 2 },
-                    }}
-                  >
-                    <Rating value={4} readOnly size="small" precision={0.5} />
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        ml: 0.5,
-                        fontSize: { xs: "0.7rem", sm: "0.75rem" },
-                      }}
-                      color="text.secondary"
-                    >
-                      (4.0)
-                    </Typography>
-                  </Box>
-                  <Stack spacing={{ xs: 0.75, sm: 1 }}>
-                    <Button
-                      variant="outlined"
-                      startIcon={<InfoOutlined />}
-                      onClick={() => navigate(`/books/${book.id}`)}
-                      sx={{
-                        textTransform: "none",
-                        fontWeight: 600,
-                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
-                        py: { xs: 0.5, sm: 0.75 },
-                        "&:hover": { bgcolor: "action.hover" },
-                      }}
-                    >
-                      Xem chi tiết
-                    </Button>
-                    <Button
-                      variant="contained"
-                      startIcon={<ShoppingCart />}
-                      sx={{
-                        textTransform: "none",
-                        fontWeight: 600,
-                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
-                        py: { xs: 0.5, sm: 0.75 },
-                        boxShadow: "0 2px 6px rgba(99,102,241,0.25)",
-                        "&:hover": { transform: "translateY(-1px)" },
-                      }}
-                    >
-                      Thêm vào giỏ
-                    </Button>
-                  </Stack>
-                </CardContent>
-              </MotionCard>
-            </SwiperSlide>
+            <SwiperSlide key={book.id}>{CardItem(book)}</SwiperSlide>
           ))}
         </Swiper>
 
-        {/* làm mờ ở cuối  */}
+        {/* làm mờ card cuối */}
         <Box
           sx={{
             position: "absolute",
@@ -429,7 +397,7 @@ const FeaturedBooks: React.FC = () => {
           }}
         />
 
-        {/* nút chấm trang của book cart*/}
+        {/* Pagination custom */}
         <style>{`
           .swiper-pagination {
             position: relative;

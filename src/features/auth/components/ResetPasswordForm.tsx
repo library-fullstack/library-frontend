@@ -16,6 +16,7 @@ import {
   CheckCircleOutline,
   Home,
 } from "@mui/icons-material";
+import { LoadingButton } from "@mui/lab";
 import { motion } from "framer-motion";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -23,6 +24,7 @@ import {
   validatePassword,
 } from "../../../shared/lib/errorHandler";
 import { authApi } from "../api/auth.api";
+import { CircularProgress } from "@mui/material";
 
 export default function ResetPasswordForm(): React.ReactElement {
   const theme = useTheme();
@@ -473,13 +475,20 @@ export default function ResetPasswordForm(): React.ReactElement {
           }}
         />
 
-        <Button
+        <LoadingButton
           fullWidth
           type="submit"
           variant="contained"
-          disabled={
-            !token || !passwordValidation.isValid || !passwordsMatch || loading
+          loading={loading}
+          loadingIndicator={
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <CircularProgress color="inherit" size={16} thickness={4} />
+              <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
+                Đang thay đổi...
+              </Typography>
+            </Box>
           }
+          disabled={!token || !passwordValidation.isValid || !passwordsMatch}
           sx={{
             py: 1.5,
             borderRadius: 1.5,
@@ -492,8 +501,8 @@ export default function ResetPasswordForm(): React.ReactElement {
             },
           }}
         >
-          {loading ? "Đang xử lý..." : "Đặt lại mật khẩu"}
-        </Button>
+          Đặt lại mật khẩu
+        </LoadingButton>
       </Box>
     </motion.div>
   );

@@ -13,7 +13,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { Menu as MenuIcon } from "@mui/icons-material";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation } from "react-router-dom";
 import { motion, useMotionValueEvent, useScroll } from "framer-motion";
 
 export default function MenuBar(): React.ReactElement {
@@ -171,11 +171,13 @@ export default function MenuBar(): React.ReactElement {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         disableScrollLock
+        keepMounted={false}
         ModalProps={{
-          keepMounted: true,
+          keepMounted: false,
           disableScrollLock: true,
           disableEnforceFocus: true,
           disableAutoFocus: true,
+          disableRestoreFocus: true,
         }}
         sx={{
           display: isMobile ? "block" : "none",

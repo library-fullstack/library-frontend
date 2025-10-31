@@ -20,34 +20,7 @@ axiosClient.interceptors.request.use((config) => {
       "application/json";
   }
 
-  console.log("[Axios Request]", {
-    method: config.method,
-    url: config.url,
-    isFormData: config.data instanceof FormData,
-    headers: config.headers,
-  });
-
   return config;
 });
-
-// log errors
-axiosClient.interceptors.response.use(
-  (response) => {
-    console.log("[Axios Response Success]", {
-      status: response.status,
-      url: response.config.url,
-    });
-    return response;
-  },
-  (error) => {
-    console.error("[Axios Response Error]", {
-      status: error.response?.status,
-      url: error.config?.url,
-      message: error.response?.data?.message || error.message,
-      data: error.response?.data,
-    });
-    return Promise.reject(error);
-  }
-);
 
 export default axiosClient;

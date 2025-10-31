@@ -7,16 +7,33 @@ import {
   Button,
   Stack,
   useTheme,
+  useMediaQuery,
 } from "@mui/material";
-import { motion } from "framer-motion";
+import { motion, useAnimation, Variants } from "framer-motion";
+import { useInView } from "react-intersection-observer";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import EventOutlinedIcon from "@mui/icons-material/EventOutlined";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+import { Link as RouterLink } from "react-router-dom";
 
-// cái này thì cần phải gọi api vì sự kiện không thể tĩnh
-// tuy nhiên chưa có table news trong cơ sở dữ liệu nên sẽ tạm thời bỏ qua
-// TO-DO
-// TO-DO
-// TO-DO
+const MotionBox = motion.create(Box);
+
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay: i * 0.15, ease: "easeOut" },
+  }),
+};
+
+// cần gọi api lấy tin tức
+// TODO
+// TODO
+// TODO
 const mockNews = [
   {
     title: "Thư viện HBH mở rộng khu đọc mới",
@@ -35,11 +52,10 @@ const mockNews = [
   },
 ];
 
-// cái này thì cần phải gọi api vì sự kiện không thể tĩnh
-// tuy nhiên chưa có table events trong cơ sở dữ liệu nên sẽ tạm thời bỏ qua
-// TO-DO
-// TO-DO
-// TO-DO
+// cần gọi api lấy sự kiện
+// TODO
+// TODO
+// TODO
 const mockEvents = [
   {
     title: "Ngày hội đọc sách HBH 2025",
@@ -58,30 +74,120 @@ const mockEvents = [
   },
 ];
 
-export default function NewsAndEventsSection(): React.ReactElement {
+function NewsAndEventsSection() {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const controls = useAnimation();
+  const [ref, inView] = useInView({ threshold: 0.25, triggerOnce: true });
+
+  React.useEffect(() => {
+    if (!isMobile && inView) controls.start("visible");
+  }, [inView, isMobile, controls]);
+
+  const renderCard = (
+    item: { title: string; date: string; desc: string },
+    color: "primary" | "secondary",
+    index?: number
+  ) => {
+    const CardContentBox = (
+      <Card
+        key={item.title}
+        sx={{
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          p: { xs: 2.5, sm: 3 },
+          borderRadius: 2,
+          bgcolor: theme.palette.background.paper,
+          border: `1px solid ${theme.palette.divider}`,
+          boxShadow: theme.shadows[1],
+          transition: isMobile ? "none" : "all 0.25s ease",
+          "&:hover": !isMobile
+            ? {
+                transform: "translateY(-4px)",
+                boxShadow: (t) => t.shadows[4],
+                transition: "0.3s ease",
+              }
+            : {},
+        }}
+      >
+        <Box>
+          <Typography
+            variant="caption"
+            color={`${color}.main`}
+            fontWeight={600}
+            sx={{ mb: 0.5, display: "block" }}
+          >
+            {item.date}
+          </Typography>
+          <Typography
+            variant="subtitle1"
+            fontWeight={700}
+            sx={{
+              mb: 0.5,
+              color: theme.palette.text.primary,
+              lineHeight: 1.5,
+              minHeight: "3em",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {item.title}
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              pt: 0.5,
+              display: "-webkit-box",
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              minHeight: 56,
+            }}
+          >
+            {item.desc}
+          </Typography>
+        </Box>
+      </Card>
+    );
+
+    if (isMobile) return CardContentBox;
+
+    return (
+      <MotionBox
+        key={item.title}
+        custom={index}
+        variants={cardVariants}
+        initial="hidden"
+        animate={controls}
+      >
+        {CardContentBox}
+      </MotionBox>
+    );
+  };
 
   return (
     <Box
+      ref={ref}
       component={motion.div}
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6 }}
+      initial={isMobile ? false : "hidden"}
+      animate={isMobile ? undefined : controls}
       sx={{
         bgcolor: theme.palette.background.default,
         py: { xs: 6, md: 10 },
-        width: "100%",
       }}
     >
       <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
-        {/* Tiêu đề */}
         <Typography
           variant="h4"
           fontWeight={700}
           textAlign="center"
           mb={1}
-          sx={{ color: theme.palette.text.primary }}
+          color="text.primary"
         >
           Tin tức & Sự kiện
         </Typography>
@@ -94,178 +200,172 @@ export default function NewsAndEventsSection(): React.ReactElement {
           Cập nhật những hoạt động và thông báo mới nhất từ Thư viện HBH.
         </Typography>
 
-        {/* Hai cột: News & Events */}
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-            gap: { xs: 4, md: 6 },
-          }}
-        >
-          {/* Cột Tin tức */}
-          <Box>
-            <Stack direction="row" alignItems="center" spacing={1} mb={2}>
-              <ArticleOutlinedIcon color="primary" />
-              <Typography fontWeight={600}>Tin tức mới</Typography>
-            </Stack>
+        {isMobile ? (
+          <Stack spacing={6}>
+            <Box>
+              <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+                <ArticleOutlinedIcon color="primary" />
+                <Typography fontWeight={600}>Tin tức mới</Typography>
+              </Stack>
 
-            <Stack spacing={3}>
-              {mockNews.map((news, idx) => (
-                <Card
-                  key={idx}
-                  component={motion.div}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1 }}
-                  sx={{
-                    p: { xs: 2.5, sm: 3 },
-                    borderRadius: 2,
-                    bgcolor: theme.palette.background.paper,
-                    border: `1px solid ${theme.palette.divider}`,
-                    boxShadow:
-                      theme.palette.mode === "light"
-                        ? "0 6px 16px rgba(99,102,241,0.06)"
-                        : "0 6px 16px rgba(129,140,248,0.1)",
-                    "&:hover": {
-                      transform: "translateY(-4px)",
-                      transition: "0.3s ease",
-                      boxShadow:
-                        theme.palette.mode === "light"
-                          ? "0 8px 20px rgba(99,102,241,0.15)"
-                          : "0 8px 20px rgba(129,140,248,0.2)",
-                    },
-                  }}
-                >
-                  <Typography
-                    variant="caption"
-                    color="primary.main"
-                    fontWeight={600}
-                    sx={{ mb: 0.5, display: "block" }}
-                  >
-                    {news.date}
-                  </Typography>
-                  <Typography
-                    variant="h6"
-                    fontWeight={600}
-                    sx={{
-                      mb: 0.5,
-                      color: theme.palette.text.primary,
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {news.title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                    }}
-                  >
-                    {news.desc}
-                  </Typography>
-                </Card>
-              ))}
-            </Stack>
+              <Swiper
+                modules={[Pagination, Autoplay]}
+                spaceBetween={16}
+                slidesPerView={1}
+                pagination={{ clickable: true }}
+                autoplay={
+                  isMobile
+                    ? {
+                        delay: 4000,
+                        disableOnInteraction: false,
+                      }
+                    : false
+                }
+              >
+                {mockNews.map((news) => (
+                  <SwiperSlide key={news.title} style={{ display: "flex" }}>
+                    {renderCard(news, "primary")}
+                  </SwiperSlide>
+                ))}
+              </Swiper>
 
-            <Button
-              href="/news"
-              variant="outlined"
-              color="primary"
-              sx={{
-                mt: 4,
-                display: "block",
-                mx: "auto",
-                px: 4,
-                py: 1.2,
-                fontWeight: 600,
-              }}
-            >
-              Xem tất cả tin tức
-            </Button>
+              <Button
+                component={RouterLink}
+                to="/news"
+                variant="contained"
+                color="primary"
+                sx={{
+                  mt: 0,
+                  mb: 0.5,
+                  display: "block",
+                  mx: "auto",
+                  px: 4,
+                  py: 1.2,
+                  fontWeight: 600,
+                  textTransform: "none",
+                  textAlign: "center",
+                }}
+              >
+                Xem tất cả tin tức
+              </Button>
+            </Box>
+
+            <Box>
+              <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+                <EventOutlinedIcon color="secondary" />
+                <Typography fontWeight={600}>Sự kiện sắp tới</Typography>
+              </Stack>
+
+              <Swiper
+                modules={[Pagination, Autoplay]}
+                spaceBetween={16}
+                slidesPerView={1}
+                pagination={{ clickable: true }}
+                autoplay={
+                  isMobile
+                    ? {
+                        delay: 4000,
+                        disableOnInteraction: false,
+                      }
+                    : false
+                }
+              >
+                {mockEvents.map((event) => (
+                  <SwiperSlide key={event.title} style={{ display: "flex" }}>
+                    {renderCard(event, "secondary")}
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+
+              <Button
+                component={RouterLink}
+                to="/events"
+                variant="contained"
+                color="primary"
+                sx={{
+                  mt: 0,
+                  mb: 0.5,
+                  display: "block",
+                  mx: "auto",
+                  px: 4,
+                  py: 1.2,
+                  fontWeight: 600,
+                  textTransform: "none",
+                  textAlign: "center",
+                }}
+              >
+                Xem tất cả sự kiện
+              </Button>
+            </Box>
+          </Stack>
+        ) : (
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 6,
+            }}
+          >
+            <Box>
+              <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+                <ArticleOutlinedIcon color="primary" />
+                <Typography fontWeight={600}>Tin tức mới</Typography>
+              </Stack>
+              <Stack spacing={3}>
+                {mockNews.map((news, i) => renderCard(news, "primary", i))}
+              </Stack>
+              <Button
+                component={RouterLink}
+                to="/news"
+                variant="contained"
+                color="primary"
+                sx={{
+                  mt: 3,
+                  display: "block",
+                  mx: "auto",
+                  px: 4,
+                  py: 1.2,
+                  fontWeight: 600,
+                  textTransform: "none",
+                }}
+              >
+                Xem tất cả tin tức
+              </Button>
+            </Box>
+
+            <Box>
+              <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+                <EventOutlinedIcon color="secondary" />
+                <Typography fontWeight={600}>Sự kiện sắp tới</Typography>
+              </Stack>
+              <Stack spacing={3}>
+                {mockEvents.map((event, i) =>
+                  renderCard(event, "secondary", i + mockNews.length)
+                )}
+              </Stack>
+              <Button
+                component={RouterLink}
+                to="/events"
+                variant="contained"
+                color="primary"
+                sx={{
+                  mt: 3,
+                  display: "block",
+                  mx: "auto",
+                  px: 4,
+                  py: 1.2,
+                  fontWeight: 600,
+                  textTransform: "none",
+                }}
+              >
+                Xem tất cả sự kiện
+              </Button>
+            </Box>
           </Box>
-
-          {/* Cột Sự kiện */}
-          <Box>
-            <Stack direction="row" alignItems="center" spacing={1} mb={2}>
-              <EventOutlinedIcon color="secondary" />
-              <Typography fontWeight={600}>Sự kiện sắp tới</Typography>
-            </Stack>
-
-            <Stack spacing={3}>
-              {mockEvents.map((event, idx) => (
-                <Card
-                  key={idx}
-                  component={motion.div}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1 }}
-                  sx={{
-                    p: { xs: 2.5, sm: 3 },
-                    borderRadius: 2,
-                    bgcolor:
-                      theme.palette.mode === "light"
-                        ? "rgba(99,102,241,0.04)"
-                        : "rgba(129,140,248,0.08)",
-                  }}
-                >
-                  <Typography
-                    variant="caption"
-                    color="primary.main"
-                    fontWeight={600}
-                    sx={{ mb: 0.5, display: "block" }}
-                  >
-                    {event.date}
-                  </Typography>
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight={600}
-                    sx={{ mb: 0.5, color: theme.palette.text.primary }}
-                  >
-                    {event.title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mb: 1.5 }}
-                  >
-                    {event.desc}
-                  </Typography>
-                  <Button
-                    size="small"
-                    href="/events"
-                    color="primary"
-                    sx={{ fontWeight: 600 }}
-                  >
-                    Xem chi tiết
-                  </Button>
-                </Card>
-              ))}
-            </Stack>
-
-            <Button
-              href="/events"
-              variant="outlined"
-              color="primary"
-              sx={{
-                mt: 4,
-                display: "block",
-                mx: "auto",
-                px: 4,
-                py: 1.2,
-                fontWeight: 600,
-              }}
-            >
-              Xem tất cả sự kiện
-            </Button>
-          </Box>
-        </Box>
+        )}
       </Container>
     </Box>
   );
 }
+
+export default NewsAndEventsSection;

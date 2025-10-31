@@ -7,10 +7,21 @@ import {
   Avatar,
   Chip,
   Stack,
+  useMediaQuery,
+  useTheme,
+  Button,
 } from "@mui/material";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/pagination";
 import { motion } from "framer-motion";
-import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
+import { Link as RouterLink, useNavigationType } from "react-router-dom";
+import { Pagination, Autoplay } from "swiper/modules";
 
+// cần gọi api lấy post ra
+// TODO
+// TODO
+// TODO
 const mockPosts = [
   {
     id: 1,
@@ -38,180 +49,374 @@ const mockPosts = [
   },
 ];
 
-// phần này cần xem xét việc xử lí gọi api và lấy ra bài viết trending thay vì static dữ liệu như này
-// tuy nhiên vấn đề lấy bài viết trending sẽ có vấn đề về sự nghiêm túc và lệch chuẩn do đôi khi bài
-// viết có thể sẽ không phù hợp. và vì thế nó không phù hợp nằm ở webpage.
-// có lẽ vẫn nên để static để thể hiện ví dụ về cộng đồng...
 export default function CommunitySection(): React.ReactElement {
-  return (
-    <Box
-      component={motion.div}
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6 }}
-      sx={{
-        bgcolor: (theme) => theme.palette.background.default,
-        py: { xs: 6, md: 10 },
-        mb: { xs: 4, md: 6 },
-      }}
-    >
-      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="center"
-          spacing={1.2}
-          mb={1}
-        >
-          <ForumOutlinedIcon color="primary" />
-          <Typography
-            variant="h4"
-            fontWeight={700}
-            sx={{ color: (theme) => theme.palette.text.primary }}
-          >
-            Góc cộng đồng sinh viên
-          </Typography>
-        </Stack>
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const navigationType = useNavigationType();
+  const shouldAnimate = !isMobile && navigationType !== "POP";
 
+  const MobileContent = (
+    <Container maxWidth="md" sx={{ px: { xs: 2, sm: 3 } }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 1.2,
+          mb: 1,
+        }}
+      >
         <Typography
-          variant="body2"
-          textAlign="center"
-          color="text.secondary"
-          mb={6}
+          variant="h4"
+          fontWeight={700}
+          sx={{ color: (t) => t.palette.text.primary }}
         >
-          Một vài chia sẻ nổi bật từ diễn đàn của Thư viện HBH.
+          Góc cộng đồng sinh viên
         </Typography>
+      </Box>
 
-        <Stack
-          direction={{ xs: "column", md: "row" }}
-          spacing={{ xs: 3, md: 4 }}
-        >
-          {mockPosts.map((post, index) => (
+      <Typography
+        variant="body2"
+        textAlign="center"
+        color="text.secondary"
+        mb={6}
+      >
+        Một vài chia sẻ nổi bật từ diễn đàn của Thư viện HBH.
+      </Typography>
+
+      <Swiper
+        modules={[Pagination, Autoplay]}
+        pagination={{ clickable: true }}
+        spaceBetween={24}
+        slidesPerView={1}
+        breakpoints={{
+          600: { slidesPerView: 1.2 },
+          900: { slidesPerView: 2 },
+        }}
+        autoplay={
+          isMobile
+            ? {
+                delay: 4000,
+                disableOnInteraction: false,
+              }
+            : false
+        }
+        touchStartPreventDefault={false}
+        touchReleaseOnEdges
+        resistanceRatio={0.5}
+        observer
+        observeParents
+        speed={500}
+      >
+        {mockPosts.map((post) => (
+          <SwiperSlide key={post.id} style={{ display: "flex" }}>
             <Card
-              key={post.id}
-              component={motion.div}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 * index, duration: 0.5 }}
               sx={{
-                flex: 1,
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
                 p: { xs: 2.5, sm: 3 },
                 borderRadius: 2,
-                bgcolor: (theme) => theme.palette.background.paper,
-                border: (theme) => `1px solid ${theme.palette.divider}`,
-                boxShadow: (theme) => theme.shadows[1],
-                "&:hover": {
-                  transform: "translateY(-4px)",
-                  transition: "0.3s ease",
-                  boxShadow: (theme) => theme.shadows[4],
-                },
+                bgcolor: theme.palette.background.paper,
+                border: `1px solid ${theme.palette.divider}`,
+                boxShadow: theme.shadows[1],
+                transition: isMobile ? "none" : "all 0.25s ease",
+                "&:hover": !isMobile
+                  ? {
+                      transform: "translateY(-4px)",
+                      boxShadow: (t) => t.shadows[4],
+                      transition: "0.3s ease",
+                    }
+                  : {},
               }}
             >
-              <Chip
-                label={post.tag}
-                size="small"
-                color="primary"
-                sx={{
-                  mb: 1.2,
-                  fontWeight: 500,
-                  borderRadius: 2,
-                }}
-              />
-              <Typography
-                variant="h6"
-                fontWeight={600}
-                sx={{
-                  mb: 1,
-                  color: (theme) => theme.palette.text.primary,
-                  lineHeight: 1.4,
-                }}
-              >
-                {post.title}
-              </Typography>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{
-                  mb: 1.5,
-                  display: "-webkit-box",
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                }}
-              >
-                {post.excerpt}
-              </Typography>
+              <Box>
+                <Chip
+                  label={post.tag}
+                  size="small"
+                  color="primary"
+                  sx={{ mb: 1.2, fontWeight: 500, borderRadius: 2 }}
+                />
+                <Typography
+                  variant="subtitle1"
+                  fontWeight={700}
+                  sx={{
+                    mb: 0.5,
+                    color: theme.palette.text.primary,
+                    lineHeight: 1.5,
+                    minHeight: "3em", // giữ chỗ đủ cho 2 dòng
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
+                  {post.title}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    pt: 0.5,
+                    display: "-webkit-box",
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                    minHeight: 56, // luôn chiếm đủ chỗ để các card đều
+                  }}
+                >
+                  {post.excerpt}
+                </Typography>
+              </Box>
 
               <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  mt: "auto",
-                }}
+                sx={{ display: "flex", alignItems: "center", gap: 1, mt: 2 }}
               >
                 <Avatar
                   sx={{
                     width: 28,
                     height: 28,
-                    bgcolor: (theme) => theme.palette.primary.main,
+                    bgcolor: (t) => t.palette.primary.main,
                     fontSize: 13,
-                    color: (theme) => theme.palette.primary.contrastText,
+                    color: (t) => t.palette.primary.contrastText,
+                    flexShrink: 0,
                   }}
                 >
                   {post.author.charAt(0)}
                 </Avatar>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" color="text.secondary" noWrap>
                   {post.author}
                 </Typography>
               </Box>
             </Card>
-          ))}
-        </Stack>
+          </SwiperSlide>
+        ))}
+      </Swiper>
 
-        {/* nút xem thêm */}
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
-          <Box
+      <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Button
+          component={RouterLink}
+          to="/forum"
+          variant="contained"
+          color="primary"
+          sx={{
+            mt: 0,
+            mb: 0.5,
+            display: "block",
+            mx: "auto",
+            px: 5,
+            py: 1.3,
+            minWidth: "100%",
+            fontWeight: 600,
+            textTransform: "none",
+            borderRadius: 1,
+            textAlign: "center",
+            "&:hover": { filter: "brightness(0.98)" },
+          }}
+        >
+          Đến diễn đàn ngay
+        </Button>
+      </Box>
+
+      <style>
+        {`
+          .swiper-pagination {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 25px;
+            margin-bottom: 10px;
+          }
+          .swiper-pagination-bullet {
+            width: 8px;
+            height: 8px;
+            margin: 0 4px !important;
+            background: ${theme.palette.action.disabled};
+            opacity: 1;
+            transition: all 0.3s ease;
+          }
+          .swiper-pagination-bullet-active {
+            width: 20px;
+            border-radius: 8px;
+            background: ${theme.palette.primary.main};
+          }
+        `}
+      </style>
+    </Container>
+  );
+
+  const DesktopContent = (
+    <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="center"
+        spacing={1.2}
+        mb={1}
+      >
+        <Typography
+          variant="h4"
+          fontWeight={700}
+          sx={{ color: (t) => t.palette.text.primary }}
+        >
+          Góc cộng đồng sinh viên
+        </Typography>
+      </Stack>
+
+      <Typography
+        variant="body2"
+        textAlign="center"
+        color="text.secondary"
+        mb={6}
+      >
+        Một vài chia sẻ nổi bật từ diễn đàn của Thư viện HBH.
+      </Typography>
+
+      <Stack direction="row" spacing={4}>
+        {mockPosts.map((post, index) => (
+          <Card
+            key={post.id}
             component={motion.div}
-            whileHover={{ y: -2, scale: 1.02 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 * index, duration: 0.5 }}
+            sx={{
+              flex: 1,
+              p: 3,
+              borderRadius: 2,
+              bgcolor: (t) => t.palette.background.paper,
+              border: (t) => `1px solid ${t.palette.divider}`,
+              boxShadow: (t) => t.shadows[1],
+              overflow: "hidden",
+              "&:hover": !isMobile
+                ? {
+                    transform: "translateY(-4px)",
+                    boxShadow: (t) => t.shadows[4],
+                    transition: "0.3s ease",
+                  }
+                : {},
+            }}
           >
-            <Box
-              component="a"
-              href="/forum"
+            <Chip
+              label={post.tag}
+              size="small"
+              color="primary"
+              sx={{ mb: 1.2, fontWeight: 500, borderRadius: 2 }}
+            />
+            <Typography
+              variant="h6"
+              fontWeight={600}
               sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 1,
-                px: 3.5,
-                py: 1.2,
-                borderRadius: 2,
-                border: (theme) => `1.5px solid ${theme.palette.primary.main}`,
-                color: (theme) => theme.palette.primary.main,
-                fontWeight: 600,
-                fontSize: "0.95rem",
-                textDecoration: "none",
-                transition: "all 0.25s ease",
-                "&:hover": {
-                  bgcolor: (theme) => theme.palette.action.hover,
-                  boxShadow: (theme) => theme.shadows[2],
-                },
+                mb: 1,
+                color: (t) => t.palette.text.primary,
+                lineHeight: 1.4,
               }}
             >
-              <ForumOutlinedIcon
+              {post.title}
+            </Typography>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                mb: 1.5,
+                display: "-webkit-box",
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {post.excerpt}
+            </Typography>
+
+            <Box
+              sx={{ display: "flex", alignItems: "center", gap: 1, mt: "auto" }}
+            >
+              <Avatar
                 sx={{
-                  fontSize: 20,
-                  color: (theme) => theme.palette.primary.main,
+                  width: 28,
+                  height: 28,
+                  bgcolor: (t) => t.palette.primary.main,
+                  fontSize: 13,
+                  color: (t) => t.palette.primary.contrastText,
                 }}
-              />
-              <span>Truy cập diễn đàn sinh viên</span>
+              >
+                {post.author.charAt(0)}
+              </Avatar>
+              <Typography variant="caption" color="text.secondary">
+                {post.author}
+              </Typography>
             </Box>
+          </Card>
+        ))}
+      </Stack>
+
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+        <Box
+          component={motion.div}
+          whileHover={{ y: -2, scale: 1.02 }}
+          transition={{ duration: 0.2 }}
+        >
+          <Box
+            component={RouterLink}
+            to="/forum"
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 1,
+              px: 3.5,
+              py: 1.2,
+              borderRadius: 2,
+              border: (t) => `1.5px solid ${t.palette.primary.main}`,
+              color: (t) => t.palette.primary.main,
+              fontWeight: 600,
+              fontSize: "0.95rem",
+              textDecoration: "none",
+              transition: "all 0.25s ease",
+              "&:hover": {
+                bgcolor: (t) => t.palette.action.hover,
+                boxShadow: (t) => t.shadows[2],
+              },
+            }}
+          >
+            <span>Truy cập diễn đàn sinh viên</span>
           </Box>
         </Box>
-      </Container>
+      </Box>
+    </Container>
+  );
+
+  if (isMobile) {
+    return (
+      <Box
+        sx={{
+          bgcolor: (t) => t.palette.background.default,
+          py: { xs: 6, md: 10 },
+          mb: { xs: 4, md: 6 },
+        }}
+      >
+        {MobileContent}
+      </Box>
+    );
+  }
+
+  return (
+    <Box
+      component={motion.div}
+      initial={shouldAnimate ? { opacity: 0, y: 40 } : false}
+      whileInView={shouldAnimate ? { opacity: 1, y: 0 } : {}}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6 }}
+      sx={{
+        bgcolor: (t) => t.palette.background.default,
+        py: { xs: 6, md: 10 },
+        mb: { xs: 4, md: 6 },
+      }}
+    >
+      {DesktopContent}
     </Box>
   );
 }

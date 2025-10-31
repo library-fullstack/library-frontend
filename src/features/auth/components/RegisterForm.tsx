@@ -3,13 +3,13 @@ import {
   Box,
   Typography,
   TextField,
-  Button,
   InputAdornment,
   IconButton,
   Alert,
   Divider,
   useTheme,
 } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
 import { Visibility, VisibilityOff, Check, Close } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +18,7 @@ import {
   parseApiError,
   validatePassword,
 } from "../../../shared/lib/errorHandler";
+import { CircularProgress } from "@mui/material";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -30,6 +31,7 @@ export default function RegisterForm(): React.ReactElement {
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [error, setError] = React.useState("");
   const [success, setSuccess] = React.useState("");
+  const [isRegistering, setIsRegistering] = React.useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [passwordTouched, setPasswordTouched] = React.useState(false);
@@ -57,14 +59,18 @@ export default function RegisterForm(): React.ReactElement {
     }
 
     try {
+      setIsRegistering(true);
       await axios.post(`${API_URL}/auth/register`, {
         student_id: studentId,
         password,
       });
+
       setSuccess("Đăng ký thành công! Đang chuyển đến trang đăng nhập...");
-      setTimeout(() => navigate("/auth/login"), 1500);
+      navigate("/auth/login");
     } catch (err) {
       setError(parseApiError(err));
+    } finally {
+      setIsRegistering(false);
     }
   }
 
@@ -197,7 +203,7 @@ export default function RegisterForm(): React.ReactElement {
           }}
         />
 
-        {/* Password Strength Indicator */}
+        {/* thanh đo độ mạnh của mật khẩu */}
         {password.length > 0 && (
           <Box sx={{ mb: 2 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
@@ -459,10 +465,19 @@ export default function RegisterForm(): React.ReactElement {
           }}
         />
 
-        <Button
+        <LoadingButton
           fullWidth
           type="submit"
           variant="contained"
+          loading={isRegistering}
+          loadingIndicator={
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <CircularProgress color="inherit" size={16} thickness={4} />
+              <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
+                Đang đăng ký...
+              </Typography>
+            </Box>
+          }
           disabled={!passwordValidation.isValid || !passwordsMatch}
           sx={{
             py: 1.5,
@@ -477,7 +492,7 @@ export default function RegisterForm(): React.ReactElement {
           }}
         >
           Đăng ký
-        </Button>
+        </LoadingButton>
       </Box>
 
       <Divider sx={{ my: 3 }} />

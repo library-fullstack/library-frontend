@@ -21,7 +21,7 @@ import {
 } from "@mui/material";
 
 import { Search, Menu as MenuIcon } from "@mui/icons-material";
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate, useLocation } from "react-router-dom";
 import useAuth from "../../features/auth/hooks/useAuth";
 import { useThemeMode } from "../../shared/hooks/useThemeMode";
 import { useBookSearch } from "../../shared/hooks/useBookSearch";
@@ -420,10 +420,13 @@ export default function Navbar(): React.ReactElement {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         disableScrollLock
+        keepMounted={false}
         ModalProps={{
           disableEnforceFocus: true,
           disableAutoFocus: true,
+          disableRestoreFocus: true,
           disableScrollLock: true,
+          keepMounted: false,
         }}
         sx={{
           display: isMobile ? "block" : "none",
@@ -516,7 +519,24 @@ export default function Navbar(): React.ReactElement {
             <ListItem disablePadding>
               <ListItemButton onClick={handleAccountClick}>
                 <ListItemIcon sx={{ color: "text.primary", minWidth: 40 }}>
-                  <UserRound size={20} />
+                  {user ? (
+                    <Avatar
+                      src={user.avatar_url || ""}
+                      alt={user.full_name}
+                      sx={{
+                        width: 28,
+                        height: 28,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        bgcolor: "primary.main",
+                        ml: "-2px",
+                      }}
+                    >
+                      {user.full_name?.charAt(0).toUpperCase() || "?"}
+                    </Avatar>
+                  ) : (
+                    <UserRound size={20} />
+                  )}
                 </ListItemIcon>
                 <ListItemText
                   primary={user ? user.full_name : "Tài khoản"}

@@ -59,40 +59,46 @@ export default function BookCatalogFilters({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  // local state cho thanh tìm kiếm
-  const [searchValue, setSearchValue] = useState(filters.keyword || "");
+  useEffect(() => {
+    if (!isMobile) {
+      const handleScroll = () => {
+        const activeEl = document.activeElement as HTMLElement | null;
+        if (
+          activeEl?.tagName === "INPUT" ||
+          activeEl?.getAttribute("role") === "combobox"
+        ) {
+          activeEl.blur();
+        }
+      };
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      return () => window.removeEventListener("scroll", handleScroll);
+    }
+  }, [isMobile]);
 
-  // ref cho search input (vấn đề 2)
+  const [searchValue, setSearchValue] = useState(filters.keyword || "");
+  const [lastFilterKeyword, setLastFilterKeyword] = useState(filters.keyword);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Sync searchValue với filters.keyword khi filters thay đổi từ bên ngoài (vấn đề 4)
-  useEffect(() => {
-    if (filters.keyword !== searchValue) {
-      setSearchValue(filters.keyword || "");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.keyword]);
+  if (lastFilterKeyword !== filters.keyword) {
+    setLastFilterKeyword(filters.keyword);
+    setSearchValue(filters.keyword || "");
+  }
 
-  // Focus vào search input khi có keyword từ URL (vấn đề 2)
   useEffect(() => {
     if (filters.keyword && searchInputRef.current) {
-      // Delay để đảm bảo component đã render xong
       setTimeout(() => {
         searchInputRef.current?.focus();
       }, 100);
     }
   }, [filters.keyword]);
 
-  // gọi debounce
   const debouncedSearch = useDebounce(searchValue, 500);
 
-  // update filters khi debounce thay đổi
   useEffect(() => {
     if (debouncedSearch !== filters.keyword) {
       onFiltersChange({ ...filters, keyword: debouncedSearch });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch]);
+  }, [debouncedSearch, filters, onFiltersChange]);
 
   const handleFilterChange = (
     key: keyof BookFilters,
@@ -101,7 +107,6 @@ export default function BookCatalogFilters({
     onFiltersChange({ ...filters, [key]: value });
   };
 
-  // reset filter
   const handleResetFilters = React.useCallback(() => {
     setSearchValue("");
     onFiltersChange({
@@ -121,10 +126,8 @@ export default function BookCatalogFilters({
       filters.language_code
   );
 
-  // nội dung filter
   const FilterContent = (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      {/* phần header cho mobile*/}
       {isMobile && (
         <Box
           sx={{
@@ -149,9 +152,7 @@ export default function BookCatalogFilters({
         </Box>
       )}
 
-      {/* phần có thể scroll */}
       <Box sx={{ flex: 1, overflowX: "visible", p: { xs: 2, md: 0 } }}>
-        {/* tìm kiếm với debounce */}
         <Box sx={{ mb: 3 }}>
           <TextField
             fullWidth
@@ -182,7 +183,6 @@ export default function BookCatalogFilters({
           />
         </Box>
 
-        {/* phần sắp xếp */}
         <Box sx={{ mb: 3 }}>
           <Typography
             variant="subtitle2"
@@ -194,7 +194,10 @@ export default function BookCatalogFilters({
           <FormControl fullWidth size="small">
             <Select
               value={sortBy}
-              onChange={(e) => onSortChange(e.target.value as SortOption)}
+              onChange={(e) => {
+                onSortChange(e.target.value as SortOption);
+                if (isMobile) setTimeout(() => onMobileClose?.(), 350);
+              }}
             >
               {SORT_OPTIONS.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
@@ -207,16 +210,12 @@ export default function BookCatalogFilters({
 
         <Divider sx={{ my: 2 }} />
 
-        {/* sắp xếp theo loại sách */}
         {categories.length > 0 && (
           <Accordion
             defaultExpanded
             elevation={0}
             disableGutters
-            sx={{
-              "&:before": { display: "none" },
-              bgcolor: "transparent",
-            }}
+            sx={{ "&:before": { display: "none" }, bgcolor: "transparent" }}
           >
             <AccordionSummary
               expandIcon={<ExpandMore />}
@@ -253,7 +252,6 @@ export default function BookCatalogFilters({
               }}
             >
               {categoriesLoading ? (
-                // skeleton
                 <Box>
                   {[1, 2, 3, 4].map((i) => (
                     <Box
@@ -283,8 +281,9 @@ export default function BookCatalogFilters({
                     const val = e.target.value;
                     handleFilterChange(
                       "category_id",
-                      val === "all" ? null : Number(val)
+                      val === "all" ? null : val
                     );
+                    if (isMobile) setTimeout(() => onMobileClose?.(), 350);
                   }}
                 >
                   <FormControlLabel
@@ -329,15 +328,11 @@ export default function BookCatalogFilters({
 
         <Divider sx={{ my: 2 }} />
 
-        {/* format */}
         <Accordion
           defaultExpanded
           elevation={0}
           disableGutters
-          sx={{
-            "&:before": { display: "none" },
-            bgcolor: "transparent",
-          }}
+          sx={{ "&:before": { display: "none" }, bgcolor: "transparent" }}
         >
           <AccordionSummary
             expandIcon={<ExpandMore />}
@@ -370,6 +365,7 @@ export default function BookCatalogFilters({
               onChange={(e) => {
                 const val = e.target.value;
                 handleFilterChange("format", val === "all" ? null : val);
+                if (isMobile) setTimeout(() => onMobileClose?.(), 350);
               }}
             >
               <FormControlLabel
@@ -391,14 +387,10 @@ export default function BookCatalogFilters({
 
         <Divider sx={{ my: 2 }} />
 
-        {/* sắp xếp theo ngôn ngữ */}
         <Accordion
           elevation={0}
           disableGutters
-          sx={{
-            "&:before": { display: "none" },
-            bgcolor: "transparent",
-          }}
+          sx={{ "&:before": { display: "none" }, bgcolor: "transparent" }}
         >
           <AccordionSummary
             expandIcon={<ExpandMore />}
@@ -431,6 +423,7 @@ export default function BookCatalogFilters({
               onChange={(e) => {
                 const val = e.target.value;
                 handleFilterChange("language_code", val === "all" ? null : val);
+                if (isMobile) setTimeout(() => onMobileClose?.(), 350);
               }}
             >
               <FormControlLabel
@@ -451,7 +444,6 @@ export default function BookCatalogFilters({
         </Accordion>
       </Box>
 
-      {/* phần footer - nút reset filter */}
       {hasActiveFilters && (
         <Box
           sx={{
@@ -473,9 +465,7 @@ export default function BookCatalogFilters({
               fontWeight: 600,
               fontSize: "0.875rem",
               transition: "all 0.2s",
-              "&:hover": {
-                bgcolor: "action.hover",
-              },
+              "&:hover": { bgcolor: "action.hover" },
             }}
           >
             Xóa tất cả bộ lọc
@@ -485,7 +475,6 @@ export default function BookCatalogFilters({
     </Box>
   );
 
-  // drawer ở mobile
   if (isMobile) {
     return (
       <Drawer
@@ -493,10 +482,13 @@ export default function BookCatalogFilters({
         open={mobileOpen}
         onClose={onMobileClose}
         disableScrollLock
+        keepMounted={false}
         ModalProps={{
           disableEnforceFocus: true,
           disableAutoFocus: true,
+          disableRestoreFocus: true,
           disableScrollLock: true,
+          keepMounted: false,
         }}
         sx={{
           "& .MuiDrawer-paper": {
@@ -505,11 +497,7 @@ export default function BookCatalogFilters({
           },
         }}
         slotProps={{
-          backdrop: {
-            sx: {
-              backdropFilter: "blur(4px)",
-            },
-          },
+          backdrop: { sx: { backdropFilter: "blur(4px)" } },
         }}
       >
         {FilterContent}
@@ -517,7 +505,6 @@ export default function BookCatalogFilters({
     );
   }
 
-  // thanh sidebar bên trái - desktop
   return (
     <Paper
       elevation={0}
@@ -547,10 +534,7 @@ export default function BookCatalogFilters({
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
         <TuneOutlined
           color="primary"
-          sx={{
-            fontSize: 24,
-            WebkitFontSmoothing: "antialiased",
-          }}
+          sx={{ fontSize: 24, WebkitFontSmoothing: "antialiased" }}
         />
         <Typography variant="h6" fontWeight={600}>
           Bộ lọc

@@ -1,35 +1,28 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Box, CircularProgress } from "@mui/material";
+import { KeepAlive } from "react-activation";
 import MainLayout from "../../widgets/layout/MainLayout";
 
-// các component chức năng CRITICAL - load ngay
+// critical
 import HomePage from "../../pages/home/HomePage";
 import AuthLayout from "../../pages/auth/AuthLayout";
-
-// các component auth CRITICAL
 import LoginForm from "../../features/auth/components/LoginForm";
 import RegisterForm from "../../features/auth/components/RegisterForm";
 import ForgotPasswordForm from "../../features/auth/components/ForgotPasswordForm";
 import ResetPasswordForm from "../../features/auth/components/ResetPasswordForm";
-
-// User Profile - load ngay
-// fix lỗi loading 2 lần
 import Profile from "../../pages/user/Profile";
-
-// lớp bảo vệ CRITICAL
 import ProtectedRoute from "../../widgets/routing/ProtectedRoute";
 import PublicRoute from "../../widgets/routing/PublicRoute";
 import NotFound from "../../shared/ui/NotFound";
 
-// LAZY LOAD - các component không critical
+// lazy
 const BookList = lazy(() => import("../../pages/book/BookList"));
 const BookDetail = lazy(() => import("../../pages/book/BookDetail"));
 const Cart = lazy(() => import("../../pages/borrow/Cart"));
 const Checkout = lazy(() => import("../../pages/borrow/Checkout"));
 const BorrowList = lazy(() => import("../../pages/borrow/BorrowList"));
 const OrderList = lazy(() => import("../../pages/borrow/OrderList"));
-// const Profile = lazy(() => import("../../pages/user/Profile"));
 const AdminDashboard = lazy(() => import("../../pages/admin/AdminDashboard"));
 const Services = lazy(() => import("../../pages/common/Services"));
 const News = lazy(() => import("../../pages/common/News"));
@@ -38,7 +31,6 @@ const Contact = lazy(() => import("../../pages/common/Contact"));
 const Forum = lazy(() => import("../../pages/common/Forum"));
 const Favorites = lazy(() => import("../../pages/common/Favorites"));
 
-// loading fallback
 const PageLoader = () => (
   <Box
     sx={{
@@ -55,11 +47,9 @@ const PageLoader = () => (
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* redirect /auth đến /auth/login nếu người dùng bằng cách nào đấy lại gõ mỗi /auth thay vì /auth/login */}
+      {/* redirect auth */}
       <Route path="/auth" element={<Navigate to="/auth/login" replace />} />
 
-      {/* auth routes - chỉ cho phép truy cập khi chưa đăng nhập */}
-      {/* nếu chưa đăng nhập thì cho truy cập đến auth */}
       <Route
         path="/auth"
         element={
@@ -73,22 +63,95 @@ export default function AppRoutes() {
         <Route path="forgot-password" element={<ForgotPasswordForm />} />
       </Route>
 
-      {/* reset-password - cho phép truy cập dù đã đăng nhập hay chưa */}
       <Route path="/auth" element={<AuthLayout />}>
         <Route path="reset-password" element={<ResetPasswordForm />} />
       </Route>
 
-      {/* layout chính cho các route  */}
+      {/* layout chính */}
       <Route element={<MainLayout />}>
-        <Route path="/" element={<HomePage />} />
+        {/* keep alive */}
+        <Route
+          path="/"
+          element={
+            <KeepAlive id="home" name="home">
+              <HomePage />
+            </KeepAlive>
+          }
+        />
         <Route
           path="/catalog"
           element={
-            <Suspense fallback={<PageLoader />}>
-              <BookList />
-            </Suspense>
+            <KeepAlive id="catalog" name="catalog">
+              <Suspense fallback={<PageLoader />}>
+                <BookList />
+              </Suspense>
+            </KeepAlive>
           }
         />
+        <Route
+          path="/news"
+          element={
+            <KeepAlive id="news" name="news">
+              <Suspense fallback={<PageLoader />}>
+                <News />
+              </Suspense>
+            </KeepAlive>
+          }
+        />
+        <Route
+          path="/forum"
+          element={
+            <KeepAlive id="forum" name="forum">
+              <Suspense fallback={<PageLoader />}>
+                <ProtectedRoute>
+                  <Forum />
+                </ProtectedRoute>
+              </Suspense>
+            </KeepAlive>
+          }
+        />
+        <Route
+          path="/services"
+          element={
+            <KeepAlive id="services" name="services">
+              <Suspense fallback={<PageLoader />}>
+                <Services />
+              </Suspense>
+            </KeepAlive>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <KeepAlive id="about" name="about">
+              <Suspense fallback={<PageLoader />}>
+                <About />
+              </Suspense>
+            </KeepAlive>
+          }
+        />
+        <Route
+          path="/contact"
+          element={
+            <KeepAlive id="contact" name="contact">
+              <Suspense fallback={<PageLoader />}>
+                <Contact />
+              </Suspense>
+            </KeepAlive>
+          }
+        />
+        <Route
+          path="/favorites"
+          element={
+            <KeepAlive id="favorites" name="favorites">
+              <Suspense fallback={<PageLoader />}>
+                <Favorites />
+              </Suspense>
+            </KeepAlive>
+          }
+        />
+
+        {/* không keep alive */}
         <Route
           path="/books/:id"
           element={
@@ -137,14 +200,6 @@ export default function AppRoutes() {
             </Suspense>
           }
         />
-        {/* <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        /> */}
         <Route
           path="/user/profile"
           element={
@@ -163,60 +218,9 @@ export default function AppRoutes() {
             </Suspense>
           }
         />
-        {/* các page khác */}
-        <Route
-          path="/services"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <Services />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/news"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <News />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/about"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <About />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/contact"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <Contact />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/forum"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <ProtectedRoute>
-                <Forum />
-              </ProtectedRoute>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/favorites"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <Favorites />
-            </Suspense>
-          }
-        />
       </Route>
 
-      {/* trang 404 */}
+      {/* 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

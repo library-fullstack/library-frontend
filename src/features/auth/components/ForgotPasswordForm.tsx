@@ -12,6 +12,8 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { parseApiError } from "../../../shared/lib/errorHandler";
 import { authApi } from "../api/auth.api";
+import { LoadingButton } from "@mui/lab";
+import { CircularProgress } from "@mui/material";
 
 export default function ForgotPasswordForm(): React.ReactElement {
   const theme = useTheme();
@@ -22,7 +24,8 @@ export default function ForgotPasswordForm(): React.ReactElement {
   const [emailSent, setEmailSent] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
-  const isEmailValid = email.includes("@") && email.includes(".");
+  const isEmailValid =
+    email.trim().length > 0 && email.includes("@") && email.includes(".");
 
   async function handleForgotPassword(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -248,11 +251,20 @@ export default function ForgotPasswordForm(): React.ReactElement {
           }}
         />
 
-        <Button
+        <LoadingButton
           fullWidth
           type="submit"
           variant="contained"
-          disabled={!email.trim() || loading}
+          loading={loading}
+          loadingIndicator={
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <CircularProgress color="inherit" size={16} thickness={4} />
+              <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
+                Đang gửi yêu cầu...
+              </Typography>
+            </Box>
+          }
+          disabled={!isEmailValid}
           sx={{
             py: 1.5,
             borderRadius: 1.5,
@@ -263,8 +275,8 @@ export default function ForgotPasswordForm(): React.ReactElement {
             "&:hover": { boxShadow: "none" },
           }}
         >
-          {loading ? "Đang gửi..." : "Gửi yêu cầu"}
-        </Button>
+          Gửi yêu cầu
+        </LoadingButton>
 
         {/* nút quay lại đăng nhập */}
         <Button
