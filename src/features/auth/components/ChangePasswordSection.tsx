@@ -8,8 +8,15 @@ import {
   Stack,
   LinearProgress,
   Typography,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
+import { Visibility, VisibilityOff, Check, Close } from "@mui/icons-material";
 import { usersApi } from "../../users/api/users.api";
+import useAuth from "../../../features/auth/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { CircularProgress } from "@mui/material";
 
 export default function ChangePasswordSection() {
   const [current, setCurrent] = useState("");
@@ -18,6 +25,21 @@ export default function ChangePasswordSection() {
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<"form" | "otp">("form");
 
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const [loading, setLoading] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error";
+  }>({ open: false, message: "", severity: "success" });
+
+  // giữ step và otp khi reload
   useEffect(() => {
     sessionStorage.setItem("changePassStep", step);
     sessionStorage.setItem("changePassOtp", otp);
@@ -33,8 +55,6 @@ export default function ChangePasswordSection() {
     if (savedOtp) setOtp(savedOtp);
   }, []);
 
-  const [resendTimer, setResendTimer] = useState(0);
-
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (resendTimer > 0) {
@@ -45,14 +65,6 @@ export default function ChangePasswordSection() {
     return () => clearInterval(interval);
   }, [resendTimer]);
 
-  const [loading, setLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: "success" | "error";
-  }>({ open: false, message: "", severity: "success" });
-
-  // tính độ mạnh mật khẩu
   const strength = (() => {
     let score = 0;
     if (newPass.length >= 8) score++;
@@ -61,6 +73,13 @@ export default function ChangePasswordSection() {
     if (/[^A-Za-z0-9]/.test(newPass)) score++;
     return score;
   })();
+
+  const passwordsMatch = confirm === newPass && confirm.length > 0;
+
+  function handleLogout(): void {
+    logout();
+    navigate("/");
+  }
 
   const handleCheckPassword = async () => {
     try {
@@ -73,7 +92,6 @@ export default function ChangePasswordSection() {
         message: "Mã OTP đã được gửi đến email của bạn.",
         severity: "success",
       });
-
       setResendTimer(60);
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
@@ -86,7 +104,7 @@ export default function ChangePasswordSection() {
   };
 
   const handleChangePassword = async () => {
-    if (newPass !== confirm) {
+    if (!passwordsMatch) {
       setSnackbar({
         open: true,
         message: "Mật khẩu xác nhận không khớp.",
@@ -104,9 +122,11 @@ export default function ChangePasswordSection() {
       });
       setSnackbar({
         open: true,
-        message: "Đổi mật khẩu thành công!",
+        message: "Đổi mật khẩu thành công! Đang đăng xuất...",
         severity: "success",
       });
+
+      // reset form
       setCurrent("");
       setNewPass("");
       setConfirm("");
@@ -115,6 +135,8 @@ export default function ChangePasswordSection() {
       setResendTimer(0);
       sessionStorage.removeItem("changePassStep");
       sessionStorage.removeItem("changePassOtp");
+
+      setTimeout(() => handleLogout(), 1200);
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       const msg =
@@ -132,7 +154,7 @@ export default function ChangePasswordSection() {
       await usersApi.sendOtp("change_password");
       setSnackbar({
         open: true,
-        message: "Đã gửi lại mã OTP. Vui lòng kiểm tra email của bạn.",
+        message: "Đã gửi lại mã OTP. Vui lòng kiểm tra email.",
         severity: "success",
       });
       setResendTimer(60);
@@ -151,24 +173,53 @@ export default function ChangePasswordSection() {
 
       {step === "form" && (
         <Stack spacing={2}>
+          {/* nhập mật khẩu hiện tại */}
           <TextField
             label="Mật khẩu hiện tại"
             type="password"
             fullWidth
             value={current}
             onChange={(e) => setCurrent(e.target.value)}
+            sx={{
+              "& .MuiOutlinedInput-root": { borderRadius: 1.5 },
+            }}
           />
+
+          {/* nhập mật khẩu mới */}
           <TextField
             label="Mật khẩu mới"
-            type="password"
             fullWidth
+            type={showNewPass ? "text" : "password"}
             value={newPass}
             onChange={(e) => setNewPass(e.target.value)}
+            placeholder="Nhập mật khẩu mới"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowNewPass((p) => !p)}
+                    size="small"
+                    edge="end"
+                  >
+                    {showNewPass ? (
+                      <Visibility fontSize="small" />
+                    ) : (
+                      <VisibilityOff fontSize="small" />
+                    )}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
             helperText="Tối thiểu 8 ký tự, gồm chữ hoa, số và ký tự đặc biệt"
             FormHelperTextProps={{
               sx: { ml: 0.5, fontSize: "0.75rem", color: "text.secondary" },
             }}
+            sx={{
+              "& .MuiOutlinedInput-root": { borderRadius: 1.5 },
+            }}
           />
+
+          {/* thanh độ mạnh của mật khẩu */}
           {newPass.length > 0 && (
             <Box sx={{ mt: 0.5, ml: 0.5 }}>
               <LinearProgress
@@ -181,18 +232,14 @@ export default function ChangePasswordSection() {
                     ? "warning"
                     : "success"
                 }
-                sx={{
-                  height: 4, // 👈 mảnh hơn
-                  borderRadius: 2,
-                  width: "calc(100% - 4px)", // 👈 canh đều với input
-                }}
+                sx={{ height: 4, borderRadius: 2, width: "calc(100% - 4px)" }}
               />
               <Typography
                 variant="caption"
                 sx={{
                   display: "block",
                   mt: 0.5,
-                  ml: 0.5, // 👈 canh thẳng với textfield
+                  ml: 0.5,
                   color:
                     strength <= 1
                       ? "error.main"
@@ -205,24 +252,95 @@ export default function ChangePasswordSection() {
               </Typography>
             </Box>
           )}
+
+          {/* xác nhận mật khẩu mới*/}
           <TextField
             label="Xác nhận mật khẩu mới"
-            type="password"
             fullWidth
+            type={showConfirm ? "text" : "password"}
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
+            placeholder="Nhập lại mật khẩu mới"
+            error={confirm.length > 0 && !passwordsMatch}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  {confirm.length > 0 && (
+                    <Box
+                      sx={{
+                        mr: 1,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {passwordsMatch ? (
+                        <Check sx={{ fontSize: 20, color: "#22c55e" }} />
+                      ) : (
+                        <Close sx={{ fontSize: 20, color: "#ef4444" }} />
+                      )}
+                    </Box>
+                  )}
+                  <IconButton
+                    onClick={() => setShowConfirm((p) => !p)}
+                    size="small"
+                    edge="end"
+                  >
+                    {showConfirm ? (
+                      <Visibility fontSize="small" />
+                    ) : (
+                      <VisibilityOff fontSize="small" />
+                    )}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 1.5,
+                ...(passwordsMatch && {
+                  "& fieldset": {
+                    borderColor: "#22c55e !important",
+                    borderWidth: "2px !important",
+                  },
+                }),
+                ...(!passwordsMatch &&
+                  confirm.length > 0 && {
+                    "& fieldset": {
+                      borderColor: "#ef4444 !important",
+                      borderWidth: "2px !important",
+                    },
+                  }),
+              },
+            }}
           />
-          <Button
+
+          <LoadingButton
             variant="contained"
             disabled={loading}
+            loading={loading}
             onClick={handleCheckPassword}
-            sx={{ textTransform: "none", fontWeight: 700 }}
+            loadingIndicator={
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <CircularProgress color="inherit" size={16} thickness={4} />
+                <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
+                  Đang gửi mã...
+                </Typography>
+              </Box>
+            }
+            sx={{
+              textTransform: "none",
+              fontWeight: 700,
+              borderRadius: 1.5,
+              py: 1.2,
+            }}
           >
             Gửi mã OTP xác nhận
-          </Button>
+          </LoadingButton>
         </Stack>
       )}
 
+      {/* chỗ nhập OTP */}
       {step === "otp" && (
         <Stack spacing={2}>
           <TextField
@@ -232,14 +350,16 @@ export default function ChangePasswordSection() {
             inputProps={{ maxLength: 6 }}
             fullWidth
           />
-          <Button
+          <LoadingButton
             variant="contained"
             disabled={loading}
+            loading={loading}
+            loadingIndicator="Đang thay đổi..."
             onClick={handleChangePassword}
             sx={{ textTransform: "none", fontWeight: 700 }}
           >
             Xác nhận đổi mật khẩu
-          </Button>
+          </LoadingButton>
           <Stack direction="row" spacing={1}>
             <Button
               variant="outlined"
@@ -263,6 +383,7 @@ export default function ChangePasswordSection() {
         </Stack>
       )}
 
+      {/* snackbar thông báo */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}

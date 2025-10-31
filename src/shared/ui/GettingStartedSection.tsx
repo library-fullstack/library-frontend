@@ -6,14 +6,33 @@ import {
   Card,
   CardContent,
   useTheme,
+  useMediaQuery,
+  Grid,
 } from "@mui/material";
-import Grid from "@mui/material/Grid";
-import { motion } from "framer-motion";
+import { motion, useAnimation, Variants } from "framer-motion";
+import { useInView } from "react-intersection-observer";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import LibraryBooksOutlinedIcon from "@mui/icons-material/LibraryBooksOutlined";
 import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
 
+const MotionBox = motion.create(Box);
+
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 50, scale: 0.94 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.5, delay: i * 0.15, ease: "easeOut" },
+  }),
+};
+
+// cái này thì không cần gọi API. cố định luôn
 const steps = [
   {
     icon: <LoginOutlinedIcon fontSize="large" />,
@@ -37,20 +56,28 @@ const steps = [
   },
 ];
 
-export default function GettingStartedSection(): React.ReactElement {
+export default function GettingStartedSection() {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const controls = useAnimation();
+  const [ref, inView] = useInView({ threshold: 0.25, triggerOnce: true });
+
+  React.useEffect(() => {
+    if (!isMobile && inView) controls.start("visible");
+  }, [inView, isMobile, controls]);
 
   return (
     <Box
+      ref={ref}
       component={motion.div}
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6 }}
+      initial={isMobile ? false : "hidden"}
+      animate={isMobile ? undefined : controls}
       sx={{
-        bgcolor: theme.palette.background.default,
+        bgcolor:
+          theme.palette.mode === "light"
+            ? "#f9fafb"
+            : theme.palette.background.default,
         py: { xs: 6, md: 10 },
-        width: "100%",
       }}
     >
       <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
@@ -63,6 +90,7 @@ export default function GettingStartedSection(): React.ReactElement {
         >
           Bắt đầu với Thư viện HBH
         </Typography>
+
         <Typography
           variant="body2"
           color="text.secondary"
@@ -73,86 +101,180 @@ export default function GettingStartedSection(): React.ReactElement {
           giản.
         </Typography>
 
-        <Grid container spacing={{ xs: 3, md: 4 }}>
-          {steps.map((step, idx) => (
-            <Grid key={idx} size={{ xs: 12, sm: 6, md: 3 }}>
-              <Card
-                component={motion.div}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 * idx, duration: 0.5 }}
-                sx={{
-                  height: "100%",
-                  textAlign: "center",
-                  borderRadius: 3,
-                  p: 1,
-                  bgcolor: theme.palette.background.paper,
-                  border: `1px solid ${theme.palette.divider}`,
-                  boxShadow:
-                    theme.palette.mode === "light"
-                      ? "0 6px 16px rgba(99,102,241,0.08)"
-                      : "0 6px 16px rgba(129,140,248,0.15)",
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    transform: "translateY(-6px)",
-                    boxShadow:
-                      theme.palette.mode === "light"
-                        ? "0 8px 24px rgba(99,102,241,0.18)"
-                        : "0 8px 24px rgba(129,140,248,0.25)",
-                  },
-                }}
-              >
-                <CardContent
+        {isMobile ? (
+          <Swiper
+            modules={[Pagination, Autoplay]}
+            pagination={{ clickable: true }}
+            spaceBetween={24}
+            slidesPerView={1}
+            autoplay={
+              isMobile
+                ? {
+                    delay: 4000,
+                    disableOnInteraction: false,
+                  }
+                : false
+            }
+          >
+            {steps.map((step, idx) => (
+              <SwiperSlide key={idx}>
+                <Card
                   sx={{
                     display: "flex",
                     flexDirection: "column",
+                    justifyContent: "space-between",
                     alignItems: "center",
-                    justifyContent: "center",
-                    gap: 2,
-                    py: { xs: 3, sm: 4 },
+                    textAlign: "center",
+                    borderRadius: 2,
+                    p: { xs: 2, sm: 2.5 },
+                    bgcolor: (t) => t.palette.background.paper,
+                    border: (t) => `1px solid ${t.palette.divider}`,
+                    boxShadow: (t) => t.shadows[1],
+                    minHeight: 250,
+                    "&:hover": !isMobile
+                      ? {
+                          transform: "translateY(-4px)",
+                          boxShadow: (t) => t.shadows[4],
+                          transition: "0.3s ease",
+                        }
+                      : {},
                   }}
                 >
-                  <Box
+                  <CardContent
                     sx={{
                       display: "flex",
+                      flexDirection: "column",
                       alignItems: "center",
                       justifyContent: "center",
-                      width: 64,
-                      height: 64,
-                      borderRadius: "50%",
-                      bgcolor:
-                        theme.palette.mode === "light"
-                          ? "rgba(99,102,241,0.08)"
-                          : "rgba(129,140,248,0.15)",
-                      color: theme.palette.primary.main,
+                      flexGrow: 1,
+                      gap: 1.5,
+                      py: { xs: 2.5, sm: 3 },
                     }}
                   >
-                    {step.icon}
-                  </Box>
-                  <Typography
-                    variant="h6"
-                    fontWeight={600}
-                    sx={{ color: theme.palette.text.primary }}
-                  >
-                    {step.title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: 56,
+                        height: 56,
+                        borderRadius: "50%",
+                        bgcolor:
+                          theme.palette.mode === "light"
+                            ? "rgba(79,70,229,0.08)"
+                            : "rgba(129,140,248,0.15)",
+                        color: theme.palette.primary.main,
+                        mb: 0.8,
+                      }}
+                    >
+                      {step.icon}
+                    </Box>
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight={600}
+                      sx={{ color: theme.palette.text.primary }}
+                    >
+                      {step.title}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        fontSize: "0.85rem",
+                        lineHeight: 1.55,
+                        maxWidth: 220,
+                      }}
+                    >
+                      {step.desc}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        ) : (
+          <Grid container spacing={{ xs: 3, md: 4 }} sx={{ width: "100%" }}>
+            {steps.map((step, idx) => (
+              <Grid key={idx} size={{ xs: 12, sm: 6, md: 3 }}>
+                <MotionBox
+                  custom={idx}
+                  variants={cardVariants}
+                  initial="hidden"
+                  animate={controls}
+                  sx={{ display: "flex", justifyContent: "center" }}
+                >
+                  <Card
                     sx={{
-                      fontSize: "0.875rem",
-                      lineHeight: 1.6,
-                      maxWidth: 240,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      textAlign: "center",
+                      borderRadius: 2,
+                      p: { xs: 2.5, sm: 3 },
+                      bgcolor: (t) => t.palette.background.paper,
+                      border: (t) => `1px solid ${t.palette.divider}`,
+                      boxShadow: (t) => t.shadows[1],
+                      transition: "all 0.25s ease",
+                      "&:hover": !isMobile
+                        ? {
+                            transform: "translateY(-4px)",
+                            boxShadow: (t) => t.shadows[4],
+                            transition: "0.3s ease",
+                          }
+                        : {},
                     }}
                   >
-                    {step.desc}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+                    <CardContent
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 2,
+                        py: { xs: 3, sm: 4 },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: 64,
+                          height: 64,
+                          borderRadius: "50%",
+                          bgcolor:
+                            theme.palette.mode === "light"
+                              ? "rgba(79,70,229,0.08)"
+                              : "rgba(129,140,248,0.15)",
+                          color: theme.palette.primary.main,
+                          mb: 1,
+                        }}
+                      >
+                        {step.icon}
+                      </Box>
+                      <Typography variant="h6" fontWeight={600}>
+                        {step.title}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{
+                          fontSize: "0.875rem",
+                          lineHeight: 1.6,
+                          maxWidth: 240,
+                        }}
+                      >
+                        {step.desc}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </MotionBox>
+              </Grid>
+            ))}
+          </Grid>
+        )}
       </Container>
     </Box>
   );

@@ -3,8 +3,8 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../navbar/Navbar";
 import MenuBar from "../menubar/MenuBar";
 import { Box, Snackbar, Alert } from "@mui/material";
+import ScrollMemory from "../../components/ScrollMemory";
 
-// main layout
 export default function MainLayout() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -30,9 +30,12 @@ export default function MainLayout() {
         position: "relative",
       }}
     >
+      <ScrollMemory />
+
       {!isAuthPage && <Navbar />}
       {!isAuthPage && <MenuBar />}
       <Outlet />
+
       {!isAuthPage && (
         <Snackbar
           open={loginSnackOpen}

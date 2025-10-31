@@ -4,8 +4,10 @@ import React, {
   useState,
   ReactNode,
   useEffect,
+  useCallback,
 } from "react";
 import axiosClient from "../shared/api/axiosClient";
+import { usersApi } from "../features/users/api/users.api";
 
 export interface User {
   id: string;
@@ -32,6 +34,7 @@ interface AuthContextValue {
   login: (identifier: string, password: string) => Promise<void>;
   logout: () => void;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -44,20 +47,50 @@ export function AuthProvider({ children }: Props): ReactNode {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
+  const isRefreshingRef = React.useRef(false);
 
-  // đọc token + user từ localStorage
+  // làm mới user
+  const refreshUser = useCallback(async () => {
+    if (isRefreshingRef.current) {
+      console.log("[AuthProvider] refreshUser skipped (already running)");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.warn("[AuthProvider] refreshUser skipped (no token)");
+      return;
+    }
+
+    try {
+      isRefreshingRef.current = true;
+      const res = await usersApi.getMe();
+      setUser(res.data);
+      localStorage.setItem("user", JSON.stringify(res.data));
+    } catch (err) {
+      console.error("[AuthProvider] refreshUser failed:", err);
+    } finally {
+      isRefreshingRef.current = false;
+    }
+  }, []);
+
+  // localstorage
   useEffect(() => {
-    console.log("[AuthProvider] Initializing...");
-
-    const initAuth = () => {
+    const initAuth = async () => {
       try {
         const storedUser = localStorage.getItem("user");
         const storedToken = localStorage.getItem("token");
 
-        if (storedToken && storedUser) {
-          const parsedUser = JSON.parse(storedUser);
-          setUser(parsedUser);
+        if (storedToken) {
           setToken(storedToken);
+          try {
+            const res = await usersApi.getMe();
+            setUser(res.data);
+            localStorage.setItem("user", JSON.stringify(res.data));
+          } catch (err) {
+            console.warn("[AuthProvider] getMe failed:", err);
+            if (storedUser) setUser(JSON.parse(storedUser));
+          }
         }
       } catch (err) {
         console.error("[AuthProvider] Error loading user/token:", err);
@@ -65,59 +98,55 @@ export function AuthProvider({ children }: Props): ReactNode {
         localStorage.removeItem("token");
       }
 
-      // ẩn loader sau khi init xong
       const loader = document.getElementById("initial-loader");
       if (loader) {
-        console.log("[AuthProvider] Hiding initial loader");
         setTimeout(() => {
           loader.classList.add("hidden");
-          setTimeout(() => {
-            loader.remove();
-            console.log("[AuthProvider] Initial loader removed");
-          }, 500);
+          setTimeout(() => loader.remove(), 500);
         }, 100);
       }
 
       setInitialized(true);
-      console.log("[AuthProvider] Initialization complete");
     };
     queueMicrotask(initAuth);
   }, []);
 
-  // đăng nhập
-  async function login(identifier: string, password: string): Promise<void> {
-    console.log("[AuthProvider] Login attempt for:", identifier);
+  // đồng bộ realtime user
+  useEffect(() => {
+    const handleFocus = () => {
+      refreshUser();
+    };
 
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [refreshUser]);
+
+  // login / logout
+  const login = useCallback(async (identifier: string, password: string) => {
     const res = await axiosClient.post<LoginResponse>("/auth/login", {
       identifier,
       password,
     });
     const { accessToken, user } = res.data;
-
-    console.log("[AuthProvider] Login successful, user:", user.full_name);
-
     setUser(user);
     setToken(accessToken);
     localStorage.setItem("token", accessToken);
     localStorage.setItem("user", JSON.stringify(user));
-  }
+  }, []);
 
-  // đăng xuất
-  function logout(): void {
+  const logout = useCallback(() => {
     setUser(null);
     setToken(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-  }
+  }, []);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, token, login, logout, setUser }),
-    [user, token]
+    () => ({ user, token, login, logout, setUser, refreshUser }),
+    [user, token, login, logout, refreshUser]
   );
 
-  if (!initialized) {
-    return null;
-  }
+  if (!initialized) return null;
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

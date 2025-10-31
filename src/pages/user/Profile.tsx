@@ -15,8 +15,6 @@ import {
   Switch,
   useTheme,
   Stack,
-  Backdrop,
-  CircularProgress,
 } from "@mui/material";
 import { LogoutOutlined, BadgeOutlined } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +22,8 @@ import useAuth from "../../features/auth/hooks/useAuth";
 import { usersApi } from "../../features/users/api/users.api";
 import AvatarCropDialog from "../../shared/ui/AvatarCropDialog";
 import ChangePasswordSection from "../../features/auth/components/ChangePasswordSection";
+import { LoadingButton } from "@mui/lab";
+import { CircularProgress } from "@mui/material";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -42,9 +42,13 @@ function TabPanel(props: TabPanelProps) {
 
 export default function Profile(): React.ReactElement {
   const navigate = useNavigate();
-  const { user, setUser, logout } = useAuth();
+  const { user, setUser, logout, refreshUser } = useAuth();
   const theme = useTheme();
   const [tab, setTab] = React.useState(0);
+
+  React.useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
 
   const chipBg = theme.palette.mode === "dark" ? "#4F46E5" : "#6366F1";
   const logoutBg = theme.palette.mode === "dark" ? "#7F1D1D" : "#FEE2E2";
@@ -81,7 +85,7 @@ export default function Profile(): React.ReactElement {
       return;
     }
 
-    // mở dialog crop, dùng object URL để preview
+    // mở dialog crop, dùng object URL preview
     const url = URL.createObjectURL(file);
     setSelectedImageUrl(url);
     setCropOpen(true);
@@ -102,6 +106,13 @@ export default function Profile(): React.ReactElement {
         localStorage.setItem("user", JSON.stringify(updated));
         return updated;
       });
+
+      await refreshUser();
+      setTimeout(() => {
+        const bc = new BroadcastChannel("user-sync");
+        bc.postMessage("REFRESH_USER");
+        bc.close();
+      }, 500);
     } catch (err) {
       console.error("[Upload Avatar Error]", err);
       const msg =
@@ -112,7 +123,6 @@ export default function Profile(): React.ReactElement {
       uploadingRef.current = false;
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
-      // thu hồi object URL
       if (selectedImageUrl) URL.revokeObjectURL(selectedImageUrl);
       setSelectedImageUrl("");
     }
@@ -515,20 +525,35 @@ export default function Profile(): React.ReactElement {
                   onChange={handleSelectAvatar}
                 />
 
-                <Button
+                <LoadingButton
                   variant="outlined"
                   fullWidth
-                  disabled={uploading}
+                  loading={uploading}
+                  loadingIndicator={
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <CircularProgress
+                        color="inherit"
+                        size={16}
+                        thickness={4}
+                      />
+                      <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
+                        Đang thay đổi...
+                      </Typography>
+                    </Box>
+                  }
                   onClick={() => inputRef.current?.click()}
                   sx={{
                     borderRadius: 2,
                     textTransform: "none",
                     fontWeight: 700,
                     fontSize: { xs: "0.875rem", sm: "0.9375rem" },
+                    "& .MuiLoadingButton-loadingIndicator": {
+                      color: theme.palette.primary.main,
+                    },
                   }}
                 >
-                  {uploading ? "Đang cập nhật ảnh..." : "Tải ảnh lên"}
-                </Button>
+                  Tải ảnh lên
+                </LoadingButton>
 
                 <Typography
                   variant="caption"
@@ -550,14 +575,6 @@ export default function Profile(): React.ReactElement {
                   borderColor: "divider",
                 }}
               >
-                <Typography
-                  variant="h6"
-                  fontWeight={800}
-                  mb={3}
-                  sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
-                >
-                  Đổi mật khẩu
-                </Typography>
                 <ChangePasswordSection />
               </Paper>
             </Box>
@@ -647,7 +664,7 @@ export default function Profile(): React.ReactElement {
           </TabPanel>
         </Paper>
       </Container>
-      {/* Dialog crop avatar */}
+      {/* cái dialog cắt avatar */}
       <AvatarCropDialog
         open={cropOpen}
         imageSrc={selectedImageUrl}
@@ -659,17 +676,6 @@ export default function Profile(): React.ReactElement {
         }}
         onConfirm={handleConfirmCropped}
       />
-      <Backdrop
-        open={uploading}
-        sx={{ color: "#fff", zIndex: (t) => t.zIndex.modal + 1 }}
-      >
-        <Stack alignItems="center" spacing={2}>
-          <CircularProgress color="inherit" />
-          <Typography sx={{ fontWeight: 600 }}>
-            Đang cập nhật ảnh đại diện...
-          </Typography>
-        </Stack>
-      </Backdrop>
     </Box>
   );
 }

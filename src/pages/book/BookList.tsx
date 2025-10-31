@@ -483,6 +483,8 @@ export default function BookList(): React.ReactElement {
         <Fab
           size="medium"
           onClick={scrollToTop}
+          tabIndex={showScrollTop ? 0 : -1}
+          aria-hidden={!showScrollTop}
           sx={{
             position: "fixed",
             bottom: { xs: 80, md: 24 },

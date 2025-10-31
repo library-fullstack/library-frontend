@@ -3,18 +3,19 @@ import {
   Box,
   Typography,
   TextField,
-  Button,
   InputAdornment,
   IconButton,
   Alert,
   Divider,
   useTheme,
 } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { parseApiError } from "../../../shared/lib/errorHandler";
+import { CircularProgress } from "@mui/material";
 
 export default function LoginForm(): React.ReactElement {
   const navigate = useNavigate();
@@ -25,7 +26,6 @@ export default function LoginForm(): React.ReactElement {
   const [password, setPassword] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);
   const [error, setError] = React.useState("");
-  // success hiển thị ở trang đích bằng Snackbar global
   const [isLoggingIn, setIsLoggingIn] = React.useState(false);
 
   // lấy cái trang lúc bấm mà bị redirect về login
@@ -36,23 +36,20 @@ export default function LoginForm(): React.ReactElement {
     e.preventDefault();
 
     if (isLoggingIn) {
-      console.log("[Login] Already logging in, skipping...");
       return;
     }
 
     setError("");
-    // reset error
     setIsLoggingIn(true);
 
     try {
-      console.log("[Login] Starting login...");
       await login(identifier, password);
-      console.log("[Login] Login successful, redirecting to:", from);
+
       sessionStorage.setItem("loginSuccessOnce", "1");
       navigate(from || "/", { replace: true, state: { loginSuccess: true } });
     } catch (err) {
-      console.error("[Login] Login failed:", err);
       setError(parseApiError(err));
+    } finally {
       setIsLoggingIn(false);
     }
   }
@@ -188,10 +185,19 @@ export default function LoginForm(): React.ReactElement {
           </Typography>
         </Box>
 
-        <Button
+        <LoadingButton
           fullWidth
           type="submit"
           variant="contained"
+          loading={isLoggingIn}
+          loadingIndicator={
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <CircularProgress color="inherit" size={16} thickness={4} />
+              <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
+                Đang đăng nhập...
+              </Typography>
+            </Box>
+          }
           disabled={isLoggingIn}
           sx={{
             py: 1.5,
@@ -205,8 +211,8 @@ export default function LoginForm(): React.ReactElement {
             },
           }}
         >
-          {isLoggingIn ? "Đang đăng nhập..." : "Đăng nhập"}
-        </Button>
+          Đăng nhập
+        </LoadingButton>
       </Box>
 
       <Divider sx={{ my: 3 }} />

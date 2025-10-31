@@ -12,8 +12,13 @@ import { motion } from "framer-motion";
 import Logo from "./icons/Logo";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
+import { Link as RouterLink, useNavigationType } from "react-router-dom";
 
 export default function Footer(): React.ReactElement {
+  const navigationType = useNavigationType();
+
+  const shouldAnimate = navigationType !== 'POP';
+
   return (
     <Box
       component="footer"
@@ -29,7 +34,7 @@ export default function Footer(): React.ReactElement {
         <Grid
           container
           spacing={{ xs: 6, md: 12 }}
-          justifyContent="center"
+          justifyContent={{ xs: "flex-start", md: "center" }}
           alignItems="flex-start"
           sx={{
             maxWidth: 1100,
@@ -64,8 +69,16 @@ export default function Footer(): React.ReactElement {
           </Grid>
 
           {/* cột thứ 2 */}
-          <Grid size={{ xs: 12, md: 4 }} sx={{ maxWidth: 250 }}>
-            <Stack spacing={1.5}>
+          <Grid
+            size={{ xs: 12, md: 4 }}
+            sx={{
+              maxWidth: 250,
+              textAlign: { xs: "left", md: "left" },
+              display: "flex",
+              justifyContent: { xs: "flex-start", md: "flex-start" },
+            }}
+          >
+            <Stack spacing={1.5} alignItems="flex-start">
               <Typography
                 variant="subtitle1"
                 fontWeight={700}
@@ -78,12 +91,13 @@ export default function Footer(): React.ReactElement {
                 { label: "Trang chủ", href: "/" },
                 { label: "Giới thiệu", href: "/about" },
                 { label: "Tin tức & Sự kiện", href: "/news" },
-                { label: "Tra cứu sách", href: "/book" },
+                { label: "Tra cứu sách", href: "/catalog" },
                 { label: "Diễn đàn sinh viên", href: "/forum" },
               ].map((item, i) => (
                 <Link
                   key={i}
-                  href={item.href}
+                  component={RouterLink}
+                  to={item.href}
                   underline="none"
                   sx={{
                     color: (theme) => theme.palette.text.secondary,
@@ -139,12 +153,11 @@ export default function Footer(): React.ReactElement {
             </Stack>
           </Grid>
         </Grid>
-        {/* phần bản quyền*/}
-        <Divider sx={{ my: { xs: 3, md: 4 } }} />{" "}
+        <Divider sx={{ my: { xs: 3, md: 4 } }} />
         <Typography
           component={motion.p}
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={shouldAnimate ? { opacity: 0, y: 10 } : false}
+          whileInView={shouldAnimate ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
           variant="body2"
           textAlign="center"

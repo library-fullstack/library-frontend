@@ -3,7 +3,7 @@ import AppRoutes from "./app/routes/AppRoutes";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from "@vercel/analytics/react";
 
-const App: React.FC = () => {
+export default function App() {
   return (
     <>
       <AppRoutes />
@@ -11,6 +11,4 @@ const App: React.FC = () => {
       <Analytics />
     </>
   );
-};
-
-export default App;
+}

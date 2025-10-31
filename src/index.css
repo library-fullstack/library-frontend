@@ -1,0 +1,32 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+  transition: background-color 0.3s ease;
+  scroll-behavior: auto !important;
+}
+
+html,
+body {
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  transition: background-color 0.3s ease;
+}
+
+body.disable-animations * {
+  animation: none !important;
+  transition: none !important;
+}
+
+#root {
+  min-height: 100vh;
+  background-color: inherit;
+  transition: background-color 0.3s ease;
+}
