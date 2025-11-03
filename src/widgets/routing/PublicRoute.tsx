@@ -11,8 +11,6 @@ export default function PublicRoute({
 }: PublicRouteProps): React.ReactElement {
   const { user, token } = useAuth();
   const location = useLocation();
-  // Không còn suppression: điều hướng ngay khi đã đăng nhập
-
   // nếu đã đăng nhập, redirect về home
   if (token && user) {
     const from = (location.state as { from?: { pathname: string } } | null)
@@ -24,6 +22,6 @@ export default function PublicRoute({
     return <Navigate to={from || "/"} replace />;
   }
 
-  console.log("[PublicRoute] Access granted (not logged in)");
+  console.log("[PublicRoute] Truy cập được chấp nhận (chưa đăng nhập)");
   return children;
 }

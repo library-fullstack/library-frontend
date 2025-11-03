@@ -69,23 +69,6 @@ const HeroSection: React.FC = () => {
           Xem thêm
         </Button>
       </Box>
-
-      {/* nội dung bên phải ( hình ) banner */}
-      <Box
-        component="img"
-        src="/assets/hero-books.png"
-        alt="Books"
-        sx={{
-          width: { xs: "80%", md: "45vw" },
-          height: { xs: "auto", md: "100%" },
-          objectFit: "cover",
-          borderRadius: 0,
-          position: { xs: "static", md: "absolute" },
-          right: 0,
-          top: 0,
-          bottom: 0,
-        }}
-      />
     </Box>
   );
 };

@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://hbh.libsys.me/sitemap.xml
+
+Disallow: /admin
+Disallow: /private
+Disallow: /api
+Disallow: /.git
+
+Crawl-delay: 1
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: AhrefsBot
+Allow: /

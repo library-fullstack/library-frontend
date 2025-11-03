@@ -146,7 +146,11 @@ export default function BookCatalogFilters({
               Bộ lọc
             </Typography>
           </Box>
-          <IconButton onClick={onMobileClose} size="small">
+          <IconButton
+            onClick={onMobileClose}
+            size="small"
+            aria-label="Đóng bộ lọc"
+          >
             <Close />
           </IconButton>
         </Box>
@@ -174,6 +178,7 @@ export default function BookCatalogFilters({
                     onClick={() => {
                       setSearchValue("");
                     }}
+                    aria-label="Xóa tìm kiếm"
                   >
                     <Close fontSize="small" />
                   </IconButton>

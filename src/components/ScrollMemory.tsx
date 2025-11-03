@@ -15,7 +15,7 @@ export default function ScrollMemory() {
 
     restored.current = false;
 
-    // reset scroll khi PUSH hoặc FORWARD
+    // reset scroll
     if (navigationType !== "POP") {
       window.scrollTo(0, 0);
       restored.current = true;

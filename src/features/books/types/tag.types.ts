@@ -1,8 +1,3 @@
-/**
- * Tag entity types
- * Định nghĩa các interface cho Tag entity từ API
- */
-
 export interface Tag {
   id: number;
   name: string;

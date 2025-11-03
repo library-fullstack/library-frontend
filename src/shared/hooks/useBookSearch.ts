@@ -52,7 +52,7 @@ export function useBookSearch(): UseBookSearchReturn {
       setErrorMessage(null);
     } catch (error) {
       if (error instanceof Error && error.name !== "AbortError") {
-        console.error("Search error:", error);
+        console.error("Lỗi khi tìm kiếm:", error);
         setResults([]);
         setIsOpen(true);
 

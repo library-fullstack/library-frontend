@@ -195,7 +195,11 @@ export default function Profile(): React.ReactElement {
                         sx={{ fontSize: 18, position: "relative", top: "-2px" }}
                       />
                       <Typography sx={{ fontWeight: 700, color: "white" }}>
-                        {user?.student_id || "Chưa có MSSV"}
+                        {user?.role === "ADMIN" || user?.role === "LIBRARIAN"
+                          ? user.role === "ADMIN"
+                            ? "Quản trị viên"
+                            : "Thủ thư"
+                          : user?.student_id || "Chưa có MSSV"}
                       </Typography>
                     </Box>
                   }
@@ -338,61 +342,113 @@ export default function Profile(): React.ReactElement {
                 </Box>
               </Paper>
 
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 3,
-                  borderRadius: 2,
-                  border: "1px solid",
-                  borderColor: "divider",
-                }}
-              >
-                <Typography variant="h6" fontWeight={800} mb={2}>
-                  Thông tin học vấn
-                </Typography>
-                <Box sx={{ display: "grid", gap: 1.5 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Lớp:{" "}
-                    <Typography
-                      component="span"
-                      color="text.primary"
-                      fontWeight={700}
-                    >
-                      {user?.class_name || "Chưa cập nhật"}
-                    </Typography>
+              {user?.role !== "ADMIN" && user?.role !== "LIBRARIAN" && (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    borderRadius: 2,
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <Typography variant="h6" fontWeight={800} mb={2}>
+                    Thông tin học vấn
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Khoa:{" "}
-                    <Typography
-                      component="span"
-                      color="text.primary"
-                      fontWeight={700}
-                    >
-                      {user?.faculty || "Chưa cập nhật"}
+                  <Box sx={{ display: "grid", gap: 1.5 }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Lớp:{" "}
+                      <Typography
+                        component="span"
+                        color="text.primary"
+                        fontWeight={700}
+                      >
+                        {user?.class_name || "Chưa cập nhật"}
+                      </Typography>
                     </Typography>
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Chuyên ngành:{" "}
-                    <Typography
-                      component="span"
-                      color="text.primary"
-                      fontWeight={700}
-                    >
-                      {user?.major || "Chưa cập nhật"}
+                    <Typography variant="body2" color="text.secondary">
+                      Khoa:{" "}
+                      <Typography
+                        component="span"
+                        color="text.primary"
+                        fontWeight={700}
+                      >
+                        {user?.faculty || "Chưa cập nhật"}
+                      </Typography>
                     </Typography>
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Năm nhập học:{" "}
-                    <Typography
-                      component="span"
-                      color="text.primary"
-                      fontWeight={700}
-                    >
-                      {user?.admission_year || "Chưa cập nhật"}
+                    <Typography variant="body2" color="text.secondary">
+                      Chuyên ngành:{" "}
+                      <Typography
+                        component="span"
+                        color="text.primary"
+                        fontWeight={700}
+                      >
+                        {user?.major || "Chưa cập nhật"}
+                      </Typography>
                     </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Năm nhập học:{" "}
+                      <Typography
+                        component="span"
+                        color="text.primary"
+                        fontWeight={700}
+                      >
+                        {user?.admission_year || "Chưa cập nhật"}
+                      </Typography>
+                    </Typography>
+                  </Box>
+                </Paper>
+              )}
+
+              {(user?.role === "ADMIN" || user?.role === "LIBRARIAN") && (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    borderRadius: 2,
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <Typography variant="h6" fontWeight={800} mb={2}>
+                    Thông tin công việc
                   </Typography>
-                </Box>
-              </Paper>
+                  <Box sx={{ display: "grid", gap: 1.5 }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Chức vụ:{" "}
+                      <Typography
+                        component="span"
+                        color="text.primary"
+                        fontWeight={700}
+                      >
+                        {user.role === "ADMIN"
+                          ? "Quản trị viên hệ thống"
+                          : "Thủ thư"}
+                      </Typography>
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Phòng ban:{" "}
+                      <Typography
+                        component="span"
+                        color="text.primary"
+                        fontWeight={700}
+                      >
+                        Phòng Quản lý Thư viện
+                      </Typography>
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Quyền truy cập:{" "}
+                      <Typography
+                        component="span"
+                        color="text.primary"
+                        fontWeight={700}
+                      >
+                        {user.role === "ADMIN" ? "Toàn quyền" : "Quản lý sách"}
+                      </Typography>
+                    </Typography>
+                  </Box>
+                </Paper>
+              )}
             </Box>
 
             {/* bảng thống kê */}

@@ -27,7 +27,15 @@ import { useThemeMode } from "../../shared/hooks/useThemeMode";
 import { useBookSearch } from "../../shared/hooks/useBookSearch";
 import SearchResultsPanel from "./SearchResultsPanel";
 import Logo from "../../shared/ui/icons/Logo";
-import { Heart, ShoppingBag, UserRound, Moon, Sun, X } from "lucide-react";
+import {
+  Heart,
+  ShoppingBag,
+  UserRound,
+  Moon,
+  Sun,
+  X,
+  LayoutDashboard,
+} from "lucide-react";
 
 export default function Navbar(): React.ReactElement {
   const navigate = useNavigate();
@@ -102,13 +110,20 @@ export default function Navbar(): React.ReactElement {
     setDrawerOpen(false);
   };
 
+  const handleAdminClick = () => {
+    navigate("/admin/dashboard");
+    setDrawerOpen(false);
+  };
+
+  const isAdminOrLibrarian =
+    user && (user.role === "ADMIN" || user.role === "LIBRARIAN");
+
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && query.trim().length >= 2) {
       e.preventDefault();
       handleSearch();
       setIsOpen(false);
       const searchQuery = query.trim();
-      // reset input
       setQuery("");
       navigate(`/catalog?search=${encodeURIComponent(searchQuery)}`);
     }
@@ -124,7 +139,6 @@ export default function Navbar(): React.ReactElement {
     if (query.trim().length >= 2) {
       setIsOpen(false);
       const searchQuery = query.trim();
-      // reset input
       setQuery("");
       navigate(`/catalog?search=${encodeURIComponent(searchQuery)}`);
     }
@@ -242,7 +256,11 @@ export default function Navbar(): React.ReactElement {
                 endAdornment: (
                   <InputAdornment position="end">
                     {query ? (
-                      <IconButton size="small" onClick={handleClearSearch}>
+                      <IconButton
+                        size="small"
+                        onClick={handleClearSearch}
+                        aria-label="Xóa tìm kiếm"
+                      >
                         <X size={18} />
                       </IconButton>
                     ) : (
@@ -275,6 +293,7 @@ export default function Navbar(): React.ReactElement {
             {isMobile ? (
               <IconButton
                 onClick={() => setDrawerOpen(true)}
+                aria-label="Mở menu"
                 disableRipple
                 disableFocusRipple
                 sx={{
@@ -310,6 +329,11 @@ export default function Navbar(): React.ReactElement {
               >
                 <IconButton
                   onClick={toggleTheme}
+                  aria-label={
+                    mode === "light"
+                      ? "Chuyển sang chế độ tối"
+                      : "Chuyển sang chế độ sáng"
+                  }
                   sx={{
                     color: "text.primary",
                     transition: "all 0.2s ease",
@@ -327,7 +351,15 @@ export default function Navbar(): React.ReactElement {
                 <Box sx={{ width: "1px", height: 18, bgcolor: "divider" }} />
 
                 {[
-                  // giỏ mượn, yêu thích, tài khoản
+                  ...(isAdminOrLibrarian
+                    ? [
+                        {
+                          label: "Quản trị",
+                          icon: <LayoutDashboard size={19} />,
+                          onClick: handleAdminClick,
+                        },
+                      ]
+                    : []),
                   {
                     label: "Giỏ mượn",
                     icon: <ShoppingBag size={19} />,
@@ -338,10 +370,8 @@ export default function Navbar(): React.ReactElement {
                     icon: <Heart size={20} />,
                     onClick: handleFavouriteClick,
                   },
-                  // avatar và tải khoản
                   {
                     label: user ? user.full_name : "Tài khoản",
-                    // icon: <UserRound size={20} />,
                     icon: user ? (
                       <Avatar
                         src={user.avatar_url || ""}
@@ -401,7 +431,7 @@ export default function Navbar(): React.ReactElement {
                         {item.label}
                       </Typography>
                     </Box>
-                    {i < 2 && (
+                    {i < (isAdminOrLibrarian ? 3 : 2) && (
                       <Box
                         sx={{ width: "1px", height: 18, bgcolor: "divider" }}
                       />
@@ -481,6 +511,25 @@ export default function Navbar(): React.ReactElement {
                 />
               </ListItemButton>
             </ListItem>
+
+            {isAdminOrLibrarian && (
+              <ListItem disablePadding>
+                <ListItemButton onClick={handleAdminClick}>
+                  <ListItemIcon sx={{ color: "text.primary", minWidth: 40 }}>
+                    <LayoutDashboard size={19} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Trang quản trị"
+                    sx={{
+                      "& .MuiTypography-root": {
+                        color: "text.primary",
+                        fontSize: "0.95rem",
+                      },
+                    }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            )}
 
             <ListItem disablePadding>
               <ListItemButton onClick={handleCartClick}>

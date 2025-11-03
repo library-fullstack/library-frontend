@@ -29,12 +29,25 @@ export interface LoginResponse {
   token: string;
 }
 
+export interface RegisterResponse {
+  message: string;
+  require_info_confirm: boolean;
+  token?: string;
+  user_preview?: {
+    student_id: string;
+    full_name: string;
+    email: string;
+    phone: string;
+  };
+}
+
 // gọi api auth
 export const authApi = {
   login: (data: LoginRequest) =>
     axiosClient.post<LoginResponse>("/auth/login", data),
 
-  register: (data: RegisterRequest) => axiosClient.post("/auth/register", data),
+  register: (data: RegisterRequest) =>
+    axiosClient.post<RegisterResponse>("/auth/register", data),
 
   forgotPassword: (data: ForgotPasswordRequest) =>
     axiosClient.post("/auth/forgot-password", data),

@@ -19,6 +19,8 @@ import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import LibraryBooksOutlinedIcon from "@mui/icons-material/LibraryBooksOutlined";
 import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
+import { useEventTheme } from "../hooks/useEventTheme";
+import "../../styles/eventTheme.css";
 
 const MotionBox = motion.create(Box);
 
@@ -61,6 +63,7 @@ export default function GettingStartedSection() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const controls = useAnimation();
   const [ref, inView] = useInView({ threshold: 0.25, triggerOnce: true });
+  const eventClass = useEventTheme();
 
   React.useEffect(() => {
     if (!isMobile && inView) controls.start("visible");
@@ -72,6 +75,7 @@ export default function GettingStartedSection() {
       component={motion.div}
       initial={isMobile ? false : "hidden"}
       animate={isMobile ? undefined : controls}
+      className={`event-banner ${eventClass}`}
       sx={{
         bgcolor:
           theme.palette.mode === "light"

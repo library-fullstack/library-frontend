@@ -1,7 +1,6 @@
-/**
- * Book entity types
- * Định nghĩa các interface cho Book entity từ API
- */
+import type { Author } from "./author.types";
+import type { BookImage } from "./book-image.types";
+import type { BookCopy } from "./book-copy.types";
 
 export interface Book {
   id: number;
@@ -18,12 +17,19 @@ export interface Book {
   thumbnail_url?: string | null;
 
   // Relations (từ API)
-  author_names?: string | null; // backend trả chuỗi GROUP_CONCAT, không phải mảng
+  author_names?: string | null;
   category_name?: string | null;
   publisher_name?: string | null;
+  publisher_city?: string | null;
+  publisher_country?: string | null;
   tags?: string[] | null;
   copies_count?: number | null;
   available_count?: number | null;
+
+  // Extended relations
+  authors?: Author[];
+  images?: BookImage[];
+  copies?: BookCopy[];
 
   // Timestamps
   created_at?: string;
@@ -49,3 +55,12 @@ export interface BookInputFull extends BookInput {
 
 export type BookFormat = "PAPERBACK" | "HARDCOVER" | "OTHER";
 export type BookStatus = "ACTIVE" | "INACTIVE" | "DRAFT";
+
+/**
+ * Extended book detail with additional information
+ * Used for book detail page
+ */
+export interface BookDetail extends Book {
+  // Metadata có thể cần thêm từ API nếu có
+  author_count?: number;
+}

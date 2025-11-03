@@ -15,17 +15,14 @@ export default function Forum(): React.ReactElement {
 
   const handleCreatePost = React.useCallback(() => {
     // chưa làm phần tạo bài viết khi bấm vào tạo bài viết
-    // TODO: Implement create post functionality
   }, []);
 
   const handleSearch = React.useCallback((_query: string) => {
     // chưa làm xử lí logic khi tìm kiếm
-    // TODO: Implement search functionality
   }, []);
 
   const handlePostClick = React.useCallback((_postId: number) => {
     // chưa làm phần xem bài viết khi bấm vào bài viết
-    // TODO: Implement post detail navigation
   }, []);
 
   // filter các bài viết với danh mục

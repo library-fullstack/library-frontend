@@ -1,8 +1,3 @@
-/**
- * Publisher entity types
- * Định nghĩa các interface cho Publisher entity từ API
- */
-
 export interface Publisher {
   id: number;
   name: string;

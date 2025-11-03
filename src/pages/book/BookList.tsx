@@ -17,6 +17,7 @@ import { TuneOutlined, Home, KeyboardArrowUp } from "@mui/icons-material";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import BookCatalogFilters from "../../widgets/book-catalog-filters/BookCatalogFilters";
 import BookCatalogGrid from "../../widgets/book-catalog-grid/BookCatalogGrid";
+import SeoMetaTags from "../../shared/components/SeoMetaTags";
 import { booksApi, categoriesApi } from "../../features/books/api";
 import type {
   Book,
@@ -42,7 +43,6 @@ export default function BookList(): React.ReactElement {
   const [page, setPage] = useState(1);
 
   // số lượng sách mỗi lần tải là 12
-  // đặt ngoài state để tránh render lại
   const BOOKS_PER_BATCH = 12;
 
   // filter state
@@ -55,15 +55,39 @@ export default function BookList(): React.ReactElement {
   });
   const [sortBy, setSortBy] = useState<SortOption>("newest-published");
 
+  // theo dõi loại tìm kiếm (author, category, publisher)
+  const [searchType, setSearchType] = useState<
+    "author" | "category" | "publisher" | null
+  >(null);
+
   // search keyword từ URL params
   useEffect(() => {
     const searchQuery = searchParams.get("search");
-    if (searchQuery) {
-      setFilters((prev) => ({
-        ...prev,
-        keyword: searchQuery,
-      }));
+    const categoryQuery = searchParams.get("category");
+    const searchTypeQuery = searchParams.get("type");
+
+    setFilters((prev) => ({
+      ...prev,
+      keyword: searchQuery || "",
+      category_id: categoryQuery ? Number(categoryQuery) : null,
+    }));
+
+    // xác định loại tìm kiếm dựa vào URL params
+    let newSearchType: "author" | "category" | "publisher" | null = null;
+    if (categoryQuery) {
+      newSearchType = "category";
+    } else if (searchTypeQuery) {
+      const normalizedType = (
+        searchTypeQuery as "author" | "category" | "publisher"
+      ).toLowerCase() as "author" | "category" | "publisher";
+      newSearchType = normalizedType;
+    } else if (searchQuery) {
+      newSearchType = "author";
+    } else {
+      newSearchType = null;
     }
+
+    setSearchType(newSearchType);
   }, [searchParams]);
 
   // drawer mobile
@@ -323,6 +347,11 @@ export default function BookList(): React.ReactElement {
         pb: { xs: 4, sm: 5, md: 6 },
       }}
     >
+      <SeoMetaTags
+        title="Danh sách sách - Thư viện trực tuyến HBH"
+        description="Duyệt và tìm kiếm hàng nghìn cuốn sách trong thư viện. Lọc theo danh mục, tác giả, nhà xuất bản."
+        keywords="danh sách sách, tìm sách, lọc sách, thư viện"
+      />
       <Container
         maxWidth="xl"
         sx={{
@@ -394,11 +423,19 @@ export default function BookList(): React.ReactElement {
                 minWidth: 0,
               }}
             >
-              {filters.keyword
-                ? `Kết quả tìm kiếm: "${filters.keyword}"`
+              {filters.category_id
+                ? `Tìm kiếm theo thể loại: "${
+                    categories.find((c) => c.id === filters.category_id)
+                      ?.name || "Không tìm thấy"
+                  }"`
+                : filters.keyword && searchType === "author"
+                ? `Tìm kiếm theo tác giả: "${filters.keyword}"`
+                : filters.keyword && searchType === "publisher"
+                ? `Tìm kiếm theo nhà xuất bản: "${filters.keyword}"`
+                : filters.keyword
+                ? `Tìm kiếm: "${filters.keyword}"`
                 : "Thư viện sách"}
-            </Typography>
-
+            </Typography>{" "}
             {isMobile && (
               <IconButton
                 onClick={() => setMobileFiltersOpen(true)}
@@ -422,7 +459,7 @@ export default function BookList(): React.ReactElement {
               fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
             }}
           >
-            {filters.keyword
+            {filters.keyword || filters.category_id
               ? `Hiển thị ${books.length} kết quả`
               : "Khám phá kho tàng tri thức với hàng nghìn đầu sách phong phú"}
           </Typography>

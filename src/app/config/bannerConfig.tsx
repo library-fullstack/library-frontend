@@ -1,4 +1,21 @@
-export const bannerConfig = {
+export interface BannerConfig {
+  id: string;
+  image: string;
+  overlay: "dark" | "light";
+  title: string;
+  subtitle: string;
+  titleColor: string;
+  subtitleColor: string;
+  buttonColor: string;
+  buttonText: string;
+  eventType?: string;
+  startDate?: string;
+  endDate?: string;
+  isActive?: boolean;
+}
+
+export const defaultBannerConfig: BannerConfig = {
+  id: "default",
   image: "/assets/img/banner.webp",
   overlay: "dark",
   title: "Xin chào các bạn",
@@ -8,3 +25,35 @@ export const bannerConfig = {
   buttonColor: "#ED553B",
   buttonText: "Xem thêm",
 };
+
+export const getActiveBannerConfig = async (): Promise<BannerConfig> => {
+  try {
+    const apiBaseUrl =
+      import.meta.env.VITE_API_URL ?? "http://localhost:4000/api/v1";
+    const response = await fetch(`${apiBaseUrl}/banners/active`);
+
+    if (!response.ok) {
+      console.warn(
+        "Không thể lấy banner đang hoạt động từ API, đang sử dụng mặc định",
+        response.status
+      );
+      return defaultBannerConfig;
+    }
+
+    const data = await response.json();
+    console.log("Banner từ API:", data);
+
+    const banner = data.data || data;
+
+    if (banner && banner.image) {
+      return banner as BannerConfig;
+    }
+
+    return defaultBannerConfig;
+  } catch (err) {
+    console.error("Không thể tải cấu hình banner:", err);
+    return defaultBannerConfig;
+  }
+};
+
+export const bannerConfig = defaultBannerConfig;

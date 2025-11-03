@@ -149,6 +149,10 @@ export default function ChangePasswordSection() {
   };
 
   const handleResendOtp = async () => {
+    if (resendTimer > 0) {
+      return;
+    }
+
     try {
       setLoading(true);
       await usersApi.sendOtp("change_password");

@@ -1,8 +1,30 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function parseApiError(error: any): string {
-  // xử lí cái cấu trúc lỗi của axios
-  const message = error?.response?.data?.message || error?.message || "";
+export function parseApiError(error: unknown): string {
+  if (
+    error &&
+    typeof error === "object" &&
+    "response" in error &&
+    "message" in error
+  ) {
+    const axiosError = error as {
+      response?: { data?: { message?: string } };
+      message?: string;
+    };
+    const message =
+      axiosError.response?.data?.message || axiosError.message || "";
+    return processErrorMessage(message);
+  }
 
+  if (error instanceof Error) {
+    return processErrorMessage(error.message);
+  }
+
+  return "Có lỗi xảy ra. Vui lòng thử lại sau.";
+}
+
+function processErrorMessage(message: string): string {
+  if (!message) return "Có lỗi xảy ra. Vui lòng thử lại sau.";
+
+  // xử lí cái cấu trúc lỗi của axios
   // kiểm tra lỗi liên quan đến SQL
   // thay vì in lỗi của SQL ra thì thay vào đó là trả về lỗi do hệ thống
   if (
@@ -96,11 +118,11 @@ export function validatePassword(password: string): PasswordValidation {
 
   // tính số lượng điều kiện mật khẩu thoả mãn
   const validCount = [
-    hasMinLength, // độ dài
-    hasUpperCase, // có viết hoa
-    hasNumber, // có số
-    hasSpecialChar, // có kí tự đặc biệt
-  ].filter(Boolean).length; // đúng thì được giữ lại bằng hàm filter
+    hasMinLength,
+    hasUpperCase,
+    hasNumber,
+    hasSpecialChar,
+  ].filter(Boolean).length;
 
   // nếu hợp lệ cả 3 yêu cầu thì cho nó valid
   const isValid = hasMinLength && hasUpperCase && hasNumber && hasSpecialChar;

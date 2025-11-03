@@ -30,3 +30,144 @@ body.disable-animations * {
   background-color: inherit;
   transition: background-color 0.3s ease;
 }
+
+.admin-layout-container {
+  overflow: hidden;
+}
+
+.admin-layout-container .MuiDrawer-paper {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overflow-y: hidden !important;
+}
+
+.admin-layout-container .MuiDrawer-paper::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-layout-container main {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.admin-layout-container main::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-layout-container .MuiTableContainer-root {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.admin-layout-container .MuiTableContainer-root::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-layout-container .MuiTableContainer-root::-webkit-scrollbar-track {
+  display: none;
+}
+
+.admin-layout-container .MuiTableContainer-root::-webkit-scrollbar-thumb {
+  display: none;
+}
+
+.admin-layout-container .MuiTableCell-root {
+  padding: 12px 8px !important;
+  font-size: 0.875rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-layout-container .MuiTableCell-head {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.admin-layout-container.zoom-compact .MuiTableCell-root {
+  padding: 8px 6px !important;
+  font-size: 0.75rem;
+}
+
+.admin-layout-container.zoom-compact .MuiTableCell-head {
+  font-size: 0.75rem;
+}
+
+.admin-layout-container.zoom-compact .MuiIconButton-root {
+  width: 32px !important;
+  height: 32px !important;
+  padding: 4px !important;
+}
+
+.admin-layout-container.zoom-compact .MuiChip-root {
+  height: 24px !important;
+  font-size: 0.7rem !important;
+}
+
+.admin-layout-container.zoom-compact .MuiButton-root {
+  padding: 6px 12px !important;
+  font-size: 0.75rem !important;
+}
+
+.admin-layout-container.zoom-compact .MuiTextField-root {
+  font-size: 0.75rem !important;
+}
+
+.admin-layout-container.zoom-compact .MuiTextField-root input,
+.admin-layout-container.zoom-compact .MuiTextField-root textarea {
+  font-size: 0.75rem !important;
+}
+
+.admin-layout-container .MuiList-root {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overflow-y: hidden !important;
+}
+
+.admin-layout-container .MuiList-root::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-layout-container [style*="overflow-x: auto"],
+.admin-layout-container [style*="overflowX: auto"],
+.admin-layout-container [style*="overflow-y: auto"],
+.admin-layout-container [style*="overflowY: auto"],
+.admin-layout-container [style*="overflow: auto"] {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.admin-layout-container [style*="overflow-x: auto"]::-webkit-scrollbar,
+.admin-layout-container [style*="overflowX: auto"]::-webkit-scrollbar,
+.admin-layout-container [style*="overflow-y: auto"]::-webkit-scrollbar,
+.admin-layout-container [style*="overflowY: auto"]::-webkit-scrollbar,
+.admin-layout-container [style*="overflow: auto"]::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-layout-container [class*="MuiPaper"] {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.admin-layout-container [class*="MuiPaper"]::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-layout-container * {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.admin-layout-container *::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+.admin-layout-container *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-layout-container *::-webkit-scrollbar-thumb {
+  background: transparent;
+}

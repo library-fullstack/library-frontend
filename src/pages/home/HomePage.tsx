@@ -7,6 +7,7 @@ import CommunitySection from "../../shared/ui/CommunitySection";
 import GettingStartedSection from "../../shared/ui/GettingStartedSection";
 import NewsAndEventsSection from "../../shared/ui/NewsAndEventsSection";
 import Footer from "../../shared/ui/Footer";
+import SeoMetaTags from "../../shared/components/SeoMetaTags";
 
 // homepage
 const HomePage: React.FC = React.memo(() => {
@@ -18,6 +19,11 @@ const HomePage: React.FC = React.memo(() => {
         minHeight: "100vh",
       }}
     >
+      <SeoMetaTags
+        title="Thư viện trực tuyến HBH - Mượn sách online dễ dàng"
+        description="Khám phá hàng nghìn cuốn sách học tập, nghiên cứu và giải trí. Đặt mượn sách online nhanh chóng, miễn phí."
+        keywords="thư viện, sách, mượn sách online, đọc sách, học tập, HBH"
+      />
       {/* cái banner đầu trang */}
       <HeroBanner />
       {/* cái danh sách sách tự chạy  */}

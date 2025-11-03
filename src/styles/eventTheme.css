@@ -1,0 +1,476 @@
+:root {
+  --animation-duration-short: 2s;
+  --animation-duration-medium: 4s;
+  --animation-duration-long: 8s;
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.event-banner {
+  position: relative;
+  overflow: hidden;
+  background-attachment: scroll;
+  transition: all 0.8s var(--ease-smooth);
+}
+
+.event-banner::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* theme mặc định */
+.banner-title {
+  position: relative;
+  z-index: 1;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  transition: all 0.6s var(--ease-smooth);
+}
+
+/* halloween theme */
+.event-halloween {
+  --primary-color: #ed553b;
+  --accent-color: #1a1a1a;
+  --secondary-color: #ffa500;
+}
+
+.event-halloween .banner-title {
+  color: var(--primary-color);
+  animation: float-subtle 4s var(--ease-smooth) infinite;
+  text-shadow: 0 0 20px rgba(237, 85, 59, 0.3), 0 0 40px rgba(255, 165, 0, 0.15);
+}
+
+.event-halloween::before {
+  background: transparent;
+}
+
+/* christmas theme */
+.event-christmas {
+  --primary-color: #065f46;
+  --accent-color: #059669;
+  --secondary-color: #ffffff;
+}
+
+.event-christmas .banner-title {
+  color: #fff;
+  animation: gentle-lift 5s var(--ease-smooth) infinite;
+  text-shadow: 0 0 25px rgba(211, 196, 196, 0.7),
+    0 0 50px rgba(156, 182, 194, 0.4), 0 0 15px rgba(255, 255, 255, 0.3),
+    0 2px 6px rgba(0, 0, 0, 0.4);
+  letter-spacing: 1.5px;
+  font-weight: 700;
+}
+
+.event-christmas .banner-title::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(220, 38, 38, 0.2) 0%,
+    rgba(255, 200, 100, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  filter: blur(12px);
+  animation: christmas-glow 4s var(--ease-smooth) infinite;
+  z-index: -1;
+}
+
+.event-christmas::before {
+  background: transparent;
+}
+
+/* theme Tết 1  */
+.event-tet {
+  --primary-color: #dc2626;
+  --accent-color: #f59e0b;
+  --secondary-color: #ffd700;
+}
+
+.event-tet .banner-title {
+  color: var(--primary-color);
+  animation: festive-pulse 3s var(--ease-bounce) infinite;
+  text-shadow: 0 0 15px rgba(220, 38, 38, 0.5), 0 0 30px rgba(245, 158, 11, 0.3);
+}
+
+.event-tet::before {
+  background: transparent;
+}
+
+/* theme Tết 2  */
+.event-newyear {
+  --primary-color: #f59e0b;
+  --accent-color: #3b82f6;
+  --secondary-color: #ec4899;
+}
+
+.event-newyear .banner-title {
+  background: linear-gradient(135deg, #f59e0b, #3b82f6, #ec4899, #f59e0b);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 7s ease infinite;
+  text-shadow: none;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
+}
+
+.event-newyear::before {
+  background: transparent;
+}
+
+/* valentine theme */
+.event-valentine {
+  --primary-color: #ec4899;
+  --accent-color: #f472b6;
+  --secondary-color: #fce7f3;
+}
+
+.event-valentine .banner-title {
+  color: var(--primary-color);
+  animation: heartbeat 2.2s var(--ease-smooth) infinite;
+  text-shadow: 0 0 15px rgba(236, 72, 153, 0.35),
+    0 0 30px rgba(244, 114, 182, 0.15);
+}
+
+.event-valentine::before {
+  background: transparent;
+}
+
+/* theme mùa hè */
+.event-summer {
+  --primary-color: #f59e0b;
+  --accent-color: #fbbf24;
+  --secondary-color: #fef3c7;
+}
+
+.event-summer .banner-title {
+  color: var(--primary-color);
+  animation: radiant-glow 3s var(--ease-smooth) infinite;
+  text-shadow: 0 0 15px rgba(245, 158, 11, 0.4),
+    0 0 30px rgba(251, 191, 36, 0.2);
+}
+
+.event-summer::before {
+  background: transparent;
+}
+
+/* theme quay lại trường học  */
+.event-backtoschool {
+  --primary-color: #3b82f6;
+  --accent-color: #60a5fa;
+  --secondary-color: #dbeafe;
+}
+
+.event-backtoschool .banner-title {
+  color: var(--primary-color);
+  animation: energetic-bounce 3.5s var(--ease-bounce) infinite;
+  text-shadow: 0 0 12px rgba(59, 130, 246, 0.4),
+    0 0 25px rgba(96, 165, 250, 0.15);
+}
+
+.event-backtoschool::before {
+  background: transparent;
+}
+
+/* theme mùa xuân */
+.event-spring {
+  --primary-color: #10b981;
+  --accent-color: #34d399;
+  --secondary-color: #d1fae5;
+}
+
+.event-spring .banner-title {
+  color: var(--primary-color);
+  animation: bloom 4.5s var(--ease-smooth) infinite;
+  text-shadow: 0 0 12px rgba(16, 185, 129, 0.35),
+    0 0 25px rgba(52, 211, 153, 0.15);
+}
+
+.event-spring::before {
+  background: transparent;
+}
+
+/* hiệu ứng */
+@keyframes float-subtle {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes gentle-lift {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes shimmer-glow {
+  0%,
+  100% {
+    opacity: 0.4;
+    filter: blur(8px) brightness(0.95);
+  }
+  50% {
+    opacity: 0.8;
+    filter: blur(10px) brightness(1.1);
+  }
+}
+
+@keyframes christmas-glow {
+  0%,
+  100% {
+    opacity: 0.7;
+    filter: blur(12px);
+  }
+  50% {
+    opacity: 1;
+    filter: blur(14px) brightness(1.1);
+  }
+}
+
+@keyframes soft-glow {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.08);
+  }
+}
+
+@keyframes ambient-pulse {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.05);
+  }
+}
+
+@keyframes festive-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    text-shadow: 0 0 15px rgba(220, 38, 38, 0.5),
+      0 0 30px rgba(245, 158, 11, 0.3);
+  }
+  50% {
+    transform: scale(1.04);
+    text-shadow: 0 0 20px rgba(220, 38, 38, 0.7),
+      0 0 40px rgba(245, 158, 11, 0.4);
+  }
+}
+
+@keyframes festive-glow {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.1);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes shimmer-wave {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes heartbeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.05);
+  }
+  50% {
+    transform: scale(1);
+  }
+  75% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes gentle-drift {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.05);
+  }
+}
+
+@keyframes radiant-glow {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.12);
+  }
+}
+
+@keyframes sun-rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes energetic-bounce {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes academic-glow {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.07);
+  }
+}
+
+@keyframes bloom {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.03);
+    filter: brightness(1.08);
+  }
+}
+
+@keyframes nature-sway {
+  0%,
+  100% {
+    filter: brightness(1) hue-rotate(0deg);
+  }
+  50% {
+    filter: brightness(1.08) hue-rotate(3deg);
+  }
+}
+
+@keyframes electric-flash {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes electric-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.6));
+  }
+}
+
+@media (max-width: 640px) {
+  .banner-title {
+    font-size: 1.5rem;
+    letter-spacing: 0.3px;
+  }
+
+  .event-halloween .banner-title,
+  .event-backtoschool .banner-title {
+    animation-duration: 3.5s !important;
+  }
+
+  .event-newyear .banner-title,
+  .event-blackfriday .banner-title {
+    animation-duration: 5s !important;
+  }
+
+  .event-valentine .banner-title {
+    animation-duration: 1.8s !important;
+  }
+
+  .event-halloween::before,
+  .event-summer::before {
+    animation-duration: 4s !important;
+  }
+
+  .event-tet::before,
+  .event-spring::before {
+    animation-duration: 3s !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .banner-title {
+    font-size: 1.25rem;
+  }
+
+  .event-banner .banner-title {
+    will-change: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .event-banner::before,
+  .banner-title,
+  .event-halloween::before,
+  .event-tet::before,
+  .event-newyear::before,
+  .event-valentine::before,
+  .event-summer::before,
+  .event-spring::before,
+  .event-blackfriday::before {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .event-newyear .banner-title,
+  .event-blackfriday .banner-title {
+    background-position: center !important;
+  }
+}
