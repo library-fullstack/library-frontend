@@ -17,6 +17,8 @@ import "swiper/css/pagination";
 import { motion } from "framer-motion";
 import { Link as RouterLink, useNavigationType } from "react-router-dom";
 import { Pagination, Autoplay } from "swiper/modules";
+import { useEventTheme } from "../hooks/useEventTheme";
+import "../../styles/eventTheme.css";
 
 // cần gọi api lấy post ra
 // TODO
@@ -54,6 +56,7 @@ export default function CommunitySection(): React.ReactElement {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigationType = useNavigationType();
   const shouldAnimate = !isMobile && navigationType !== "POP";
+  const eventClass = useEventTheme();
 
   const MobileContent = (
     <Container maxWidth="md" sx={{ px: { xs: 2, sm: 3 } }}>
@@ -392,6 +395,7 @@ export default function CommunitySection(): React.ReactElement {
   if (isMobile) {
     return (
       <Box
+        className={`event-banner ${eventClass}`}
         sx={{
           bgcolor: (t) => t.palette.background.default,
           py: { xs: 6, md: 10 },
@@ -406,6 +410,7 @@ export default function CommunitySection(): React.ReactElement {
   return (
     <Box
       component={motion.div}
+      className={`event-banner ${eventClass}`}
       initial={shouldAnimate ? { opacity: 0, y: 40 } : false}
       whileInView={shouldAnimate ? { opacity: 1, y: 0 } : {}}
       viewport={{ once: true }}

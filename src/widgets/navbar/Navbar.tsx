@@ -27,7 +27,15 @@ import { useThemeMode } from "../../shared/hooks/useThemeMode";
 import { useBookSearch } from "../../shared/hooks/useBookSearch";
 import SearchResultsPanel from "./SearchResultsPanel";
 import Logo from "../../shared/ui/icons/Logo";
-import { Heart, ShoppingBag, UserRound, Moon, Sun, X } from "lucide-react";
+import {
+  Heart,
+  ShoppingBag,
+  UserRound,
+  Moon,
+  Sun,
+  X,
+  LayoutDashboard,
+} from "lucide-react";
 
 export default function Navbar(): React.ReactElement {
   const navigate = useNavigate();
@@ -101,6 +109,14 @@ export default function Navbar(): React.ReactElement {
     else navigate("/auth/login");
     setDrawerOpen(false);
   };
+
+  const handleAdminClick = () => {
+    navigate("/admin/dashboard");
+    setDrawerOpen(false);
+  };
+
+  const isAdminOrLibrarian =
+    user && (user.role === "ADMIN" || user.role === "LIBRARIAN");
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && query.trim().length >= 2) {
@@ -327,7 +343,15 @@ export default function Navbar(): React.ReactElement {
                 <Box sx={{ width: "1px", height: 18, bgcolor: "divider" }} />
 
                 {[
-                  // giỏ mượn, yêu thích, tài khoản
+                  ...(isAdminOrLibrarian
+                    ? [
+                        {
+                          label: "Quản trị",
+                          icon: <LayoutDashboard size={19} />,
+                          onClick: handleAdminClick,
+                        },
+                      ]
+                    : []),
                   {
                     label: "Giỏ mượn",
                     icon: <ShoppingBag size={19} />,
@@ -338,10 +362,8 @@ export default function Navbar(): React.ReactElement {
                     icon: <Heart size={20} />,
                     onClick: handleFavouriteClick,
                   },
-                  // avatar và tải khoản
                   {
                     label: user ? user.full_name : "Tài khoản",
-                    // icon: <UserRound size={20} />,
                     icon: user ? (
                       <Avatar
                         src={user.avatar_url || ""}
@@ -401,7 +423,7 @@ export default function Navbar(): React.ReactElement {
                         {item.label}
                       </Typography>
                     </Box>
-                    {i < 2 && (
+                    {i < (isAdminOrLibrarian ? 3 : 2) && (
                       <Box
                         sx={{ width: "1px", height: 18, bgcolor: "divider" }}
                       />
@@ -481,6 +503,25 @@ export default function Navbar(): React.ReactElement {
                 />
               </ListItemButton>
             </ListItem>
+
+            {isAdminOrLibrarian && (
+              <ListItem disablePadding>
+                <ListItemButton onClick={handleAdminClick}>
+                  <ListItemIcon sx={{ color: "text.primary", minWidth: 40 }}>
+                    <LayoutDashboard size={19} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Trang quản trị"
+                    sx={{
+                      "& .MuiTypography-root": {
+                        color: "text.primary",
+                        fontSize: "0.95rem",
+                      },
+                    }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            )}
 
             <ListItem disablePadding>
               <ListItemButton onClick={handleCartClick}>

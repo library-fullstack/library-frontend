@@ -3,6 +3,7 @@ import { lazy, Suspense } from "react";
 import { Box, CircularProgress } from "@mui/material";
 import { KeepAlive } from "react-activation";
 import MainLayout from "../../widgets/layout/MainLayout";
+import AdminLayout from "../../widgets/layout/AdminLayout";
 
 // critical
 import HomePage from "../../pages/home/HomePage";
@@ -15,6 +16,7 @@ import Profile from "../../pages/user/Profile";
 import ProtectedRoute from "../../widgets/routing/ProtectedRoute";
 import PublicRoute from "../../widgets/routing/PublicRoute";
 import NotFound from "../../shared/ui/NotFound";
+import ConfirmStudentInfo from "../../features/auth/components/ConfirmStudentInfo";
 
 // lazy
 const BookList = lazy(() => import("../../pages/book/BookList"));
@@ -24,6 +26,15 @@ const Checkout = lazy(() => import("../../pages/borrow/Checkout"));
 const BorrowList = lazy(() => import("../../pages/borrow/BorrowList"));
 const OrderList = lazy(() => import("../../pages/borrow/OrderList"));
 const AdminDashboard = lazy(() => import("../../pages/admin/AdminDashboard"));
+const BooksManagement = lazy(() => import("../../pages/admin/BooksManagement"));
+const UsersManagement = lazy(() => import("../../pages/admin/UsersManagement"));
+const BorrowManagement = lazy(
+  () => import("../../pages/admin/BorrowManagement")
+);
+const AnalyticsPage = lazy(() => import("../../pages/admin/AnalyticsPage"));
+const BannerManagement = lazy(
+  () => import("../../pages/admin/BannerManagement")
+);
 const Services = lazy(() => import("../../pages/common/Services"));
 const News = lazy(() => import("../../pages/common/News"));
 const About = lazy(() => import("../../pages/common/About"));
@@ -208,17 +219,72 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         />
+      </Route>
+
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute roles={["ADMIN", "LIBRARIAN"]}>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="/admin/dashboard" replace />} />
         <Route
-          path="/admin"
+          path="dashboard"
           element={
             <Suspense fallback={<PageLoader />}>
-              <ProtectedRoute roles={["ADMIN", "LIBRARIAN"]}>
-                <AdminDashboard />
-              </ProtectedRoute>
+              <AdminDashboard />
             </Suspense>
           }
         />
+        <Route
+          path="books"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <BooksManagement />
+            </Suspense>
+          }
+        />
+        <Route
+          path="users"
+          element={
+            <ProtectedRoute roles={["ADMIN"]}>
+              <Suspense fallback={<PageLoader />}>
+                <UsersManagement />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="borrows"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <BorrowManagement />
+            </Suspense>
+          }
+        />
+        <Route
+          path="analytics"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AnalyticsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="banners"
+          element={
+            <ProtectedRoute roles={["ADMIN"]}>
+              <Suspense fallback={<PageLoader />}>
+                <BannerManagement />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
       </Route>
+
+      <Route path="/auth/confirm-info" element={<ConfirmStudentInfo />} />
 
       {/* 404 */}
       <Route path="*" element={<NotFound />} />

@@ -65,9 +65,9 @@ export default function LoginForm(): React.ReactElement {
         sx={{
           fontWeight: 700,
           textAlign: "center",
-          mb: 1,
+          mb: 0.75,
           color: theme.palette.text.primary,
-          fontSize: { xs: 28, sm: 32 },
+          fontSize: { xs: 26, sm: 30 },
         }}
       >
         Đăng nhập
@@ -76,8 +76,8 @@ export default function LoginForm(): React.ReactElement {
         textAlign="center"
         sx={{
           color: theme.palette.text.secondary,
-          mb: 4,
-          fontSize: 15,
+          mb: 3,
+          fontSize: 14,
         }}
       >
         Truy cập hệ thống thư viện HBH
@@ -88,10 +88,10 @@ export default function LoginForm(): React.ReactElement {
           severity="error"
           variant="filled"
           sx={{
-            mb: 3,
+            mb: 2.5,
             borderRadius: 1.5,
-            fontSize: 14,
-            py: 1.2,
+            fontSize: 13,
+            py: 1,
             alignItems: "center",
           }}
         >
@@ -102,8 +102,8 @@ export default function LoginForm(): React.ReactElement {
       <Box component="form" onSubmit={handleLogin}>
         <Typography
           sx={{
-            fontSize: 14,
-            mb: 1,
+            fontSize: 13,
+            mb: 0.75,
             fontWeight: 600,
             color: theme.palette.text.primary,
           }}
@@ -112,22 +112,26 @@ export default function LoginForm(): React.ReactElement {
         </Typography>
         <TextField
           fullWidth
-          placeholder="VD: 231032xxx24"
+          size="medium"
+          placeholder="231032xxx24 / abc@abc.com"
           value={identifier}
           onChange={(e) => setIdentifier(e.target.value)}
           required
           sx={{
-            mb: 3,
+            mb: 2.5,
             "& .MuiOutlinedInput-root": {
               borderRadius: 1.5,
+            },
+            "& .MuiInputBase-input": {
+              fontSize: "0.95rem",
             },
           }}
         />
 
         <Typography
           sx={{
-            fontSize: 14,
-            mb: 1,
+            fontSize: 13,
+            mb: 0.75,
             fontWeight: 600,
             color: theme.palette.text.primary,
           }}
@@ -136,6 +140,7 @@ export default function LoginForm(): React.ReactElement {
         </Typography>
         <TextField
           fullWidth
+          size="medium"
           type={showPassword ? "text" : "password"}
           placeholder="Nhập mật khẩu"
           value={password}
@@ -159,19 +164,22 @@ export default function LoginForm(): React.ReactElement {
             ),
           }}
           sx={{
-            mb: 2,
+            mb: 1.75,
             "& .MuiOutlinedInput-root": {
               borderRadius: 1.5,
+            },
+            "& .MuiInputBase-input": {
+              fontSize: "0.95rem",
             },
           }}
         />
 
-        <Box textAlign="right" mb={3}>
+        <Box textAlign="right" mb={2.5}>
           <Typography
             onClick={() => navigate("/auth/forgot-password")}
             sx={{
               color: theme.palette.primary.main,
-              fontSize: 14,
+              fontSize: 13,
               cursor: "pointer",
               fontWeight: 500,
               "&:hover": {
@@ -192,8 +200,8 @@ export default function LoginForm(): React.ReactElement {
           loading={isLoggingIn}
           loadingIndicator={
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <CircularProgress color="inherit" size={16} thickness={4} />
-              <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
+              <CircularProgress color="inherit" size={18} thickness={4} />
+              <Typography sx={{ fontSize: 15, fontWeight: 500 }}>
                 Đang đăng nhập...
               </Typography>
             </Box>
@@ -215,8 +223,8 @@ export default function LoginForm(): React.ReactElement {
         </LoadingButton>
       </Box>
 
-      <Divider sx={{ my: 3 }} />
-      <Typography textAlign="center" sx={{ fontSize: 14 }}>
+      <Divider sx={{ my: 2.5 }} />
+      <Typography textAlign="center" sx={{ fontSize: 13 }}>
         Chưa có tài khoản?{" "}
         <Box
           component="span"

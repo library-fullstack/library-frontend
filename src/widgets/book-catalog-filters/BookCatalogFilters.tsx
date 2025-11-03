@@ -79,6 +79,7 @@ export default function BookCatalogFilters({
   const [lastFilterKeyword, setLastFilterKeyword] = useState(filters.keyword);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
 
+  // Sync search input with filters when keyword changes from URL params
   if (lastFilterKeyword !== filters.keyword) {
     setLastFilterKeyword(filters.keyword);
     setSearchValue(filters.keyword || "");
@@ -94,11 +95,13 @@ export default function BookCatalogFilters({
 
   const debouncedSearch = useDebounce(searchValue, 500);
 
+  // Update filters when debounced search changes
   useEffect(() => {
     if (debouncedSearch !== filters.keyword) {
       onFiltersChange({ ...filters, keyword: debouncedSearch });
     }
-  }, [debouncedSearch, filters, onFiltersChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
 
   const handleFilterChange = (
     key: keyof BookFilters,

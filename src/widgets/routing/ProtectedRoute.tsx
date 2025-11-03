@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import useAuth from "../../features/auth/hooks/useAuth";
+import Unauthorized from "../../shared/ui/Unauthorized";
 
 interface ProtectedRouteProps {
   children: React.ReactElement;
@@ -33,7 +34,8 @@ export default function ProtectedRoute({
       "Required:",
       roles
     );
-    return <Navigate to="/" replace />;
+    // Hiển thị trang unauthorized thay vì redirect về home
+    return <Unauthorized />;
   }
 
   console.log("[ProtectedRoute] Access granted for:", location.pathname);

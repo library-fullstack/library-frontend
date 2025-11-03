@@ -18,6 +18,8 @@ import { Autoplay, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import { Link as RouterLink } from "react-router-dom";
+import { useEventTheme } from "../hooks/useEventTheme";
+import "../../styles/eventTheme.css";
 
 const MotionBox = motion.create(Box);
 
@@ -79,6 +81,7 @@ function NewsAndEventsSection() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const controls = useAnimation();
   const [ref, inView] = useInView({ threshold: 0.25, triggerOnce: true });
+  const eventClass = useEventTheme();
 
   React.useEffect(() => {
     if (!isMobile && inView) controls.start("visible");
@@ -175,6 +178,7 @@ function NewsAndEventsSection() {
       ref={ref}
       component={motion.div}
       initial={isMobile ? false : "hidden"}
+      className={`event-banner ${eventClass}`}
       animate={isMobile ? undefined : controls}
       sx={{
         bgcolor: theme.palette.background.default,

@@ -113,12 +113,32 @@ export function AuthProvider({ children }: Props): ReactNode {
 
   // đồng bộ realtime user
   useEffect(() => {
+    let focusTimeout: ReturnType<typeof setTimeout>;
+
     const handleFocus = () => {
-      refreshUser();
+      // Debounce focus event để tránh gọi API liên tục
+      clearTimeout(focusTimeout);
+      focusTimeout = setTimeout(() => {
+        refreshUser();
+      }, 500);
     };
 
     window.addEventListener("focus", handleFocus);
-    return () => window.removeEventListener("focus", handleFocus);
+
+    // Listen for user updates via BroadcastChannel (e.g., avatar change)
+    const bc = new BroadcastChannel("user-sync");
+    bc.onmessage = (event) => {
+      if (event.data === "REFRESH_USER") {
+        console.log("[AuthProvider] Received REFRESH_USER broadcast");
+        refreshUser();
+      }
+    };
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      clearTimeout(focusTimeout);
+      bc.close();
+    };
   }, [refreshUser]);
 
   // login / logout

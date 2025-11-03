@@ -13,12 +13,8 @@ import {
   IconButton,
   useMediaQuery,
 } from "@mui/material";
-import {
-  ShoppingCart,
-  InfoOutlined,
-  ArrowBack,
-  ArrowForward,
-} from "@mui/icons-material";
+import { InfoOutlined, ArrowBack, ArrowForward } from "@mui/icons-material";
+import { ShoppingBag } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -28,6 +24,9 @@ import { useNavigate, useNavigationType } from "react-router-dom";
 import { booksApi } from "../../features/books/api";
 import type { Book } from "../../features/books/types";
 import { motion } from "framer-motion";
+import { useEventTheme } from "../../shared/hooks/useEventTheme";
+import EventFallingElements from "../../shared/components/EventFallingElements";
+import "../../styles/eventTheme.css";
 
 const MotionCard = motion.create(Card);
 
@@ -39,6 +38,7 @@ const FeaturedBooks: React.FC = () => {
   const navigate = useNavigate();
   const navigationType = useNavigationType();
   const isMobile = useMediaQuery("(max-width:900px)");
+  const eventClass = useEventTheme();
 
   const isBackNavigation = navigationType === "POP";
 
@@ -223,7 +223,7 @@ const FeaturedBooks: React.FC = () => {
             </Button>
             <Button
               variant="contained"
-              startIcon={<ShoppingCart />}
+              startIcon={<ShoppingBag />}
               sx={{
                 textTransform: "none",
                 fontWeight: 600,
@@ -264,141 +264,144 @@ const FeaturedBooks: React.FC = () => {
   };
 
   return (
-    <Box
-      sx={{
-        py: 8,
-        bgcolor: "background.default",
-        position: "relative",
-        width: "100%",
-        overflow: "hidden",
-      }}
-    >
-      <Container
-        maxWidth="lg"
+    <>
+      <EventFallingElements eventType={eventClass.replace("event-", "")} />
+      <Box
+        className={`event-banner ${eventClass}`}
         sx={{
+          py: 8,
+          bgcolor: "background.default",
           position: "relative",
-          px: { xs: 2, sm: 3 },
-          "&:hover .nav-btn": { opacity: 1 },
-          ".nav-btn": { opacity: 0, transition: "opacity 0.3s ease" },
+          width: "100%",
+          overflow: "hidden",
         }}
       >
-        <Typography
-          variant="h4"
-          fontWeight={700}
-          textAlign="center"
-          mb={1}
-          color="text.primary"
-        >
-          Sách nổi bật
-        </Typography>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          textAlign="center"
-          mb={5}
-        >
-          Khám phá những đầu sách được yêu thích nhất
-        </Typography>
-
-        {/* Nút điều hướng */}
-        <IconButton
-          ref={prevRef}
-          className="nav-btn"
+        <Container
+          maxWidth="lg"
           sx={{
-            position: "absolute",
-            top: "50%",
-            display: { xs: "none", sm: "flex" },
-            transform: "translateY(-50%)",
-            left: { xs: 4, sm: -40 },
-            zIndex: 15,
-            width: 46,
-            height: 46,
-            borderRadius: "50%",
-            backgroundColor: theme.palette.action.hover,
-            color: theme.palette.text.primary,
-            backdropFilter: "blur(8px)",
-            boxShadow: theme.shadows[2],
+            position: "relative",
+            px: { xs: 2, sm: 3 },
+            "&:hover .nav-btn": { opacity: 1 },
+            ".nav-btn": { opacity: 0, transition: "opacity 0.3s ease" },
           }}
         >
-          <ArrowBack fontSize="small" />
-        </IconButton>
+          <Typography
+            variant="h4"
+            fontWeight={700}
+            textAlign="center"
+            mb={1}
+            color="text.primary"
+          >
+            Sách nổi bật
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            textAlign="center"
+            mb={5}
+          >
+            Khám phá những đầu sách được yêu thích nhất
+          </Typography>
 
-        <IconButton
-          ref={nextRef}
-          className="nav-btn"
-          sx={{
-            position: "absolute",
-            top: "50%",
-            display: { xs: "none", sm: "flex" },
-            transform: "translateY(-50%)",
-            right: { xs: 4, sm: -40 },
-            zIndex: 15,
-            width: 46,
-            height: 46,
-            borderRadius: "50%",
-            backgroundColor: theme.palette.action.hover,
-            color: theme.palette.text.primary,
-            backdropFilter: "blur(8px)",
-            boxShadow: theme.shadows[2],
-          }}
-        >
-          <ArrowForward fontSize="small" />
-        </IconButton>
+          {/* Nút điều hướng */}
+          <IconButton
+            ref={prevRef}
+            className="nav-btn"
+            sx={{
+              position: "absolute",
+              top: "50%",
+              display: { xs: "none", sm: "flex" },
+              transform: "translateY(-50%)",
+              left: { xs: 4, sm: -40 },
+              zIndex: 15,
+              width: 46,
+              height: 46,
+              borderRadius: "50%",
+              backgroundColor: theme.palette.action.hover,
+              color: theme.palette.text.primary,
+              backdropFilter: "blur(8px)",
+              boxShadow: theme.shadows[2],
+            }}
+          >
+            <ArrowBack fontSize="small" />
+          </IconButton>
 
-        {/* Swiper */}
-        <Swiper
-          modules={[Navigation, Pagination, Autoplay]}
-          onBeforeInit={(swiper) => {
-            if (typeof swiper.params.navigation !== "boolean") {
-              const nav = swiper.params.navigation;
-              if (nav) {
-                nav.prevEl = prevRef.current;
-                nav.nextEl = nextRef.current;
+          <IconButton
+            ref={nextRef}
+            className="nav-btn"
+            sx={{
+              position: "absolute",
+              top: "50%",
+              display: { xs: "none", sm: "flex" },
+              transform: "translateY(-50%)",
+              right: { xs: 4, sm: -40 },
+              zIndex: 15,
+              width: 46,
+              height: 46,
+              borderRadius: "50%",
+              backgroundColor: theme.palette.action.hover,
+              color: theme.palette.text.primary,
+              backdropFilter: "blur(8px)",
+              boxShadow: theme.shadows[2],
+            }}
+          >
+            <ArrowForward fontSize="small" />
+          </IconButton>
+
+          {/* Swiper */}
+          <Swiper
+            modules={[Navigation, Pagination, Autoplay]}
+            onBeforeInit={(swiper) => {
+              if (typeof swiper.params.navigation !== "boolean") {
+                const nav = swiper.params.navigation;
+                if (nav) {
+                  nav.prevEl = prevRef.current;
+                  nav.nextEl = nextRef.current;
+                }
               }
-            }
-          }}
-          navigation={{
-            prevEl: prevRef.current,
-            nextEl: nextRef.current,
-          }}
-          pagination={{ clickable: true }}
-          autoplay={{
-            delay: isMobile ? 6000 : 4000,
-            disableOnInteraction: false,
-          }}
-          spaceBetween={24}
-          slidesPerView={4.5}
-          breakpoints={{
-            0: { slidesPerView: 1.2, spaceBetween: 12 },
-            640: { slidesPerView: 2.2, spaceBetween: 16 },
-            900: { slidesPerView: 3.3, spaceBetween: 20 },
-            1280: { slidesPerView: 4.5, spaceBetween: 24 },
-          }}
-          style={{ paddingBottom: 50 }}
-        >
-          {books.map((book) => (
-            <SwiperSlide key={book.id}>{CardItem(book)}</SwiperSlide>
-          ))}
-        </Swiper>
+            }}
+            navigation={{
+              prevEl: prevRef.current,
+              nextEl: nextRef.current,
+            }}
+            pagination={{ clickable: true }}
+            autoplay={{
+              delay: isMobile ? 6000 : 4000,
+              disableOnInteraction: false,
+            }}
+            spaceBetween={24}
+            slidesPerView={4.5}
+            breakpoints={{
+              0: { slidesPerView: 1.2, spaceBetween: 12 },
+              640: { slidesPerView: 2.2, spaceBetween: 16 },
+              900: { slidesPerView: 3.3, spaceBetween: 20 },
+              1280: { slidesPerView: 4.5, spaceBetween: 24 },
+            }}
+            style={{ paddingBottom: 50 }}
+          >
+            {books.map((book) => (
+              <SwiperSlide key={book.id}>{CardItem(book)}</SwiperSlide>
+            ))}
+          </Swiper>
 
-        {/* làm mờ card cuối */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            right: 0,
-            width: { xs: 0, sm: 80, md: 160 },
-            height: "100%",
-            background: (theme) =>
-              `linear-gradient(to right, transparent 0%, ${theme.palette.background.default} 100%)`,
-            pointerEvents: "none",
-            zIndex: 10,
-            display: { xs: "none", sm: "block" },
-          }}
-        />
+          {/* làm mờ card cuối */}
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              width: { xs: 0, sm: 80, md: 160 },
+              height: "100%",
+              background: (theme) =>
+                `linear-gradient(to right, transparent 0%, ${theme.palette.background.default} 100%)`,
+              pointerEvents: "none",
+              zIndex: 10,
+              display: { xs: "none", sm: "block" },
+            }}
+          />
 
-        {/* Pagination custom */}
-        <style>{`
+          {/* Pagination custom */}
+          <style>{`
           .swiper-pagination {
             position: relative;
             margin-top: 28px;
@@ -420,8 +423,9 @@ const FeaturedBooks: React.FC = () => {
             background: ${theme.palette.primary.main};
           }
         `}</style>
-      </Container>
-    </Box>
+        </Container>
+      </Box>
+    </>
   );
 };
 

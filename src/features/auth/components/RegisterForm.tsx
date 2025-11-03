@@ -22,6 +22,18 @@ import { CircularProgress } from "@mui/material";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+type RegisterResponse = {
+  message: string;
+  require_info_confirm?: boolean;
+  token?: string;
+  user_preview?: {
+    student_id: string;
+    full_name: string;
+    email: string;
+    phone: string;
+  };
+};
+
 export default function RegisterForm(): React.ReactElement {
   const navigate = useNavigate();
   const theme = useTheme();
@@ -60,13 +72,30 @@ export default function RegisterForm(): React.ReactElement {
 
     try {
       setIsRegistering(true);
-      await axios.post(`${API_URL}/auth/register`, {
-        student_id: studentId,
-        password,
-      });
+      const res = await axios.post<RegisterResponse>(
+        `${API_URL}/auth/register`,
+        {
+          student_id: studentId,
+          password,
+        }
+      );
 
-      setSuccess("Đăng ký thành công! Đang chuyển đến trang đăng nhập...");
-      navigate("/auth/login");
+      if (res.data.require_info_confirm) {
+        localStorage.setItem(
+          "pending_student_info",
+          JSON.stringify({
+            token: res.data.token,
+            user_preview: res.data.user_preview,
+            createdAt: Date.now(),
+          })
+        );
+        navigate("/auth/confirm-info");
+      } else {
+        setSuccess("Đăng ký thành công! Đang chuyển đến trang đăng nhập...");
+        setTimeout(() => {
+          navigate("/auth/login");
+        }, 2000);
+      }
     } catch (err) {
       setError(parseApiError(err));
     } finally {
@@ -85,9 +114,9 @@ export default function RegisterForm(): React.ReactElement {
         sx={{
           fontWeight: 700,
           textAlign: "center",
-          mb: 1,
+          mb: 0.75,
           color: theme.palette.text.primary,
-          fontSize: { xs: 28, sm: 32 },
+          fontSize: { xs: 26, sm: 30 },
         }}
       >
         Đăng ký tài khoản
@@ -96,8 +125,8 @@ export default function RegisterForm(): React.ReactElement {
         textAlign="center"
         sx={{
           color: theme.palette.text.secondary,
-          mb: 4,
-          fontSize: 15,
+          mb: 3,
+          fontSize: 14,
         }}
       >
         Tham gia hệ thống thư viện HBH
@@ -108,10 +137,10 @@ export default function RegisterForm(): React.ReactElement {
           severity="error"
           variant="filled"
           sx={{
-            mb: 3,
+            mb: 2.5,
             borderRadius: 1.5,
-            fontSize: 14,
-            py: 1.2,
+            fontSize: 13,
+            py: 1,
             alignItems: "center",
           }}
         >
@@ -123,10 +152,10 @@ export default function RegisterForm(): React.ReactElement {
           severity="success"
           variant="filled"
           sx={{
-            mb: 3,
+            mb: 2.5,
             borderRadius: 1.5,
-            fontSize: 14,
-            py: 1.2,
+            fontSize: 13,
+            py: 1,
             alignItems: "center",
           }}
         >
@@ -137,8 +166,8 @@ export default function RegisterForm(): React.ReactElement {
       <Box component="form" onSubmit={handleRegister}>
         <Typography
           sx={{
-            fontSize: 14,
-            mb: 1,
+            fontSize: 13,
+            mb: 0.75,
             fontWeight: 600,
             color: theme.palette.text.primary,
           }}
@@ -147,22 +176,26 @@ export default function RegisterForm(): React.ReactElement {
         </Typography>
         <TextField
           fullWidth
+          size="medium"
           placeholder="VD: 231032xxx24"
           value={studentId}
           onChange={(e) => setStudentId(e.target.value)}
           required
           sx={{
-            mb: 3,
+            mb: 2.5,
             "& .MuiOutlinedInput-root": {
               borderRadius: 1.5,
+            },
+            "& .MuiInputBase-input": {
+              fontSize: "0.95rem",
             },
           }}
         />
 
         <Typography
           sx={{
-            fontSize: 14,
-            mb: 1,
+            fontSize: 13,
+            mb: 0.75,
             fontWeight: 600,
             color: theme.palette.text.primary,
           }}
@@ -171,6 +204,7 @@ export default function RegisterForm(): React.ReactElement {
         </Typography>
         <TextField
           fullWidth
+          size="medium"
           type={showPassword ? "text" : "password"}
           placeholder="Nhập mật khẩu"
           value={password}
@@ -196,20 +230,24 @@ export default function RegisterForm(): React.ReactElement {
             ),
           }}
           sx={{
-            mb: 1.5,
+            mb: 1.25,
             "& .MuiOutlinedInput-root": {
               borderRadius: 1.5,
+            },
+            "& .MuiInputBase-input": {
+              fontSize: "0.95rem",
             },
           }}
         />
 
-        {/* thanh đo độ mạnh của mật khẩu */}
         {password.length > 0 && (
-          <Box sx={{ mb: 2 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+          <Box sx={{ mb: 1.75 }}>
+            <Box
+              sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.75 }}
+            >
               <Box
                 sx={{
-                  height: 4,
+                  height: 3,
                   flex: 1,
                   borderRadius: 2,
                   bgcolor: theme.palette.divider,
@@ -237,7 +275,7 @@ export default function RegisterForm(): React.ReactElement {
               </Box>
               <Typography
                 sx={{
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: 600,
                   color:
                     passwordValidation.strength === "strong"
@@ -255,12 +293,12 @@ export default function RegisterForm(): React.ReactElement {
               </Typography>
             </Box>
 
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Box
                   sx={{
-                    width: 18,
-                    height: 18,
+                    width: 16,
+                    height: 16,
                     borderRadius: "50%",
                     display: "flex",
                     alignItems: "center",
@@ -274,12 +312,12 @@ export default function RegisterForm(): React.ReactElement {
                   }}
                 >
                   {passwordValidation.hasMinLength && (
-                    <Check sx={{ fontSize: 14, color: "#FFFFFF" }} />
+                    <Check sx={{ fontSize: 12, color: "#FFFFFF" }} />
                   )}
                 </Box>
                 <Typography
                   sx={{
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: passwordValidation.hasMinLength ? 500 : 400,
                     color: passwordValidation.hasMinLength
                       ? theme.palette.text.primary
@@ -290,11 +328,11 @@ export default function RegisterForm(): React.ReactElement {
                   Tối thiểu 6 ký tự
                 </Typography>
               </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Box
                   sx={{
-                    width: 18,
-                    height: 18,
+                    width: 16,
+                    height: 16,
                     borderRadius: "50%",
                     display: "flex",
                     alignItems: "center",
@@ -308,12 +346,12 @@ export default function RegisterForm(): React.ReactElement {
                   }}
                 >
                   {passwordValidation.hasUpperCase && (
-                    <Check sx={{ fontSize: 14, color: "#FFFFFF" }} />
+                    <Check sx={{ fontSize: 12, color: "#FFFFFF" }} />
                   )}
                 </Box>
                 <Typography
                   sx={{
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: passwordValidation.hasUpperCase ? 500 : 400,
                     color: passwordValidation.hasUpperCase
                       ? theme.palette.text.primary
@@ -324,11 +362,11 @@ export default function RegisterForm(): React.ReactElement {
                   Có chữ in hoa
                 </Typography>
               </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Box
                   sx={{
-                    width: 18,
-                    height: 18,
+                    width: 16,
+                    height: 16,
                     borderRadius: "50%",
                     display: "flex",
                     alignItems: "center",
@@ -342,12 +380,12 @@ export default function RegisterForm(): React.ReactElement {
                   }}
                 >
                   {passwordValidation.hasNumber && (
-                    <Check sx={{ fontSize: 14, color: "#FFFFFF" }} />
+                    <Check sx={{ fontSize: 12, color: "#FFFFFF" }} />
                   )}
                 </Box>
                 <Typography
                   sx={{
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: passwordValidation.hasNumber ? 500 : 400,
                     color: passwordValidation.hasNumber
                       ? theme.palette.text.primary
@@ -358,11 +396,11 @@ export default function RegisterForm(): React.ReactElement {
                   Có chữ số
                 </Typography>
               </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Box
                   sx={{
-                    width: 18,
-                    height: 18,
+                    width: 16,
+                    height: 16,
                     borderRadius: "50%",
                     display: "flex",
                     alignItems: "center",
@@ -376,12 +414,12 @@ export default function RegisterForm(): React.ReactElement {
                   }}
                 >
                   {passwordValidation.hasSpecialChar && (
-                    <Check sx={{ fontSize: 14, color: "#FFFFFF" }} />
+                    <Check sx={{ fontSize: 12, color: "#FFFFFF" }} />
                   )}
                 </Box>
                 <Typography
                   sx={{
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: passwordValidation.hasSpecialChar ? 500 : 400,
                     color: passwordValidation.hasSpecialChar
                       ? theme.palette.text.primary
@@ -398,8 +436,8 @@ export default function RegisterForm(): React.ReactElement {
 
         <Typography
           sx={{
-            fontSize: 14,
-            mb: 1,
+            fontSize: 13,
+            mb: 0.75,
             fontWeight: 600,
             color: theme.palette.text.primary,
           }}
@@ -408,6 +446,7 @@ export default function RegisterForm(): React.ReactElement {
         </Typography>
         <TextField
           fullWidth
+          size="medium"
           type={showConfirmPassword ? "text" : "password"}
           placeholder="Nhập lại mật khẩu"
           value={confirmPassword}
@@ -430,9 +469,9 @@ export default function RegisterForm(): React.ReactElement {
                     }}
                   >
                     {passwordsMatch ? (
-                      <Check sx={{ fontSize: 20, color: "#22c55e" }} />
+                      <Check sx={{ fontSize: 18, color: "#22c55e" }} />
                     ) : (
-                      <Close sx={{ fontSize: 20, color: "#ef4444" }} />
+                      <Close sx={{ fontSize: 18, color: "#ef4444" }} />
                     )}
                   </Box>
                 )}
@@ -451,7 +490,7 @@ export default function RegisterForm(): React.ReactElement {
             ),
           }}
           sx={{
-            mb: 3,
+            mb: 2.5,
             "& .MuiOutlinedInput-root": {
               borderRadius: 1.5,
               ...(passwordsMatch &&
@@ -461,6 +500,9 @@ export default function RegisterForm(): React.ReactElement {
                     borderWidth: "2px !important",
                   },
                 }),
+            },
+            "& .MuiInputBase-input": {
+              fontSize: "0.95rem",
             },
           }}
         />
@@ -472,8 +514,8 @@ export default function RegisterForm(): React.ReactElement {
           loading={isRegistering}
           loadingIndicator={
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <CircularProgress color="inherit" size={16} thickness={4} />
-              <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
+              <CircularProgress color="inherit" size={18} thickness={4} />
+              <Typography sx={{ fontSize: 15, fontWeight: 500 }}>
                 Đang đăng ký...
               </Typography>
             </Box>
@@ -495,9 +537,9 @@ export default function RegisterForm(): React.ReactElement {
         </LoadingButton>
       </Box>
 
-      <Divider sx={{ my: 3 }} />
+      <Divider sx={{ my: 2.5 }} />
 
-      <Typography textAlign="center" sx={{ fontSize: 14 }}>
+      <Typography textAlign="center" sx={{ fontSize: 13 }}>
         Đã có tài khoản?{" "}
         <Box
           component="span"

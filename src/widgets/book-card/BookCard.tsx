@@ -11,7 +11,8 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import { ShoppingCartOutlined, InfoOutlined } from "@mui/icons-material";
+import { ShoppingBag } from "lucide-react";
+import { InfoOutlined } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import type { Book } from "../../features/books/types";
 
@@ -209,9 +210,9 @@ export default function BookCard({
                       },
                     }}
                   >
-                    <ShoppingCartOutlined
-                      fontSize="small"
-                      sx={{
+                    <ShoppingBag
+                      size={18}
+                      style={{
                         filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.1))",
                       }}
                     />

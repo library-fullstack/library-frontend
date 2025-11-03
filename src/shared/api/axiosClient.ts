@@ -20,7 +20,30 @@ axiosClient.interceptors.request.use((config) => {
       "application/json";
   }
 
+  // Disable cache for API requests
+  (config.headers as Record<string, string>)["Cache-Control"] =
+    "no-cache, no-store, must-revalidate";
+  (config.headers as Record<string, string>)["Pragma"] = "no-cache";
+  (config.headers as Record<string, string>)["Expires"] = "0";
+
   return config;
 });
+
+// Handle 304 Not Modified responses
+axiosClient.interceptors.response.use(
+  (response) => {
+    // If 304 Not Modified, return a proper response
+    if (response.status === 304) {
+      console.warn(
+        "[axiosClient] Received 304 Not Modified - may need to refetch"
+      );
+    }
+    return response;
+  },
+  (error) => {
+    console.error("[axiosClient] Error:", error);
+    return Promise.reject(error);
+  }
+);
 
 export default axiosClient;
