@@ -116,7 +116,6 @@ export function AuthProvider({ children }: Props): ReactNode {
     let focusTimeout: ReturnType<typeof setTimeout>;
 
     const handleFocus = () => {
-      // Debounce focus event để tránh gọi API liên tục
       clearTimeout(focusTimeout);
       focusTimeout = setTimeout(() => {
         refreshUser();
@@ -125,7 +124,6 @@ export function AuthProvider({ children }: Props): ReactNode {
 
     window.addEventListener("focus", handleFocus);
 
-    // Listen for user updates via BroadcastChannel (e.g., avatar change)
     const bc = new BroadcastChannel("user-sync");
     bc.onmessage = (event) => {
       if (event.data === "REFRESH_USER") {

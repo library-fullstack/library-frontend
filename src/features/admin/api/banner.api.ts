@@ -50,7 +50,6 @@ export const bannerApi = {
         `/banners?page=${page}&limit=${limit}`
       );
       const banners = response.data.data?.banners || [];
-      // Convert snake_case from backend to camelCase for frontend
       return banners.map(
         (banner) =>
           snakeToCamel(
@@ -58,7 +57,7 @@ export const bannerApi = {
           ) as BannerData
       );
     } catch (error) {
-      console.error("Error fetching banners from API:", error);
+      console.error("Không thể lấy banner đang hoạt động từ API:", error);
       throw error;
     }
   },
@@ -68,12 +67,11 @@ export const bannerApi = {
       const response = await axiosClient.get<BannerResponse>(`/banners/active`);
       const banner = response.data.data as BannerData | undefined;
       if (!banner) return null;
-      // Convert snake_case from backend to camelCase for frontend
       return snakeToCamel(
         banner as unknown as Record<string, unknown>
       ) as BannerData;
     } catch (error) {
-      console.error("Error fetching active banner:", error);
+      console.error("Không thể lấy banner đang hoạt động từ API:", error);
       return null;
     }
   },
@@ -83,12 +81,11 @@ export const bannerApi = {
       const response = await axiosClient.get<BannerResponse>(`/banners/${id}`);
       const banner = response.data.data as BannerData | undefined;
       if (!banner) return null;
-      // Convert snake_case from backend to camelCase for frontend
       return snakeToCamel(
         banner as unknown as Record<string, unknown>
       ) as BannerData;
     } catch (error) {
-      console.error("Error fetching banner:", error);
+      console.error("Không thể lấy banner từ API:", error);
       throw error;
     }
   },
@@ -112,7 +109,7 @@ export const bannerApi = {
 
       return response.data.data as { url: string; public_id: string };
     } catch (error) {
-      console.error("Error uploading image:", error);
+      console.error("Không thể tải lên hình ảnh:", error);
       throw error;
     }
   },
@@ -133,7 +130,7 @@ export const bannerApi = {
           : undefined,
       };
     } catch (error) {
-      console.error("Error creating banner:", error);
+      console.error("Không thể tạo banner từ API:", error);
       throw error;
     }
   },
@@ -157,7 +154,7 @@ export const bannerApi = {
           : undefined,
       };
     } catch (error) {
-      console.error("Error updating banner:", error);
+      console.error("Không thể cập nhật banner từ API:", error);
       throw error;
     }
   },
@@ -169,7 +166,7 @@ export const bannerApi = {
       );
       return response.data as BannerResponse;
     } catch (error) {
-      console.error("Error deleting banner:", error);
+      console.error("Không thể xóa banner từ API:", error);
       throw error;
     }
   },
@@ -193,7 +190,7 @@ export const bannerApi = {
           : undefined,
       };
     } catch (error) {
-      console.error("Error toggling banner status:", error);
+      console.error("Không thể thay đổi trạng thái banner từ API:", error);
       throw error;
     }
   },

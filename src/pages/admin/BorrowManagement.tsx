@@ -152,7 +152,7 @@ export default function BorrowManagement() {
         await statisticsApi.updateBorrowStatus(selectedBorrow.id, newStatus);
         fetchBorrows();
       } catch (err) {
-        console.error("Error updating status:", err);
+        console.error("Lỗi khi cập nhật trạng thái:", err);
       }
     }
     setStatusDialogOpen(false);

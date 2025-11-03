@@ -31,12 +31,10 @@ body.disable-animations * {
   transition: background-color 0.3s ease;
 }
 
-/* Admin layout - hide internal scrollbars but keep browser scroll */
 .admin-layout-container {
   overflow: hidden;
 }
 
-/* Hide scrollbars for Drawer */
 .admin-layout-container .MuiDrawer-paper {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -47,7 +45,6 @@ body.disable-animations * {
   display: none;
 }
 
-/* Main content - allow horizontal scroll with hidden scrollbar */
 .admin-layout-container main {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -57,7 +54,6 @@ body.disable-animations * {
   display: none;
 }
 
-/* Hide scrollbars for Tables */
 .admin-layout-container .MuiTableContainer-root {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -75,7 +71,6 @@ body.disable-animations * {
   display: none;
 }
 
-/* Table cell optimization for zoom levels */
 .admin-layout-container .MuiTableCell-root {
   padding: 12px 8px !important;
   font-size: 0.875rem;
@@ -89,7 +84,6 @@ body.disable-animations * {
   font-weight: 600;
 }
 
-/* Compact mode for high zoom levels */
 .admin-layout-container.zoom-compact .MuiTableCell-root {
   padding: 8px 6px !important;
   font-size: 0.75rem;
@@ -124,7 +118,6 @@ body.disable-animations * {
   font-size: 0.75rem !important;
 }
 
-/* Hide scrollbars for Lists */
 .admin-layout-container .MuiList-root {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -135,7 +128,6 @@ body.disable-animations * {
   display: none;
 }
 
-/* Hide scrollbars for any element with overflow */
 .admin-layout-container [style*="overflow-x: auto"],
 .admin-layout-container [style*="overflowX: auto"],
 .admin-layout-container [style*="overflow-y: auto"],
@@ -153,7 +145,6 @@ body.disable-animations * {
   display: none;
 }
 
-/* CSS-in-JS support - target overflow properties */
 .admin-layout-container [class*="MuiPaper"] {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -163,7 +154,6 @@ body.disable-animations * {
   display: none;
 }
 
-/* Support for all children with overflow auto */
 .admin-layout-container * {
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;

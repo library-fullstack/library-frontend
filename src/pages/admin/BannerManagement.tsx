@@ -70,7 +70,6 @@ const BannerManagement: React.FC = () => {
     isActive: false,
   });
 
-  // Load banners and event effects state
   useEffect(() => {
     loadBanners();
     loadEventEffectsSetting();
@@ -81,15 +80,13 @@ const BannerManagement: React.FC = () => {
       setLoadingEffectsSetting(true);
       const setting = await settingsApi.getSetting("disable_event_effects");
       if (setting) {
-        // If disable_event_effects is true, then effects are disabled (enabled = false)
         const isDisabled = JSON.parse(setting.setting_value) as boolean;
         setEventEffectsEnabled(!isDisabled);
       } else {
-        // Default: effects are enabled if setting doesn't exist
         setEventEffectsEnabled(true);
       }
     } catch (err) {
-      console.error("Error loading event effects setting:", err);
+      console.error("Lỗi khi tải cài đặt hiệu ứng sự kiện:", err);
       setEventEffectsEnabled(true);
     } finally {
       setLoadingEffectsSetting(false);
@@ -233,9 +230,8 @@ const BannerManagement: React.FC = () => {
       setOpenDialog(false);
       loadBanners();
 
-      // Broadcast banner update to other tabs
       const bc = new BroadcastChannel("banner-sync");
-      console.log("[BannerManagement] Broadcasting REFRESH_BANNER");
+      console.log("[BannerManagement] Đang phát tín hiệu REFRESH_BANNER");
       bc.postMessage("REFRESH_BANNER");
       bc.close();
     } catch (err) {
@@ -249,9 +245,10 @@ const BannerManagement: React.FC = () => {
         await bannerApi.deleteBanner(id);
         loadBanners();
 
-        // Broadcast banner update to other tabs
         const bc = new BroadcastChannel("banner-sync");
-        console.log("[BannerManagement] Broadcasting REFRESH_BANNER (delete)");
+        console.log(
+          "[BannerManagement] Đang phát tín hiệu REFRESH_BANNER (xoá)"
+        );
         bc.postMessage("REFRESH_BANNER");
         bc.close();
       } catch (err) {
@@ -265,9 +262,10 @@ const BannerManagement: React.FC = () => {
       await bannerApi.toggleBannerStatus(id, !currentStatus);
       loadBanners();
 
-      // Broadcast banner update to other tabs
       const bc = new BroadcastChannel("banner-sync");
-      console.log("[BannerManagement] Broadcasting REFRESH_BANNER (toggle)");
+      console.log(
+        "[BannerManagement] Đang phát tín hiệu REFRESH_BANNER (toggle)"
+      );
       bc.postMessage("REFRESH_BANNER");
       bc.close();
     } catch (err) {
@@ -283,20 +281,16 @@ const BannerManagement: React.FC = () => {
       setEventEffectsEnabled(isEnabled);
       setLoadingEffectsSetting(true);
 
-      // Save to API: true = effects enabled, false = effects disabled
-      // So we send "disable_event_effects" = !isEnabled
       await settingsApi.updateSetting(
         "disable_event_effects",
         JSON.stringify(!isEnabled),
         "Event effects toggle"
       );
 
-      // Save to localStorage and broadcast to other tabs/windows
       localStorage.setItem("disable_event_effects", JSON.stringify(!isEnabled));
       window.dispatchEvent(new Event("storage"));
     } catch (err) {
       setError(parseApiError(err));
-      // Revert state on error
       setEventEffectsEnabled(!event.target.checked);
     } finally {
       setLoadingEffectsSetting(false);
@@ -632,7 +626,6 @@ const BannerManagement: React.FC = () => {
   );
 };
 
-// Memoized form content để tránh re-render không cần thiết
 interface BannerFormDialogProps {
   open: boolean;
   editingId: string | null;

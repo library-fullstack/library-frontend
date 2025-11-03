@@ -19,12 +19,12 @@ interface RecentBorrower {
 }
 
 interface RecentBorrowersSectionProps {
-  bookTitle: string;
+  bookTitle?: string;
 }
 
-export default function RecentBorrowersSection({
-  bookTitle,
-}: RecentBorrowersSectionProps): React.ReactElement {
+export default function RecentBorrowersSection(
+  _props: RecentBorrowersSectionProps
+): React.ReactElement {
   const theme = useTheme();
 
   const mockBorrowers: RecentBorrower[] = [
@@ -83,7 +83,7 @@ export default function RecentBorrowersSection({
         }}
       >
         <Stack spacing={2}>
-          {mockBorrowers.map((borrower, index) => (
+          {mockBorrowers.map((borrower) => (
             <Box
               key={borrower.id}
               sx={{

@@ -20,7 +20,7 @@ export default function ProtectedRoute({
   // lưu location hiện tại để redirect về sau khi đăng nhập
   if (!token || !user) {
     console.log(
-      "[ProtectedRoute] No auth, redirecting to login. Current location:",
+      "[ProtectedRoute] Chưa xác thực, đang chuyển hướng đến trang đăng nhập. Vị trí hiện tại:",
       location.pathname
     );
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
@@ -29,15 +29,17 @@ export default function ProtectedRoute({
   // kiểm tra role nếu có yêu cầu
   if (roles && !roles.includes(user.role)) {
     console.log(
-      "[ProtectedRoute] Insufficient permissions. User role:",
+      "[ProtectedRoute] Quyền truy cập không đủ. Vai trò người dùng:",
       user.role,
-      "Required:",
+      "Yêu cầu:",
       roles
     );
-    // Hiển thị trang unauthorized thay vì redirect về home
     return <Unauthorized />;
   }
 
-  console.log("[ProtectedRoute] Access granted for:", location.pathname);
+  console.log(
+    "[ProtectedRoute] Quyền truy cập được cấp cho:",
+    location.pathname
+  );
   return children;
 }

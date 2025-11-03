@@ -124,7 +124,6 @@ export default function Navbar(): React.ReactElement {
       handleSearch();
       setIsOpen(false);
       const searchQuery = query.trim();
-      // reset input
       setQuery("");
       navigate(`/catalog?search=${encodeURIComponent(searchQuery)}`);
     }
@@ -140,7 +139,6 @@ export default function Navbar(): React.ReactElement {
     if (query.trim().length >= 2) {
       setIsOpen(false);
       const searchQuery = query.trim();
-      // reset input
       setQuery("");
       navigate(`/catalog?search=${encodeURIComponent(searchQuery)}`);
     }
@@ -258,7 +256,11 @@ export default function Navbar(): React.ReactElement {
                 endAdornment: (
                   <InputAdornment position="end">
                     {query ? (
-                      <IconButton size="small" onClick={handleClearSearch}>
+                      <IconButton
+                        size="small"
+                        onClick={handleClearSearch}
+                        aria-label="Xóa tìm kiếm"
+                      >
                         <X size={18} />
                       </IconButton>
                     ) : (
@@ -291,6 +293,7 @@ export default function Navbar(): React.ReactElement {
             {isMobile ? (
               <IconButton
                 onClick={() => setDrawerOpen(true)}
+                aria-label="Mở menu"
                 disableRipple
                 disableFocusRipple
                 sx={{
@@ -326,6 +329,11 @@ export default function Navbar(): React.ReactElement {
               >
                 <IconButton
                   onClick={toggleTheme}
+                  aria-label={
+                    mode === "light"
+                      ? "Chuyển sang chế độ tối"
+                      : "Chuyển sang chế độ sáng"
+                  }
                   sx={{
                     color: "text.primary",
                     transition: "all 0.2s ease",

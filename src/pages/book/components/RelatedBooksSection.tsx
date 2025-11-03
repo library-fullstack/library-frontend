@@ -45,7 +45,7 @@ export default function RelatedBooksSection({
         const filtered = books.filter((book) => book.id !== currentBookId);
         setRelatedBooks(filtered);
       } catch (err) {
-        console.error("Error fetching related books:", err);
+        console.error("Lỗi khi lấy sách liên quan:", err);
         setRelatedBooks([]);
       } finally {
         setLoading(false);

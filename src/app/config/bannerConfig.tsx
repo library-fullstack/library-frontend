@@ -34,14 +34,14 @@ export const getActiveBannerConfig = async (): Promise<BannerConfig> => {
 
     if (!response.ok) {
       console.warn(
-        "Failed to fetch active banner from API, using default",
+        "Không thể lấy banner đang hoạt động từ API, đang sử dụng mặc định",
         response.status
       );
       return defaultBannerConfig;
     }
 
     const data = await response.json();
-    console.log("Banner from API:", data);
+    console.log("Banner từ API:", data);
 
     const banner = data.data || data;
 
@@ -51,7 +51,7 @@ export const getActiveBannerConfig = async (): Promise<BannerConfig> => {
 
     return defaultBannerConfig;
   } catch (err) {
-    console.error("Failed to load banner config:", err);
+    console.error("Không thể tải cấu hình banner:", err);
     return defaultBannerConfig;
   }
 };

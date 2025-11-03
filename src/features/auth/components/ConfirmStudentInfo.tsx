@@ -217,12 +217,27 @@ export default function ConfirmStudentInfo(): React.ReactElement | null {
       setLoading(true);
       setError("");
 
-      await axios.post(`${API_URL}/users/confirm-student-info`, {
-        token,
-        full_name: info.full_name.trim(),
-        email: info.email.trim(),
-        phone: inputValue.trim(),
-      });
+      // Create AbortController for timeout handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+      try {
+        await axios.post(
+          `${API_URL}/users/confirm-student-info`,
+          {
+            token,
+            full_name: info.full_name.trim(),
+            email: info.email.trim(),
+            phone: inputValue.trim(),
+          },
+          {
+            timeout: 10000, // 10 second timeout as fallback
+          }
+        );
+      } finally {
+        clearTimeout(timeoutId);
+        controller.abort();
+      }
 
       localStorage.removeItem("pending_student_info");
       navigate("/auth/login", {
@@ -233,7 +248,13 @@ export default function ConfirmStudentInfo(): React.ReactElement | null {
         },
       });
     } catch (err) {
-      const msg = parseApiError(err);
+      let msg = parseApiError(err);
+
+      // Handle timeout error
+      if (err instanceof Error && err.name === "AbortError") {
+        msg = "Yêu cầu quá lâu. Vui lòng kiểm tra kết nối và thử lại.";
+      }
+
       setError(msg || "Không thể xác nhận thông tin. Vui lòng thử lại.");
 
       if (

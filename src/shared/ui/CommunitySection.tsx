@@ -148,7 +148,7 @@ export default function CommunitySection(): React.ReactElement {
                     mb: 0.5,
                     color: theme.palette.text.primary,
                     lineHeight: 1.5,
-                    minHeight: "3em", // giữ chỗ đủ cho 2 dòng
+                    minHeight: "3em",
                     display: "-webkit-box",
                     WebkitLineClamp: 2,
                     WebkitBoxOrient: "vertical",
@@ -166,7 +166,7 @@ export default function CommunitySection(): React.ReactElement {
                     WebkitLineClamp: 3,
                     WebkitBoxOrient: "vertical",
                     overflow: "hidden",
-                    minHeight: 56, // luôn chiếm đủ chỗ để các card đều
+                    minHeight: 56,
                   }}
                 >
                   {post.excerpt}

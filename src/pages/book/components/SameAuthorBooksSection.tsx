@@ -41,7 +41,6 @@ export default function SameAuthorBooksSection({
 
       setLoading(true);
       try {
-        // Tìm sách cùng tất cả tác giả, không chỉ tác giả đầu tiên
         const allAuthors = authorNames
           .split(",")
           .map((name) => name.trim())
@@ -99,7 +98,6 @@ export default function SameAuthorBooksSection({
 
   const handleViewAll = () => {
     if (authorNames) {
-      // Tìm sách cùng tất cả tác giả
       const allAuthors = authorNames
         .split(",")
         .map((name) => name.trim())

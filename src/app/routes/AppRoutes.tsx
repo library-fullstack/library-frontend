@@ -5,7 +5,7 @@ import { KeepAlive } from "react-activation";
 import MainLayout from "../../widgets/layout/MainLayout";
 import AdminLayout from "../../widgets/layout/AdminLayout";
 
-// critical
+// quan trọng
 import HomePage from "../../pages/home/HomePage";
 import AuthLayout from "../../pages/auth/AuthLayout";
 import LoginForm from "../../features/auth/components/LoginForm";
@@ -58,7 +58,7 @@ const PageLoader = () => (
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* redirect auth */}
+      {/* chuyển hướng auth */}
       <Route path="/auth" element={<Navigate to="/auth/login" replace />} />
 
       <Route

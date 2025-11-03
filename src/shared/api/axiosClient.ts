@@ -2,7 +2,6 @@ import axios from "axios";
 
 const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? "http://localhost:4000/api/v1",
-  // headers: { "Content-Type": "application/json" },
 });
 
 axiosClient.interceptors.request.use((config) => {
@@ -20,7 +19,6 @@ axiosClient.interceptors.request.use((config) => {
       "application/json";
   }
 
-  // Disable cache for API requests
   (config.headers as Record<string, string>)["Cache-Control"] =
     "no-cache, no-store, must-revalidate";
   (config.headers as Record<string, string>)["Pragma"] = "no-cache";
@@ -29,19 +27,17 @@ axiosClient.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 304 Not Modified responses
 axiosClient.interceptors.response.use(
   (response) => {
-    // If 304 Not Modified, return a proper response
     if (response.status === 304) {
       console.warn(
-        "[axiosClient] Received 304 Not Modified - may need to refetch"
+        "[axiosClient] Nhận 304 Not Modified - có thể cần tải lại dữ liệu"
       );
     }
     return response;
   },
   (error) => {
-    console.error("[axiosClient] Error:", error);
+    console.error("[axiosClient] Lỗi:", error);
     return Promise.reject(error);
   }
 );

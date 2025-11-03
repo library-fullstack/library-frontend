@@ -287,7 +287,7 @@ export default function ResetPasswordForm(): React.ReactElement {
           }}
         />
 
-        {/* Password Strength Indicator */}
+        {/* thanh độ mạnh mật khẩu */}
         {password.length > 0 && (
           <Box sx={{ mb: 2 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>

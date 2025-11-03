@@ -91,11 +91,11 @@ export default function BooksManagement() {
         search: search || undefined,
         status: statusFilter || undefined,
       });
-      console.log("[BooksManagement] API Response:", response);
+      console.log("[BooksManagement] Phản hồi từ API: ", response);
       setBooks(response.data.books || []);
       setTotal(response.data.total || 0);
     } catch (err) {
-      console.error("[BooksManagement] API Error:", err);
+      console.error("[BooksManagement] Lỗi API:", err);
       setError(parseApiError(err));
       setBooks(createMockBooks());
       setTotal(50);
@@ -145,7 +145,7 @@ export default function BooksManagement() {
 
   const handleDelete = () => {
     if (selectedBook) {
-      console.log("Delete book:", selectedBook.id);
+      console.log("Xoá sách:", selectedBook.id);
     }
     handleMenuClose();
   };

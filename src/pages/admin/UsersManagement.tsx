@@ -136,7 +136,10 @@ export default function UsersManagement() {
         setAllowStudentInfoEdit(false);
       }
     } catch (err) {
-      console.error("Error loading allow student info edit setting:", err);
+      console.error(
+        "Lỗi khi tải cài đặt cho phép chỉnh sửa thông tin sinh viên:",
+        err
+      );
       setAllowStudentInfoEdit(false);
     } finally {
       setLoadingInfoEditSetting(false);
@@ -199,7 +202,7 @@ export default function UsersManagement() {
         await statisticsApi.updateUserRole(selectedUser.id, newRole);
         fetchUsers();
       } catch (err) {
-        console.error("Error updating role:", err);
+        console.error("Lỗi khi cập nhật vai trò:", err);
       }
     }
     setRoleDialogOpen(false);
@@ -213,7 +216,7 @@ export default function UsersManagement() {
         await statisticsApi.updateUserStatus(selectedUser.id, newStatus);
         fetchUsers();
       } catch (err) {
-        console.error("Error updating status:", err);
+        console.error("Lỗi khi cập nhật trạng thái:", err);
       }
     }
     handleMenuClose();
@@ -225,7 +228,7 @@ export default function UsersManagement() {
         await statisticsApi.deleteUser(selectedUser.id);
         fetchUsers();
       } catch (err) {
-        console.error("Error deleting user:", err);
+        console.error("Lỗi khi xóa người dùng:", err);
       }
     }
     handleMenuClose();

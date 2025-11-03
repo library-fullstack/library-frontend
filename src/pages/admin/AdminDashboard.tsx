@@ -138,13 +138,13 @@ export default function AdminDashboard() {
       setLoading(true);
       setError("");
       try {
-        console.log("[AdminDashboard] Fetching dashboard stats...");
+        console.log("[AdminDashboard] Đang lấy thống kê bảng điều khiển...");
         const response = await statisticsApi.getDashboardStats();
-        console.log("[AdminDashboard] Response:", response);
+        console.log("[AdminDashboard] Phản hồi từ API:", response);
         setStats(response.data);
       } catch (err) {
         const errorMsg = parseApiError(err);
-        console.error("[AdminDashboard] Error:", err, "Parsed:", errorMsg);
+        console.error("[AdminDashboard] Lỗi:", err, "Đã parse:", errorMsg);
         setError(errorMsg);
         setStats(createMockStats());
       } finally {

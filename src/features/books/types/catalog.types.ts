@@ -1,8 +1,3 @@
-/**
- * Types và interfaces cho Book Catalog Page
- * KHÔNG định nghĩa lại các entity types ở đây - import từ features/books/types
- */
-
 import type { BookStatus, BookFormat } from ".";
 
 export interface BookFilters {
@@ -29,7 +24,7 @@ export interface CatalogState {
   limit: number;
 }
 
-// Các constants
+// hằng số
 export const ITEMS_PER_PAGE_OPTIONS = [12, 24, 48, 96];
 export const DEFAULT_ITEMS_PER_PAGE = 24;
 

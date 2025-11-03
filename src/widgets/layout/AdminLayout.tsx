@@ -111,14 +111,24 @@ function AdminLayout() {
             minHeight: { xs: 56, sm: 64 },
           }}
         >
-          <IconButton edge="start" onClick={handleDrawerToggle} sx={{ mr: 2 }}>
-            <MenuIcon style={{ marginLeft: 4 }} size={24} />
+          <IconButton
+            edge="start"
+            onClick={handleDrawerToggle}
+            aria-label="Mở/đóng menu điều hướng"
+            sx={{ mr: 2 }}
+          >
+            <MenuIcon />
           </IconButton>
 
           <Box sx={{ flexGrow: 1 }} />
 
           <IconButton
             onClick={toggleTheme}
+            aria-label={
+              mode === "dark"
+                ? "Chuyển sang chế độ sáng"
+                : "Chuyển sang chế độ tối"
+            }
             sx={{
               mr: 2,
               width: 40,

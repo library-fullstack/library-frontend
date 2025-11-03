@@ -1,8 +1,3 @@
-/**
- * Author entity types
- * Định nghĩa các interface cho Author entity từ API
- */
-
 export interface Author {
   id: number;
   name: string;

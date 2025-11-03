@@ -1,8 +1,3 @@
-/**
- * Book entity types
- * Định nghĩa các interface cho Book entity từ API
- */
-
 import type { Author } from "./author.types";
 import type { BookImage } from "./book-image.types";
 import type { BookCopy } from "./book-copy.types";

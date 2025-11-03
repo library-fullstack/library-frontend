@@ -20,7 +20,7 @@ export const useEventEffectsSetting = (): boolean => {
           localStorage.setItem("disable_event_effects", JSON.stringify(false));
         }
       } catch (error) {
-        console.error("Error fetching event effects setting:", error);
+        console.error("Lỗi khi lấy cài đặt hiệu ứng sự kiện:", error);
         setIsEnabled(true);
       }
     };

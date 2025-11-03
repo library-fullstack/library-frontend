@@ -6,7 +6,6 @@
   --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-/* Mặc định */
 .event-banner {
   position: relative;
   overflow: hidden;
@@ -25,6 +24,7 @@
   z-index: 0;
 }
 
+/* theme mặc định */
 .banner-title {
   position: relative;
   z-index: 1;
@@ -33,7 +33,7 @@
   transition: all 0.6s var(--ease-smooth);
 }
 
-/* Halloween Theme */
+/* halloween theme */
 .event-halloween {
   --primary-color: #ed553b;
   --accent-color: #1a1a1a;
@@ -50,7 +50,7 @@
   background: transparent;
 }
 
-/* Christmas Theme */
+/* christmas theme */
 .event-christmas {
   --primary-color: #065f46;
   --accent-color: #059669;
@@ -86,7 +86,7 @@
   background: transparent;
 }
 
-/* Tết 1 Theme */
+/* theme Tết 1  */
 .event-tet {
   --primary-color: #dc2626;
   --accent-color: #f59e0b;
@@ -103,7 +103,7 @@
   background: transparent;
 }
 
-/* Tết 2 Theme */
+/* theme Tết 2  */
 .event-newyear {
   --primary-color: #f59e0b;
   --accent-color: #3b82f6;
@@ -125,7 +125,7 @@
   background: transparent;
 }
 
-/* Valentine Theme */
+/* valentine theme */
 .event-valentine {
   --primary-color: #ec4899;
   --accent-color: #f472b6;
@@ -143,7 +143,7 @@
   background: transparent;
 }
 
-/* Summer Theme */
+/* theme mùa hè */
 .event-summer {
   --primary-color: #f59e0b;
   --accent-color: #fbbf24;
@@ -161,7 +161,7 @@
   background: transparent;
 }
 
-/* Back to School Theme */
+/* theme quay lại trường học  */
 .event-backtoschool {
   --primary-color: #3b82f6;
   --accent-color: #60a5fa;
@@ -179,7 +179,7 @@
   background: transparent;
 }
 
-/* Spring Theme */
+/* theme mùa xuân */
 .event-spring {
   --primary-color: #10b981;
   --accent-color: #34d399;
@@ -197,7 +197,7 @@
   background: transparent;
 }
 
-/* Hiệu ứng */
+/* hiệu ứng */
 @keyframes float-subtle {
   0%,
   100% {
@@ -414,8 +414,6 @@
   }
 }
 
-/* Mobile res, giảm hiệu ứng, giảm tần xuất xuất hiện*/
-
 @media (max-width: 640px) {
   .banner-title {
     font-size: 1.5rem;
@@ -436,7 +434,6 @@
     animation-duration: 1.8s !important;
   }
 
-  /* Reduce glow effects on mobile */
   .event-halloween::before,
   .event-summer::before {
     animation-duration: 4s !important;
@@ -458,7 +455,6 @@
   }
 }
 
-/* Giảm chuyện động - để sẵn đây */
 @media (prefers-reduced-motion: reduce) {
   .event-banner::before,
   .banner-title,

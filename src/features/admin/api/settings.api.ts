@@ -18,13 +18,12 @@ export interface SettingResponse {
 export const settingsApi = {
   async getSetting(key: string): Promise<SettingData | null> {
     try {
-      // Use public endpoint (no auth required) for fetching settings
       const response = await axiosClient.get<SettingResponse>(
         `/settings/${key}`
       );
       return response.data.data as SettingData | null;
     } catch (error) {
-      console.error("Error fetching setting:", error);
+      console.error("Không thể lấy cài đặt từ API:", error);
       return null;
     }
   },
@@ -37,7 +36,7 @@ export const settingsApi = {
       const data = response.data.data;
       return Array.isArray(data) ? data : [];
     } catch (error) {
-      console.error("Error fetching all settings:", error);
+      console.error("Không thể lấy tất cả cài đặt từ API:", error);
       return [];
     }
   },
@@ -54,7 +53,7 @@ export const settingsApi = {
       );
       return response.data.data as SettingData | null;
     } catch (error) {
-      console.error("Error updating setting:", error);
+      console.error("Không thể cập nhật cài đặt từ API:", error);
       throw error;
     }
   },
@@ -67,7 +66,7 @@ export const settingsApi = {
       const data = response.data.data as SettingData | undefined;
       return data ? JSON.parse(data.setting_value) : null;
     } catch (error) {
-      console.error("Error toggling setting:", error);
+      console.error("Không thể thay đổi trạng thái cài đặt từ API:", error);
       throw error;
     }
   },
@@ -79,7 +78,7 @@ export const settingsApi = {
       );
       return response.data.success;
     } catch (error) {
-      console.error("Error deleting setting:", error);
+      console.error("Không thể xóa cài đặt từ API:", error);
       throw error;
     }
   },

@@ -47,13 +47,13 @@ export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   };
 
-  // memoize theme để tránh re-create
+  // ghi nhớ (memoize) theme để tránh tạo lại nhiều lần
   const theme = useMemo(
     () => (mode === "light" ? lightTheme : darkTheme),
     [mode]
   );
 
-  // memoize context value
+  // ghi nhớ (memoize) context value
   const contextValue = useMemo(() => ({ mode, toggleTheme }), [mode]);
 
   return (

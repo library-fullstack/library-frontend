@@ -17,6 +17,7 @@ import { TuneOutlined, Home, KeyboardArrowUp } from "@mui/icons-material";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import BookCatalogFilters from "../../widgets/book-catalog-filters/BookCatalogFilters";
 import BookCatalogGrid from "../../widgets/book-catalog-grid/BookCatalogGrid";
+import SeoMetaTags from "../../shared/components/SeoMetaTags";
 import { booksApi, categoriesApi } from "../../features/books/api";
 import type {
   Book,
@@ -42,7 +43,6 @@ export default function BookList(): React.ReactElement {
   const [page, setPage] = useState(1);
 
   // số lượng sách mỗi lần tải là 12
-  // đặt ngoài state để tránh render lại
   const BOOKS_PER_BATCH = 12;
 
   // filter state
@@ -82,7 +82,6 @@ export default function BookList(): React.ReactElement {
       ).toLowerCase() as "author" | "category" | "publisher";
       newSearchType = normalizedType;
     } else if (searchQuery) {
-      // mặc định là author nếu có search query nhưng không có type param
       newSearchType = "author";
     } else {
       newSearchType = null;
@@ -348,6 +347,11 @@ export default function BookList(): React.ReactElement {
         pb: { xs: 4, sm: 5, md: 6 },
       }}
     >
+      <SeoMetaTags
+        title="Danh sách sách - Thư viện trực tuyến HBH"
+        description="Duyệt và tìm kiếm hàng nghìn cuốn sách trong thư viện. Lọc theo danh mục, tác giả, nhà xuất bản."
+        keywords="danh sách sách, tìm sách, lọc sách, thư viện"
+      />
       <Container
         maxWidth="xl"
         sx={{

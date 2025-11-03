@@ -101,8 +101,7 @@ export default function Working(): React.ReactElement {
             mb: 4,
           }}
         >
-          Chúng tôi đang hoàn thiện nội dung này để mang đến trải nghiệm tốt
-          nhất. Hãy quay lại sau nhé!
+          Chúng tôi đang hoàn thiện nội dung này. Hãy quay lại sau nhé!
         </Typography>
 
         <Button

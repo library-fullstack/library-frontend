@@ -271,7 +271,7 @@ export default function DiscoverSection(): React.ReactElement {
             >
               Khám phá hàng nghìn cuốn sách được tuyển chọn theo thể loại, tác
               giả và xu hướng. Dù bạn đang tìm sách học tập, tiểu thuyết hay tài
-              liệu chuyên ngành, chúng tôi luôn có gợi ý phù hợp cho bạn.
+              liệu chuyên ngành, thư viện luôn có gợi ý phù hợp cho bạn.
             </Typography>
 
             <Box

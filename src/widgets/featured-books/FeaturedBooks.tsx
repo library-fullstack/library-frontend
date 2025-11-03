@@ -303,10 +303,11 @@ const FeaturedBooks: React.FC = () => {
             Khám phá những đầu sách được yêu thích nhất
           </Typography>
 
-          {/* Nút điều hướng */}
+          {/* nút điều hướng */}
           <IconButton
             ref={prevRef}
             className="nav-btn"
+            aria-label="Sách trước"
             sx={{
               position: "absolute",
               top: "50%",
@@ -329,6 +330,7 @@ const FeaturedBooks: React.FC = () => {
           <IconButton
             ref={nextRef}
             className="nav-btn"
+            aria-label="Sách tiếp theo"
             sx={{
               position: "absolute",
               top: "50%",
@@ -348,7 +350,7 @@ const FeaturedBooks: React.FC = () => {
             <ArrowForward fontSize="small" />
           </IconButton>
 
-          {/* Swiper */}
+          {/* swiper */}
           <Swiper
             modules={[Navigation, Pagination, Autoplay]}
             onBeforeInit={(swiper) => {
@@ -400,7 +402,6 @@ const FeaturedBooks: React.FC = () => {
             }}
           />
 
-          {/* Pagination custom */}
           <style>{`
           .swiper-pagination {
             position: relative;

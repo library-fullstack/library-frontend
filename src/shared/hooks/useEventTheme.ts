@@ -30,7 +30,7 @@ export const useEventTheme = (): string => {
           setEventClass("");
         }
       } catch (err) {
-        console.error("[useEventTheme] Failed to load event theme:", err);
+        console.error("[useEventTheme] Không thể tải chủ đề sự kiện:", err);
         setEventClass("");
       }
     };
@@ -40,7 +40,7 @@ export const useEventTheme = (): string => {
     const bc = new BroadcastChannel("banner-sync");
     bc.onmessage = (event) => {
       if (event.data === "REFRESH_BANNER") {
-        console.log("[useEventTheme] Received REFRESH_BANNER broadcast");
+        console.log("[useEventTheme] Nhận thông báo REFRESH_BANNER");
         loadEventTheme();
       }
     };

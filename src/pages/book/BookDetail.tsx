@@ -71,13 +71,13 @@ export default function BookDetail(): React.ReactElement {
           const availabilityData = await checkBookAvailable(Number(id));
           setAvailable(availabilityData.available);
         } catch (err) {
-          console.error("Error checking availability:", err);
+          console.error("Lỗi khi kiểm tra tình trạng sẵn có:", err);
           setAvailable(false);
         } finally {
           setCheckingAvailability(false);
         }
       } catch (err) {
-        console.error("Error fetching book:", err);
+        console.error("Lỗi khi lấy dữ liệu sách:", err);
         setError("Không thể tải thông tin sách. Vui lòng thử lại sau.");
       } finally {
         setLoading(false);
@@ -121,7 +121,7 @@ export default function BookDetail(): React.ReactElement {
         });
       }
     } catch (err) {
-      console.error("Error sharing:", err);
+      console.error("Lỗi khi chia sẻ:", err);
     }
   };
 

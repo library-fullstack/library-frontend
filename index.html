@@ -24,17 +24,24 @@
       media="(prefers-color-scheme: light)"
     />
 
-    <!-- dns prefetch -->
+    <!-- dns prefetch để phân giải CDN nhanh hơn -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
     <link rel="dns-prefetch" href="https://res.cloudinary.com" />
     <link rel="dns-prefetch" href="https://api.libsys.me" />
 
-    <!-- preconnect -->
+    <!-- preconnect để cải thiện hiệu năng (thiết lập kết nối sớm) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://res.cloudinary.com" />
     <link rel="preconnect" href="https://api.libsys.me" crossorigin />
+
+    <!-- prefetch các tài nguyên quan trọng -->
+    <link rel="prefetch" href="/assets/fonts/" />
+    <link rel="prefetch" href="https://res.cloudinary.com/" />
+
+    <!-- sitemap cho SEO -->
+    <link rel="sitemap" href="/sitemap.xml" type="application/xml" />
 
     <!-- tối ưu fonts -->
     <link
@@ -63,7 +70,7 @@
 
     <title>Thư viện trực tuyến - HBH</title>
 
-    <!-- critical CSS cho loader -->
+    <!-- CSS quan trọng cho loader -->
     <link rel="stylesheet" href="/loader.css" />
   </head>
 

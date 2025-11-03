@@ -30,7 +30,6 @@ const CategoryPieChart = React.memo(({ data }: CategoryPieChartProps) => {
     color: COLORS[index % COLORS.length],
   }));
 
-  // Responsive sizing - tối ưu cho mobile để tránh legend đè lên chart
   const outerRadius = isMobile ? 75 : isTablet ? 80 : 90;
   const chartHeight = isMobile ? 420 : isTablet ? 420 : 420;
   const tickFontSize = isMobile ? 10 : isTablet ? 11 : 12;
@@ -45,7 +44,10 @@ const CategoryPieChart = React.memo(({ data }: CategoryPieChartProps) => {
         legend: {
           hidden: false,
           direction: "column" as const,
-          position: { vertical: "bottom" as const, horizontal: "middle" as const },
+          position: {
+            vertical: "bottom" as const,
+            horizontal: "middle" as const,
+          },
           padding: 0,
           itemMarkWidth: 14,
           itemMarkHeight: 14,
@@ -62,7 +64,10 @@ const CategoryPieChart = React.memo(({ data }: CategoryPieChartProps) => {
         legend: {
           hidden: false,
           direction: "column" as const,
-          position: { vertical: "bottom" as const, horizontal: "middle" as const },
+          position: {
+            vertical: "bottom" as const,
+            horizontal: "middle" as const,
+          },
           padding: 5,
           itemMarkWidth: 16,
           itemMarkHeight: 16,
@@ -78,7 +83,10 @@ const CategoryPieChart = React.memo(({ data }: CategoryPieChartProps) => {
         legend: {
           hidden: false,
           direction: "row" as const,
-          position: { vertical: "bottom" as const, horizontal: "middle" as const },
+          position: {
+            vertical: "bottom" as const,
+            horizontal: "middle" as const,
+          },
           padding: 8,
           itemMarkWidth: 18,
           itemMarkHeight: 18,

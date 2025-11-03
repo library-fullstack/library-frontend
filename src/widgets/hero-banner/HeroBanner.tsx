@@ -22,21 +22,18 @@ export default function HeroBanner(): React.ReactElement {
         const config = await getActiveBannerConfig();
         setBannerConfig(config);
       } catch (error) {
-        console.error("Failed to load banner config:", error);
+        console.error("Không thể tải cấu hình banner:", error);
         setBannerConfig(defaultBannerConfig);
       } finally {
         setIsLoading(false);
       }
     };
-
-    // Load banner immediately
     loadBanner();
 
-    // Listen for banner updates via BroadcastChannel
     const bc = new BroadcastChannel("banner-sync");
     bc.onmessage = (event) => {
       if (event.data === "REFRESH_BANNER") {
-        console.log("[HeroBanner] Received REFRESH_BANNER broadcast");
+        console.log("[HeroBanner] Nhận được thông báo REFRESH_BANNER");
         loadBanner();
       }
     };
@@ -45,12 +42,6 @@ export default function HeroBanner(): React.ReactElement {
       bc.close();
     };
   }, []);
-
-  const books = [
-    { src: "/assets/img/book-2020-war.webp", alt: "2020 World of War" },
-    { src: "/assets/img/book-gothic.webp", alt: "War in the Gothic Line" },
-    { src: "/assets/img/book-time-traveler.webp", alt: "Time Traveler" },
-  ];
 
   if (isLoading) {
     return (
@@ -195,53 +186,6 @@ export default function HeroBanner(): React.ReactElement {
                   />
                 ))}
               </Box>
-            </Box>
-
-            {/* sách minh họa - ẩn */}
-            <Box
-              sx={{
-                flex: 1,
-                display: "none",
-              }}
-            >
-              {books.map((book, index) => (
-                <Box
-                  key={index}
-                  component="img"
-                  src={book.src}
-                  alt={book.alt}
-                  loading="lazy"
-                  width="180"
-                  height="260"
-                  onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-                    e.currentTarget.src = `https://via.placeholder.com/180x260/667eea/white?text=Book+${
-                      index + 1
-                    }`;
-                  }}
-                  sx={{
-                    position: "absolute",
-                    width: 180,
-                    height: 260,
-                    objectFit: "cover",
-                    borderRadius: "8px",
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                    transform: `translateX(${(index - 1) * 60}px) translateY(${
-                      Math.abs(index - 1) * 15
-                    }px) rotate(${(index - 1) * 5}deg)`,
-                    zIndex: 3 - Math.abs(index - 1),
-                    transition: "transform 0.3s ease",
-                    willChange: "transform",
-                    "&:hover": {
-                      transform: `translateX(${
-                        (index - 1) * 60
-                      }px) translateY(${
-                        Math.abs(index - 1) * 15 - 10
-                      }px) rotate(${(index - 1) * 5}deg) scale(1.05)`,
-                      zIndex: 10,
-                    },
-                  }}
-                />
-              ))}
             </Box>
           </Box>
         </Container>
