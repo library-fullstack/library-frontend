@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import {
   Box,
   TextField,
@@ -33,7 +33,6 @@ import {
   FORMAT_OPTIONS,
   LANGUAGE_OPTIONS,
 } from "../../features/books/types";
-import { useDebounce } from "../../shared/hooks/useDebounce";
 
 interface BookCatalogFiltersProps {
   filters: BookFilters;
@@ -75,14 +74,21 @@ export default function BookCatalogFilters({
     }
   }, [isMobile]);
 
-  const [searchValue, setSearchValue] = useState(filters.keyword || "");
-  const [lastFilterKeyword, setLastFilterKeyword] = useState(filters.keyword);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
+  const debounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const lastKeywordRef = React.useRef<string>(filters.keyword || "");
 
-  if (lastFilterKeyword !== filters.keyword) {
-    setLastFilterKeyword(filters.keyword);
-    setSearchValue(filters.keyword || "");
-  }
+  React.useLayoutEffect(() => {
+    if (filters.keyword !== lastKeywordRef.current) {
+      lastKeywordRef.current = filters.keyword || "";
+      if (
+        searchInputRef.current &&
+        document.activeElement !== searchInputRef.current
+      ) {
+        searchInputRef.current.value = lastKeywordRef.current;
+      }
+    }
+  }, [filters.keyword]);
 
   useEffect(() => {
     if (filters.keyword && searchInputRef.current) {
@@ -92,13 +98,26 @@ export default function BookCatalogFilters({
     }
   }, [filters.keyword]);
 
-  const debouncedSearch = useDebounce(searchValue, 500);
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+
+      debounceTimerRef.current = setTimeout(() => {
+        onFiltersChange({ ...filters, keyword: value });
+      }, 500);
+    },
+    [filters, onFiltersChange]
+  );
 
   useEffect(() => {
-    if (debouncedSearch !== filters.keyword) {
-      onFiltersChange({ ...filters, keyword: debouncedSearch });
-    }
-  }, [debouncedSearch, filters, onFiltersChange]);
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleFilterChange = (
     key: keyof BookFilters,
@@ -108,7 +127,6 @@ export default function BookCatalogFilters({
   };
 
   const handleResetFilters = React.useCallback(() => {
-    setSearchValue("");
     onFiltersChange({
       keyword: "",
       category_id: null,
@@ -162,8 +180,8 @@ export default function BookCatalogFilters({
             fullWidth
             size="small"
             placeholder="Tìm kiếm sách..."
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
+            defaultValue={filters.keyword || ""}
+            onChange={(e) => handleSearchChange(e.target.value)}
             inputRef={searchInputRef}
             InputProps={{
               startAdornment: (
@@ -171,12 +189,12 @@ export default function BookCatalogFilters({
                   <Search fontSize="small" color="action" />
                 </InputAdornment>
               ),
-              endAdornment: searchValue && (
+              endAdornment: filters.keyword && (
                 <InputAdornment position="end">
                   <IconButton
                     size="small"
                     onClick={() => {
-                      setSearchValue("");
+                      onFiltersChange({ ...filters, keyword: "" });
                     }}
                     aria-label="Xóa tìm kiếm"
                   >
@@ -281,12 +299,14 @@ export default function BookCatalogFilters({
                 </Box>
               ) : (
                 <RadioGroup
-                  value={filters.category_id || "all"}
+                  value={
+                    filters.category_id ? String(filters.category_id) : "all"
+                  }
                   onChange={(e) => {
                     const val = e.target.value;
                     handleFilterChange(
                       "category_id",
-                      val === "all" ? null : val
+                      val === "all" ? null : Number(val)
                     );
                     if (isMobile) setTimeout(() => onMobileClose?.(), 350);
                   }}
@@ -301,7 +321,7 @@ export default function BookCatalogFilters({
                   {categories.map((cat) => (
                     <FormControlLabel
                       key={cat.id}
-                      value={cat.id}
+                      value={String(cat.id)}
                       control={<Radio size="small" />}
                       label={
                         <Box

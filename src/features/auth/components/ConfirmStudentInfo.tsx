@@ -10,11 +10,10 @@ import {
 } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosClient from "../../../shared/api/axiosClient";
+import StorageUtil from "../../../shared/lib/storage";
 import { parseApiError } from "../../../shared/lib/errorHandler";
 import { ArrowForward, ArrowBack } from "@mui/icons-material";
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 interface SystemSettingsResponse {
   allow_student_info_edit: boolean;
@@ -114,8 +113,16 @@ export default function ConfirmStudentInfo(): React.ReactElement | null {
   const [showButtons, setShowButtons] = React.useState(false);
   const theme = useTheme();
   const navigate = useNavigate();
-  const saved = localStorage.getItem("pending_student_info");
-  const previewData = saved ? JSON.parse(saved) : null;
+  const previewData = StorageUtil.getJSON<{
+    token: string;
+    user_preview: {
+      student_id: string;
+      full_name: string;
+      email: string;
+      phone: string;
+    };
+    createdAt: number;
+  }>("pending_student_info");
   const preview = previewData?.user_preview;
   const token = previewData?.token;
 
@@ -146,7 +153,7 @@ export default function ConfirmStudentInfo(): React.ReactElement | null {
     const expired = Date.now() - createdAt > 5 * 60 * 1000;
 
     if (expired) {
-      localStorage.removeItem("pending_student_info");
+      StorageUtil.removeItem("pending_student_info");
       navigate("/auth/login", {
         replace: true,
         state: { message: "Phiên xác nhận đã hết hạn. Vui lòng đăng ký lại." },
@@ -154,11 +161,11 @@ export default function ConfirmStudentInfo(): React.ReactElement | null {
       return;
     }
 
-    axios
-      .get<SystemSettingsResponse>(`${API_URL}/admin/system/settings`)
+    axiosClient
+      .get<SystemSettingsResponse>("/admin/system/settings")
       .then((res) => {
         if (mounted && !res.data.allow_student_info_edit) {
-          localStorage.removeItem("pending_student_info");
+          StorageUtil.removeItem("pending_student_info");
           navigate("/auth/login", { replace: true });
         }
       })
@@ -217,29 +224,14 @@ export default function ConfirmStudentInfo(): React.ReactElement | null {
       setLoading(true);
       setError("");
 
-      // Create AbortController for timeout handling
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+      await axiosClient.post("/users/confirm-student-info", {
+        token,
+        full_name: info.full_name.trim(),
+        email: info.email.trim(),
+        phone: inputValue.trim(),
+      });
 
-      try {
-        await axios.post(
-          `${API_URL}/users/confirm-student-info`,
-          {
-            token,
-            full_name: info.full_name.trim(),
-            email: info.email.trim(),
-            phone: inputValue.trim(),
-          },
-          {
-            timeout: 10000, // 10 second timeout as fallback
-          }
-        );
-      } finally {
-        clearTimeout(timeoutId);
-        controller.abort();
-      }
-
-      localStorage.removeItem("pending_student_info");
+      StorageUtil.removeItem("pending_student_info");
       navigate("/auth/login", {
         replace: true,
         state: {
@@ -262,7 +254,7 @@ export default function ConfirmStudentInfo(): React.ReactElement | null {
         msg.includes("hết hạn") ||
         msg.includes("đã bị đóng")
       ) {
-        localStorage.removeItem("pending_student_info");
+        StorageUtil.removeItem("pending_student_info");
         navigate("/auth/login", {
           replace: true,
           state: {

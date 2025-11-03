@@ -66,11 +66,13 @@ export default function BookList(): React.ReactElement {
     const categoryQuery = searchParams.get("category");
     const searchTypeQuery = searchParams.get("type");
 
-    setFilters((prev) => ({
-      ...prev,
+    setFilters({
       keyword: searchQuery || "",
       category_id: categoryQuery ? Number(categoryQuery) : null,
-    }));
+      status: undefined,
+      format: null,
+      language_code: null,
+    });
 
     // xác định loại tìm kiếm dựa vào URL params
     let newSearchType: "author" | "category" | "publisher" | null = null;
@@ -88,6 +90,10 @@ export default function BookList(): React.ReactElement {
     }
 
     setSearchType(newSearchType);
+  }, [searchParams]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [searchParams]);
 
   // drawer mobile
@@ -314,9 +320,23 @@ export default function BookList(): React.ReactElement {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleFiltersChange = React.useCallback((newFilters: BookFilters) => {
-    setFilters(newFilters);
-  }, []);
+  const handleFiltersChange = React.useCallback(
+    (newFilters: BookFilters) => {
+      const params = new URLSearchParams();
+      if (newFilters.keyword?.trim()) {
+        params.set("search", newFilters.keyword.trim());
+      }
+      if (newFilters.category_id) {
+        params.set("category", String(newFilters.category_id));
+      }
+
+      const queryString = params.toString();
+      navigate(`/catalog${queryString ? "?" + queryString : ""}`, {
+        replace: true,
+      });
+    },
+    [navigate]
+  );
 
   const handleSortChange = React.useCallback((newSort: SortOption) => {
     setSortBy(newSort);

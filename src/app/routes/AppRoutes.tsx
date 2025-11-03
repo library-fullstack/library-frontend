@@ -92,11 +92,9 @@ export default function AppRoutes() {
         <Route
           path="/catalog"
           element={
-            <KeepAlive id="catalog" name="catalog">
-              <Suspense fallback={<PageLoader />}>
-                <BookList />
-              </Suspense>
-            </KeepAlive>
+            <Suspense fallback={<PageLoader />}>
+              <BookList />
+            </Suspense>
           }
         />
         <Route

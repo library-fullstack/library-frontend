@@ -16,11 +16,13 @@ import type { Book } from "../../../features/books/types";
 interface RelatedBooksSectionProps {
   currentBookId: number;
   categoryId?: number | null;
+  categoryName?: string | null;
 }
 
 export default function RelatedBooksSection({
   currentBookId,
   categoryId,
+  categoryName,
 }: RelatedBooksSectionProps): React.ReactElement | null {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -93,7 +95,13 @@ export default function RelatedBooksSection({
   const displayedBooks = relatedBooks.slice(0, displayCount);
 
   const handleViewAll = () => {
-    if (categoryId) {
+    if (categoryId && categoryName) {
+      navigate(
+        `/catalog?search=${encodeURIComponent(
+          categoryName
+        )}&category=${categoryId}`
+      );
+    } else if (categoryId) {
       navigate(`/catalog?category=${categoryId}`);
     }
   };

@@ -2,6 +2,7 @@ import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import useAuth from "../../features/auth/hooks/useAuth";
 import Unauthorized from "../../shared/ui/Unauthorized";
+import logger from "../../shared/lib/logger";
 
 interface ProtectedRouteProps {
   children: React.ReactElement;
@@ -19,7 +20,7 @@ export default function ProtectedRoute({
   // chưa đăng nhập, chưa có token thì route đến đăng nhập
   // lưu location hiện tại để redirect về sau khi đăng nhập
   if (!token || !user) {
-    console.log(
+    logger.log(
       "[ProtectedRoute] Chưa xác thực, đang chuyển hướng đến trang đăng nhập. Vị trí hiện tại:",
       location.pathname
     );
@@ -28,7 +29,7 @@ export default function ProtectedRoute({
 
   // kiểm tra role nếu có yêu cầu
   if (roles && !roles.includes(user.role)) {
-    console.log(
+    logger.log(
       "[ProtectedRoute] Quyền truy cập không đủ. Vai trò người dùng:",
       user.role,
       "Yêu cầu:",
@@ -37,7 +38,7 @@ export default function ProtectedRoute({
     return <Unauthorized />;
   }
 
-  console.log(
+  logger.log(
     "[ProtectedRoute] Quyền truy cập được cấp cho:",
     location.pathname
   );

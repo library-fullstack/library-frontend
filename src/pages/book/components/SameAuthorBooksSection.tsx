@@ -34,7 +34,7 @@ export default function SameAuthorBooksSection({
 
   useEffect(() => {
     const fetchSameAuthorBooks = async () => {
-      if (!authorNames) {
+      if (!authorNames || typeof authorNames !== "string") {
         setLoading(false);
         return;
       }
@@ -97,7 +97,7 @@ export default function SameAuthorBooksSection({
   const displayedBooks = sameAuthorBooks.slice(0, displayCount);
 
   const handleViewAll = () => {
-    if (authorNames) {
+    if (authorNames && typeof authorNames === "string") {
       const allAuthors = authorNames
         .split(",")
         .map((name) => name.trim())

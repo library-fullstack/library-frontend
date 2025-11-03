@@ -13,14 +13,13 @@ import { LoadingButton } from "@mui/lab";
 import { Visibility, VisibilityOff, Check, Close } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosClient from "../../../shared/api/axiosClient";
+import StorageUtil from "../../../shared/lib/storage";
 import {
   parseApiError,
   validatePassword,
 } from "../../../shared/lib/errorHandler";
 import { CircularProgress } from "@mui/material";
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 type RegisterResponse = {
   message: string;
@@ -72,23 +71,17 @@ export default function RegisterForm(): React.ReactElement {
 
     try {
       setIsRegistering(true);
-      const res = await axios.post<RegisterResponse>(
-        `${API_URL}/auth/register`,
-        {
-          student_id: studentId,
-          password,
-        }
-      );
+      const res = await axiosClient.post<RegisterResponse>("/auth/register", {
+        student_id: studentId,
+        password,
+      });
 
       if (res.data.require_info_confirm) {
-        localStorage.setItem(
-          "pending_student_info",
-          JSON.stringify({
-            token: res.data.token,
-            user_preview: res.data.user_preview,
-            createdAt: Date.now(),
-          })
-        );
+        StorageUtil.setJSON("pending_student_info", {
+          token: res.data.token,
+          user_preview: res.data.user_preview,
+          createdAt: Date.now(),
+        });
         navigate("/auth/confirm-info");
       } else {
         setSuccess("Đăng ký thành công! Đang chuyển đến trang đăng nhập...");

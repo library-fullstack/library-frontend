@@ -17,23 +17,7 @@ export default defineConfig(({ mode }) => {
         },
       }),
       imagetools(),
-      ...(isProduction
-        ? [
-            injectPreloadTags(),
-            // viteCompression({
-            //   algorithm: "gzip",
-            //   ext: ".gz",
-            //   threshold: 10240,
-            //   deleteOriginFile: false,
-            // }),
-            // viteCompression({
-            //   algorithm: "brotliCompress",
-            //   ext: ".br",
-            //   threshold: 10240,
-            //   deleteOriginFile: false,
-            // }),
-          ]
-        : []),
+      ...(isProduction ? [injectPreloadTags()] : []),
     ],
     resolve: {
       dedupe: ["react", "react-dom", "@emotion/react", "@emotion/styled"],
@@ -45,7 +29,7 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: "dist",
       chunkSizeWarningLimit: 2000,
-      sourcemap: env.VITE_SOURCEMAP === "true",
+      sourcemap: false,
       target: "es2020",
       minify: "esbuild",
       cssCodeSplit: true,

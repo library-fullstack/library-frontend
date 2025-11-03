@@ -7,6 +7,8 @@ import React, {
   useCallback,
 } from "react";
 import axiosClient from "../shared/api/axiosClient";
+import StorageUtil from "../shared/lib/storage";
+import logger from "../shared/lib/logger";
 import { usersApi } from "../features/users/api/users.api";
 
 export interface User {
@@ -52,13 +54,13 @@ export function AuthProvider({ children }: Props): ReactNode {
   // làm mới user
   const refreshUser = useCallback(async () => {
     if (isRefreshingRef.current) {
-      console.log("[AuthProvider] refreshUser skipped (already running)");
+      logger.log("[AuthProvider] refreshUser skipped (already running)");
       return;
     }
 
-    const token = localStorage.getItem("token");
+    const token = StorageUtil.getItem("token");
     if (!token) {
-      console.warn("[AuthProvider] refreshUser skipped (no token)");
+      logger.warn("[AuthProvider] refreshUser skipped (no token)");
       return;
     }
 
@@ -66,9 +68,9 @@ export function AuthProvider({ children }: Props): ReactNode {
       isRefreshingRef.current = true;
       const res = await usersApi.getMe();
       setUser(res.data);
-      localStorage.setItem("user", JSON.stringify(res.data));
+      StorageUtil.setJSON("user", res.data);
     } catch (err) {
-      console.error("[AuthProvider] refreshUser failed:", err);
+      logger.error("[AuthProvider] refreshUser failed:", err);
     } finally {
       isRefreshingRef.current = false;
     }
@@ -78,24 +80,24 @@ export function AuthProvider({ children }: Props): ReactNode {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const storedUser = localStorage.getItem("user");
-        const storedToken = localStorage.getItem("token");
+        const storedUser = StorageUtil.getItem("user");
+        const storedToken = StorageUtil.getItem("token");
 
         if (storedToken) {
           setToken(storedToken);
           try {
             const res = await usersApi.getMe();
             setUser(res.data);
-            localStorage.setItem("user", JSON.stringify(res.data));
+            StorageUtil.setJSON("user", res.data);
           } catch (err) {
-            console.warn("[AuthProvider] getMe failed:", err);
+            logger.warn("[AuthProvider] getMe failed:", err);
             if (storedUser) setUser(JSON.parse(storedUser));
           }
         }
       } catch (err) {
-        console.error("[AuthProvider] Error loading user/token:", err);
-        localStorage.removeItem("user");
-        localStorage.removeItem("token");
+        logger.error("[AuthProvider] Error loading user/token:", err);
+        StorageUtil.removeItem("user");
+        StorageUtil.removeItem("token");
       }
 
       const loader = document.getElementById("initial-loader");
@@ -127,7 +129,7 @@ export function AuthProvider({ children }: Props): ReactNode {
     const bc = new BroadcastChannel("user-sync");
     bc.onmessage = (event) => {
       if (event.data === "REFRESH_USER") {
-        console.log("[AuthProvider] Received REFRESH_USER broadcast");
+        logger.log("[AuthProvider] Received REFRESH_USER broadcast");
         refreshUser();
       }
     };
@@ -148,15 +150,15 @@ export function AuthProvider({ children }: Props): ReactNode {
     const { accessToken, user } = res.data;
     setUser(user);
     setToken(accessToken);
-    localStorage.setItem("token", accessToken);
-    localStorage.setItem("user", JSON.stringify(user));
+    StorageUtil.setItem("token", accessToken);
+    StorageUtil.setJSON("user", user);
   }, []);
 
   const logout = useCallback(() => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    StorageUtil.removeItem("token");
+    StorageUtil.removeItem("user");
   }, []);
 
   const value = useMemo<AuthContextValue>(
@@ -170,3 +172,4 @@ export function AuthProvider({ children }: Props): ReactNode {
 }
 
 export default AuthContext;
+

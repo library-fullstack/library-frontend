@@ -126,7 +126,8 @@ export default function BookDetail(): React.ReactElement {
   };
 
   const formatAuthors = (authorNames: string | null | undefined): string[] => {
-    if (!authorNames) return ["Đang cập nhật"];
+    if (!authorNames || typeof authorNames !== "string")
+      return ["Đang cập nhật"];
     return authorNames.split(",").map((name) => name.trim());
   };
 
@@ -180,7 +181,13 @@ export default function BookDetail(): React.ReactElement {
   };
 
   const handleCategoryClick = () => {
-    if (book?.category_id) {
+    if (book?.category_id && book?.category_name) {
+      navigate(
+        `/catalog?search=${encodeURIComponent(book.category_name)}&category=${
+          book.category_id
+        }`
+      );
+    } else if (book?.category_id) {
       navigate(`/catalog?category=${book.category_id}`);
     }
   };
@@ -710,6 +717,7 @@ export default function BookDetail(): React.ReactElement {
         <RelatedBooksSection
           currentBookId={book.id}
           categoryId={book.category_id}
+          categoryName={book.category_name}
         />
 
         <SameAuthorBooksSection

@@ -2,6 +2,7 @@
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
@@ -38,7 +39,6 @@
 
     <!-- prefetch các tài nguyên quan trọng -->
     <link rel="prefetch" href="/assets/fonts/" />
-    <link rel="prefetch" href="https://res.cloudinary.com/" />
 
     <!-- sitemap cho SEO -->
     <link rel="sitemap" href="/sitemap.xml" type="application/xml" />
@@ -57,9 +57,11 @@
           window.matchMedia("(prefers-color-scheme: dark)").matches;
         const dark = saved === "dark" || (!saved && prefersDark);
         const color = dark ? "#1b1c22" : "#f8fafc";
-        document.write(
-          `<style>html,body{background-color:${color}!important;}</style>`
-        );
+
+        const style = document.createElement("style");
+        style.textContent = `html,body{background-color:${color}!important;}`;
+        document.head.appendChild(style);
+
         document.documentElement.dataset.theme = dark ? "dark" : "light";
 
         if ("scrollRestoration" in history) {

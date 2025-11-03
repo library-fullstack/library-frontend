@@ -1,3 +1,6 @@
+import axiosClient from "../../shared/api/axiosClient";
+import logger from "../../shared/lib/logger";
+
 export interface BannerConfig {
   id: string;
   image: string;
@@ -28,22 +31,15 @@ export const defaultBannerConfig: BannerConfig = {
 
 export const getActiveBannerConfig = async (): Promise<BannerConfig> => {
   try {
-    const apiBaseUrl =
-      import.meta.env.VITE_API_URL ?? "http://localhost:4000/api/v1";
-    const response = await fetch(`${apiBaseUrl}/banners/active`);
+    const response = await axiosClient.get<{
+      success: boolean;
+      data: BannerConfig;
+    }>("/banners/active");
 
-    if (!response.ok) {
-      console.warn(
-        "Không thể lấy banner đang hoạt động từ API, đang sử dụng mặc định",
-        response.status
-      );
-      return defaultBannerConfig;
-    }
+    logger.log("Banner từ API:", response.data);
 
-    const data = await response.json();
-    console.log("Banner từ API:", data);
-
-    const banner = data.data || data;
+    const banner =
+      response.data.data || (response.data as unknown as BannerConfig);
 
     if (banner && banner.image) {
       return banner as BannerConfig;
@@ -51,7 +47,7 @@ export const getActiveBannerConfig = async (): Promise<BannerConfig> => {
 
     return defaultBannerConfig;
   } catch (err) {
-    console.error("Không thể tải cấu hình banner:", err);
+    logger.error("Không thể tải cấu hình banner:", err);
     return defaultBannerConfig;
   }
 };
