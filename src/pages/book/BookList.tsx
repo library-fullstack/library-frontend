@@ -25,6 +25,7 @@ import type {
   BookFilters,
   SortOption,
 } from "../../features/books/types";
+import logger from "@/shared/lib/logger";
 
 export default function BookList(): React.ReactElement {
   const theme = useTheme();
@@ -120,7 +121,7 @@ export default function BookList(): React.ReactElement {
         const count = await booksApi.getPublicBookCount();
         setTotalBooksInDB(count.total);
       } catch (err) {
-        console.error("Error fetching book count:", err);
+        logger.error("Error fetching book count:", err);
       }
     };
 
@@ -135,8 +136,7 @@ export default function BookList(): React.ReactElement {
         const data = await categoriesApi.getAllCategories();
         setCategories(data);
       } catch (err) {
-        console.error("Error fetching categories:", err);
-        // không báo error. chỉ báo loại sách là trống
+        logger.error("Error fetching categories:", err);
         setCategories([]);
       } finally {
         setCategoriesLoading(false);
@@ -146,7 +146,6 @@ export default function BookList(): React.ReactElement {
     fetchCategories();
   }, []);
 
-  // fetch lại khi filter ( mấy cái sắp xếp ) thay đổi
   useEffect(() => {
     const fetchBooks = async () => {
       setLoading(true);
@@ -284,7 +283,7 @@ export default function BookList(): React.ReactElement {
         setDisplayedBooks(firstBatch);
         setHasMore(filteredBooks.length > BOOKS_PER_BATCH);
       } catch (err) {
-        console.error("Error fetching books:", err);
+        logger.error("Error fetching books:", err);
         setBooks([]);
         setDisplayedBooks([]);
         setHasMore(false);

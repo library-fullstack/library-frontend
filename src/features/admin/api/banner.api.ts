@@ -1,5 +1,6 @@
 import axiosClient from "../../../shared/api/axiosClient";
 import { camelToSnake, snakeToCamel } from "../../../shared/lib/case-converter";
+import logger from "@/shared/lib/logger";
 
 export interface BannerData {
   id?: string;
@@ -40,6 +41,13 @@ export interface BannerListResponse {
   };
 }
 
+const activeBannerCache = { data: null as BannerData | null, timestamp: 0 };
+const ACTIVE_BANNER_TTL = 5 * 60 * 1000; // 5 minutes
+
+const isBannerCacheValid = (): boolean => {
+  return Date.now() - activeBannerCache.timestamp < ACTIVE_BANNER_TTL;
+};
+
 export const bannerApi = {
   async getAllBanners(
     page: number = 1,
@@ -57,21 +65,32 @@ export const bannerApi = {
           ) as BannerData
       );
     } catch (error) {
-      console.error("Không thể lấy banner đang hoạt động từ API:", error);
+      logger.error("Không thể lấy banner đang hoạt động từ API:", error);
       throw error;
     }
   },
 
   async getActiveBanner(): Promise<BannerData | null> {
     try {
+      if (isBannerCacheValid() && activeBannerCache.data) {
+        logger.log("[BannerAPI] Using cached active banner");
+        return activeBannerCache.data;
+      }
+
       const response = await axiosClient.get<BannerResponse>(`/banners/active`);
       const banner = response.data.data as BannerData | undefined;
       if (!banner) return null;
-      return snakeToCamel(
+
+      const convertedBanner = snakeToCamel(
         banner as unknown as Record<string, unknown>
       ) as BannerData;
+
+      activeBannerCache.data = convertedBanner;
+      activeBannerCache.timestamp = Date.now();
+
+      return convertedBanner;
     } catch (error) {
-      console.error("Không thể lấy banner đang hoạt động từ API:", error);
+      logger.error("Không thể lấy banner đang hoạt động từ API:", error);
       return null;
     }
   },
@@ -85,7 +104,7 @@ export const bannerApi = {
         banner as unknown as Record<string, unknown>
       ) as BannerData;
     } catch (error) {
-      console.error("Không thể lấy banner từ API:", error);
+      logger.error("Không thể lấy banner từ API:", error);
       throw error;
     }
   },
@@ -109,7 +128,7 @@ export const bannerApi = {
 
       return response.data.data as { url: string; public_id: string };
     } catch (error) {
-      console.error("Không thể tải lên hình ảnh:", error);
+      logger.error("Không thể tải lên hình ảnh:", error);
       throw error;
     }
   },
@@ -121,6 +140,10 @@ export const bannerApi = {
         camelToSnake(banner as unknown as Record<string, unknown>)
       );
       const data = response.data.data as BannerData | undefined;
+
+      activeBannerCache.data = null;
+      activeBannerCache.timestamp = 0;
+
       return {
         ...response.data,
         data: data
@@ -130,7 +153,7 @@ export const bannerApi = {
           : undefined,
       };
     } catch (error) {
-      console.error("Không thể tạo banner từ API:", error);
+      logger.error("Không thể tạo banner từ API:", error);
       throw error;
     }
   },
@@ -145,6 +168,10 @@ export const bannerApi = {
         camelToSnake(banner as unknown as Record<string, unknown>)
       );
       const data = response.data.data as BannerData | undefined;
+
+      activeBannerCache.data = null;
+      activeBannerCache.timestamp = 0;
+
       return {
         ...response.data,
         data: data
@@ -154,7 +181,7 @@ export const bannerApi = {
           : undefined,
       };
     } catch (error) {
-      console.error("Không thể cập nhật banner từ API:", error);
+      logger.error("Không thể cập nhật banner từ API:", error);
       throw error;
     }
   },
@@ -164,9 +191,13 @@ export const bannerApi = {
       const response = await axiosClient.delete<BannerResponse>(
         `/admin/banners/${id}`
       );
+
+      activeBannerCache.data = null;
+      activeBannerCache.timestamp = 0;
+
       return response.data as BannerResponse;
     } catch (error) {
-      console.error("Không thể xóa banner từ API:", error);
+      logger.error("Không thể xóa banner từ API:", error);
       throw error;
     }
   },
@@ -181,6 +212,10 @@ export const bannerApi = {
         { is_active: isActive }
       );
       const data = response.data.data as BannerData | undefined;
+
+      activeBannerCache.data = null;
+      activeBannerCache.timestamp = 0;
+
       return {
         ...response.data,
         data: data
@@ -190,8 +225,13 @@ export const bannerApi = {
           : undefined,
       };
     } catch (error) {
-      console.error("Không thể thay đổi trạng thái banner từ API:", error);
+      logger.error("Không thể thay đổi trạng thái banner từ API:", error);
       throw error;
     }
+  },
+
+  clearCache(): void {
+    activeBannerCache.data = null;
+    activeBannerCache.timestamp = 0;
   },
 };

@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import BookCard from "../../../widgets/book-card/BookCard";
 import { booksApi } from "../../../features/books/api";
 import type { Book } from "../../../features/books/types";
+import logger from "@/shared/lib/logger";
 
 interface SameAuthorBooksSectionProps {
   currentBookId: number;
@@ -49,7 +50,7 @@ export default function SameAuthorBooksSection({
         const filtered = books.filter((book) => book.id !== currentBookId);
         setSameAuthorBooks(filtered);
       } catch (err) {
-        console.error("Error fetching same author books:", err);
+        logger.error("Error fetching same author books:", err);
         setSameAuthorBooks([]);
       } finally {
         setLoading(false);

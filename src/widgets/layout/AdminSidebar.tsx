@@ -286,8 +286,13 @@ export default function AdminSidebar({
       <Divider />
 
       <List sx={{ px: 2, py: 2 }}>
-        {!isCollapsed && (
-          <ListItem disablePadding sx={{ mb: 0.5 }}>
+        <ListItem disablePadding sx={{ mb: 0.5 }}>
+          <Tooltip
+            title="Về trang chủ"
+            placement="right"
+            arrow
+            disableHoverListener={!isCollapsed}
+          >
             <ListItemButton
               onClick={() => {
                 navigate("/");
@@ -295,17 +300,34 @@ export default function AdminSidebar({
               }}
               sx={{
                 borderRadius: 2,
-                py: 1.25,
-                px: 2,
-                display: "flex",
+                justifyContent: isCollapsed ? "center" : "flex-start",
                 alignItems: "center",
-                gap: 1.5,
+                gap: isCollapsed ? 0 : 1.5,
+                px: isCollapsed ? 0 : 2,
+                py: isCollapsed ? 0 : 1.25,
+                minHeight: isCollapsed ? 0 : 44,
+                display: "flex",
                 "&:hover": {
                   bgcolor:
                     theme.palette.mode === "dark"
                       ? "rgba(255, 255, 255, 0.05)"
                       : "rgba(0, 0, 0, 0.04)",
                 },
+                transition: "all 250ms cubic-bezier(0.4, 0, 0.2, 1)",
+                ...(isCollapsed && {
+                  width: 45,
+                  height: 42,
+                  minHeight: "unset",
+                  p: 0,
+                  m: "4px auto",
+                  borderRadius: 1.5,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  "&:hover": {
+                    transform: "scale(1.05)",
+                  },
+                }),
               }}
             >
               <ListItemIcon
@@ -314,21 +336,26 @@ export default function AdminSidebar({
                   color: "text.secondary",
                   display: "flex",
                   alignItems: "center",
+                  ...(isCollapsed && {
+                    m: 0,
+                  }),
                 }}
               >
                 <ArrowLeft size={20} />
               </ListItemIcon>
-              <ListItemText
-                primary="Về trang chủ"
-                primaryTypographyProps={{
-                  fontSize: "0.875rem",
-                  fontWeight: 500,
-                  noWrap: true,
-                }}
-              />
+              {!isCollapsed && (
+                <ListItemText
+                  primary="Về trang chủ"
+                  primaryTypographyProps={{
+                    fontSize: "0.875rem",
+                    fontWeight: 500,
+                    noWrap: true,
+                  }}
+                />
+              )}
             </ListItemButton>
-          </ListItem>
-        )}
+          </Tooltip>
+        </ListItem>
       </List>
     </Box>
   );

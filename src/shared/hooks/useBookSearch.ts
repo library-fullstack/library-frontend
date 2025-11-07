@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { booksApi } from "../../features/books/api";
 import type { Book } from "../../features/books/types";
+import logger from "@/shared/lib/logger";
 
 interface UseBookSearchReturn {
   query: string;
@@ -52,7 +53,7 @@ export function useBookSearch(): UseBookSearchReturn {
       setErrorMessage(null);
     } catch (error) {
       if (error instanceof Error && error.name !== "AbortError") {
-        console.error("Lỗi khi tìm kiếm:", error);
+        logger.error("Lỗi khi tìm kiếm:", error);
         setResults([]);
         setIsOpen(true);
 

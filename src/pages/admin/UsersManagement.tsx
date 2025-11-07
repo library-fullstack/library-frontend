@@ -44,6 +44,7 @@ import { settingsApi } from "../../features/admin/api/settings.api";
 import { parseApiError } from "../../shared/lib/errorHandler";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
+import logger from "@/shared/lib/logger";
 
 interface User {
   id: string;
@@ -136,7 +137,7 @@ export default function UsersManagement() {
         setAllowStudentInfoEdit(false);
       }
     } catch (err) {
-      console.error(
+      logger.error(
         "Lỗi khi tải cài đặt cho phép chỉnh sửa thông tin sinh viên:",
         err
       );
@@ -202,7 +203,7 @@ export default function UsersManagement() {
         await statisticsApi.updateUserRole(selectedUser.id, newRole);
         fetchUsers();
       } catch (err) {
-        console.error("Lỗi khi cập nhật vai trò:", err);
+        logger.error("Lỗi khi cập nhật vai trò:", err);
       }
     }
     setRoleDialogOpen(false);
@@ -216,7 +217,7 @@ export default function UsersManagement() {
         await statisticsApi.updateUserStatus(selectedUser.id, newStatus);
         fetchUsers();
       } catch (err) {
-        console.error("Lỗi khi cập nhật trạng thái:", err);
+        logger.error("Lỗi khi cập nhật trạng thái:", err);
       }
     }
     handleMenuClose();
@@ -228,7 +229,7 @@ export default function UsersManagement() {
         await statisticsApi.deleteUser(selectedUser.id);
         fetchUsers();
       } catch (err) {
-        console.error("Lỗi khi xóa người dùng:", err);
+        logger.error("Lỗi khi xóa người dùng:", err);
       }
     }
     handleMenuClose();

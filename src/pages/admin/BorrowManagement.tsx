@@ -32,6 +32,7 @@ import { statisticsApi } from "../../features/admin/api/statistics.api";
 import { parseApiError } from "../../shared/lib/errorHandler";
 import { format, formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
+import logger from "@/shared/lib/logger";
 
 interface Borrow {
   id: string | number;
@@ -152,7 +153,7 @@ export default function BorrowManagement() {
         await statisticsApi.updateBorrowStatus(selectedBorrow.id, newStatus);
         fetchBorrows();
       } catch (err) {
-        console.error("Lỗi khi cập nhật trạng thái:", err);
+        logger.error("Lỗi khi cập nhật trạng thái:", err);
       }
     }
     setStatusDialogOpen(false);

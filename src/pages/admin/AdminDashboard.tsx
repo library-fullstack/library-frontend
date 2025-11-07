@@ -19,6 +19,7 @@ import {
 import { statisticsApi } from "../../features/admin/api/statistics.api";
 import type { DashboardStatistics } from "../../features/admin/api/statistics.api";
 import { parseApiError } from "../../shared/lib/errorHandler";
+import logger from "@/shared/lib/logger";
 
 const RecentActivity = lazy(
   () => import("../../features/admin/components/RecentActivity")
@@ -138,13 +139,13 @@ export default function AdminDashboard() {
       setLoading(true);
       setError("");
       try {
-        console.log("[AdminDashboard] Đang lấy thống kê bảng điều khiển...");
+        logger.log("[AdminDashboard] Đang lấy thống kê bảng điều khiển...");
         const response = await statisticsApi.getDashboardStats();
-        console.log("[AdminDashboard] Phản hồi từ API:", response);
+        logger.log("[AdminDashboard] Phản hồi từ API:", response);
         setStats(response.data);
       } catch (err) {
         const errorMsg = parseApiError(err);
-        console.error("[AdminDashboard] Lỗi:", err, "Đã parse:", errorMsg);
+        logger.error("[AdminDashboard] Lỗi:", err, "Đã parse:", errorMsg);
         setError(errorMsg);
         setStats(createMockStats());
       } finally {

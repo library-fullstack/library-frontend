@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Box } from "@mui/material";
 import { useEventEffectsSetting } from "../hooks/useEventEffectsSetting";
+import logger from "@/shared/lib/logger";
 
 interface FallingElementConfig {
   count: number;
@@ -12,6 +13,25 @@ interface FallingElementConfig {
   symbol?: string;
   style?: "particle" | "leaf" | "snowflake" | "heart";
 }
+
+const ALLOWED_EVENT_TYPES = [
+  "halloween",
+  "christmas",
+  "tet",
+  "valentine",
+  "summer",
+  "backtoschool",
+  "spring",
+  "blackfriday",
+  "newyear",
+  "default",
+] as const;
+
+type AllowedEventType = typeof ALLOWED_EVENT_TYPES[number];
+
+const isValidEventType = (eventType: string): eventType is AllowedEventType => {
+  return ALLOWED_EVENT_TYPES.includes(eventType.toLowerCase() as AllowedEventType);
+};
 
 const defaultConfigs: Record<string, FallingElementConfig> = {
   halloween: {
@@ -134,12 +154,19 @@ export const EventFallingElements: React.FC<Props> = ({
 
     if (initRef.current) return;
 
-    const config = defaultConfigs[eventType.toLowerCase()];
+    const normalizedEventType = eventType.toLowerCase();
+
+    if (!isValidEventType(normalizedEventType)) {
+      logger.warn(`Invalid event type: ${eventType}. Allowed types are: ${ALLOWED_EVENT_TYPES.join(", ")}`);
+      return;
+    }
+
+    const config = defaultConfigs[normalizedEventType];
     if (!config) return;
 
     container.innerHTML = "";
     const style = document.createElement("style");
-    style.textContent = generateAnimationCSS(eventType.toLowerCase(), config);
+    style.textContent = generateAnimationCSS(normalizedEventType, config);
     container.appendChild(style);
 
     const count = isMobileRef.current
@@ -147,7 +174,7 @@ export const EventFallingElements: React.FC<Props> = ({
       : config.count;
     const elements = createFallingElements(
       { ...config, count },
-      eventType.toLowerCase()
+      normalizedEventType
     );
     elements.forEach((el) => container.appendChild(el));
 

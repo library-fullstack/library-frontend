@@ -11,6 +11,7 @@ import {
 import { MenuBook } from "@mui/icons-material";
 import BookCard from "../book-card/BookCard";
 import type { Book } from "../../features/books/types";
+import logger from "@/shared/lib/logger";
 
 interface BookCatalogGridProps {
   books: Book[];
@@ -43,7 +44,7 @@ export default function BookCatalogGrid({
       const [entry] = entries;
 
       if (entry.isIntersecting) {
-        console.log("Load more triggered");
+        logger.log("Load more triggered");
         onLoadMore();
       }
     };

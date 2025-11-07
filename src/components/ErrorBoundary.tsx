@@ -1,4 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from "react";
+import { logger } from "@/shared/lib/logger";
 
 interface Props {
   children: ReactNode;
@@ -20,11 +21,17 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("ErrorBoundary đã bắt được lỗi:", error, errorInfo);
+    logger.error("ErrorBoundary caught error:", {
+      error,
+      errorInfo,
+      componentStack: errorInfo.componentStack,
+    });
   }
 
   public render() {
     if (this.state.hasError) {
+      const isProduction = import.meta.env.PROD;
+
       return (
         <div
           style={{
@@ -35,11 +42,15 @@ class ErrorBoundary extends Component<Props, State> {
           }}
         >
           <h1>Something went wrong.</h1>
-          <details style={{ whiteSpace: "pre-wrap" }}>
-            {this.state.error && this.state.error.toString()}
-            <br />
-            {this.state.error?.stack}
-          </details>
+          <p>We apologize for the inconvenience. Please try refreshing the page.</p>
+          {!isProduction && this.state.error && (
+            <details style={{ whiteSpace: "pre-wrap", marginTop: "20px" }}>
+              <summary>Error Details (Development Only)</summary>
+              {this.state.error.toString()}
+              <br />
+              {this.state.error.stack}
+            </details>
+          )}
         </div>
       );
     }

@@ -2,46 +2,13 @@ import * as React from "react";
 import { Box, Container, Typography, Button } from "@mui/material";
 import { ArrowForward } from "@mui/icons-material";
 
-import {
-  getActiveBannerConfig,
-  defaultBannerConfig,
-  BannerConfig,
-} from "../../app/config/bannerConfig";
+import { useBanner } from "../../context/useBannerContext";
 import EventFallingElements from "../../shared/components/EventFallingElements";
 import "../../styles/eventTheme.css";
 
 export default function HeroBanner(): React.ReactElement {
   const [activeSlide, setActiveSlide] = React.useState(0);
-  const [bannerConfig, setBannerConfig] =
-    React.useState<BannerConfig>(defaultBannerConfig);
-  const [isLoading, setIsLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    const loadBanner = async () => {
-      try {
-        const config = await getActiveBannerConfig();
-        setBannerConfig(config);
-      } catch (error) {
-        console.error("Không thể tải cấu hình banner:", error);
-        setBannerConfig(defaultBannerConfig);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadBanner();
-
-    const bc = new BroadcastChannel("banner-sync");
-    bc.onmessage = (event) => {
-      if (event.data === "REFRESH_BANNER") {
-        console.log("[HeroBanner] Nhận được thông báo REFRESH_BANNER");
-        loadBanner();
-      }
-    };
-
-    return () => {
-      bc.close();
-    };
-  }, []);
+  const { bannerConfig, eventClass, isLoading } = useBanner();
 
   if (isLoading) {
     return (
@@ -53,10 +20,6 @@ export default function HeroBanner(): React.ReactElement {
       />
     );
   }
-
-  const eventClass = bannerConfig.eventType
-    ? `event-${bannerConfig.eventType.toLowerCase()}`
-    : "";
 
   return (
     <>
@@ -113,7 +76,7 @@ export default function HeroBanner(): React.ReactElement {
                 sx={{
                   fontSize: { xs: "1.75rem", sm: "2rem", md: "3rem" },
                   fontWeight: 700,
-                  color: bannerConfig.titleColor,
+                  color: `${bannerConfig.titleColor} !important`,
                   mb: 2,
                   lineHeight: 1.25,
                   textShadow:
@@ -128,7 +91,7 @@ export default function HeroBanner(): React.ReactElement {
               <Typography
                 sx={{
                   fontSize: { xs: "0.9rem", sm: "1rem", md: "1.1rem" },
-                  color: bannerConfig.subtitleColor,
+                  color: `${bannerConfig.subtitleColor} !important`,
                   mb: 3,
                   lineHeight: 1.6,
                   textShadow:

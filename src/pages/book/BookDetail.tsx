@@ -36,6 +36,7 @@ import SameAuthorBooksSection from "./components/SameAuthorBooksSection";
 import RecentBorrowersSection from "./components/RecentBorrowersSection";
 import BookImageGallery from "./components/BookImageGallery";
 import BookCopiesSection from "./components/BookCopiesSection";
+import logger from "@/shared/lib/logger";
 
 export default function BookDetail(): React.ReactElement {
   const { id } = useParams<{ id: string }>();
@@ -71,13 +72,13 @@ export default function BookDetail(): React.ReactElement {
           const availabilityData = await checkBookAvailable(Number(id));
           setAvailable(availabilityData.available);
         } catch (err) {
-          console.error("Lỗi khi kiểm tra tình trạng sẵn có:", err);
+          logger.error("Lỗi khi kiểm tra tình trạng sẵn có:", err);
           setAvailable(false);
         } finally {
           setCheckingAvailability(false);
         }
       } catch (err) {
-        console.error("Lỗi khi lấy dữ liệu sách:", err);
+        logger.error("Lỗi khi lấy dữ liệu sách:", err);
         setError("Không thể tải thông tin sách. Vui lòng thử lại sau.");
       } finally {
         setLoading(false);
@@ -121,7 +122,7 @@ export default function BookDetail(): React.ReactElement {
         });
       }
     } catch (err) {
-      console.error("Lỗi khi chia sẻ:", err);
+      logger.error("Lỗi khi chia sẻ:", err);
     }
   };
 

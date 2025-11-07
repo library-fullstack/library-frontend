@@ -39,6 +39,9 @@ import {
 import { bannerApi, BannerData } from "../../features/admin/api/banner.api";
 import { settingsApi } from "../../features/admin/api/settings.api";
 import { parseApiError } from "../../shared/lib/errorHandler";
+import { DebouncedColorPicker } from "../../shared/components/DebouncedColorPicker";
+import StorageUtil from "../../shared/lib/storage";
+import logger from "@/shared/lib/logger";
 
 interface FormDataState extends BannerData {
   id?: string;
@@ -80,13 +83,18 @@ const BannerManagement: React.FC = () => {
       setLoadingEffectsSetting(true);
       const setting = await settingsApi.getSetting("disable_event_effects");
       if (setting) {
-        const isDisabled = JSON.parse(setting.setting_value) as boolean;
-        setEventEffectsEnabled(!isDisabled);
+        try {
+          const isDisabled = JSON.parse(setting.setting_value) as boolean;
+          setEventEffectsEnabled(!isDisabled);
+        } catch (parseErr) {
+          logger.error("Failed to parse event effects setting:", parseErr);
+          setEventEffectsEnabled(true);
+        }
       } else {
         setEventEffectsEnabled(true);
       }
     } catch (err) {
-      console.error("Lỗi khi tải cài đặt hiệu ứng sự kiện:", err);
+      logger.error("Error loading event effects setting:", err);
       setEventEffectsEnabled(true);
     } finally {
       setLoadingEffectsSetting(false);
@@ -200,6 +208,13 @@ const BannerManagement: React.FC = () => {
     []
   );
 
+  const handleColorChange = useCallback((name: string) => (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }, []);
+
   const handleSave = async () => {
     if (!formData.title || !formData.subtitle || !formData.image) {
       setError("Vui lòng điền đầy đủ thông tin");
@@ -231,7 +246,7 @@ const BannerManagement: React.FC = () => {
       loadBanners();
 
       const bc = new BroadcastChannel("banner-sync");
-      console.log("[BannerManagement] Đang phát tín hiệu REFRESH_BANNER");
+      logger.log("[BannerManagement] Đang phát tín hiệu REFRESH_BANNER");
       bc.postMessage("REFRESH_BANNER");
       bc.close();
     } catch (err) {
@@ -246,7 +261,7 @@ const BannerManagement: React.FC = () => {
         loadBanners();
 
         const bc = new BroadcastChannel("banner-sync");
-        console.log(
+        logger.log(
           "[BannerManagement] Đang phát tín hiệu REFRESH_BANNER (xoá)"
         );
         bc.postMessage("REFRESH_BANNER");
@@ -263,7 +278,7 @@ const BannerManagement: React.FC = () => {
       loadBanners();
 
       const bc = new BroadcastChannel("banner-sync");
-      console.log(
+      logger.log(
         "[BannerManagement] Đang phát tín hiệu REFRESH_BANNER (toggle)"
       );
       bc.postMessage("REFRESH_BANNER");
@@ -287,7 +302,7 @@ const BannerManagement: React.FC = () => {
         "Event effects toggle"
       );
 
-      localStorage.setItem("disable_event_effects", JSON.stringify(!isEnabled));
+      StorageUtil.setItem("disable_event_effects", JSON.stringify(!isEnabled));
       window.dispatchEvent(new Event("storage"));
     } catch (err) {
       setError(parseApiError(err));
@@ -615,6 +630,7 @@ const BannerManagement: React.FC = () => {
         eventTypes={eventTypes}
         onClose={handleCloseDialog}
         onInputChange={handleInputChange}
+        onColorChange={handleColorChange}
         onFileUpload={handleFileUpload}
         onRemoveImage={() => {
           setFormData((prev) => ({ ...prev, image: "" }));
@@ -639,6 +655,7 @@ interface BannerFormDialogProps {
       | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
       | { target: { name: string; value: string } }
   ) => void;
+  onColorChange: (name: string) => (value: string) => void;
   onFileUpload: (file: File) => void;
   onRemoveImage: () => void;
   onSave: () => void;
@@ -653,6 +670,7 @@ const BannerFormDialog = React.memo(function BannerFormDialog({
   eventTypes,
   onClose,
   onInputChange,
+  onColorChange,
   onFileUpload,
   onRemoveImage,
   onSave,
@@ -888,14 +906,16 @@ const BannerFormDialog = React.memo(function BannerFormDialog({
               >
                 Màu tiêu đề
               </Typography>
-              <TextField
+              <DebouncedColorPicker
                 name="titleColor"
-                type="color"
                 fullWidth
                 size="small"
                 value={formData.titleColor}
-                onChange={onInputChange}
-                inputProps={{ style: { cursor: "pointer", height: 40 } }}
+                onChange={onColorChange("titleColor")}
+                debounceMs={100}
+                slotProps={{
+                  htmlInput: { style: { cursor: "pointer", height: 40 } }
+                }}
               />
             </Box>
             <Box sx={{ flex: 1 }}>
@@ -910,14 +930,16 @@ const BannerFormDialog = React.memo(function BannerFormDialog({
               >
                 Màu nút
               </Typography>
-              <TextField
+              <DebouncedColorPicker
                 name="buttonColor"
-                type="color"
                 fullWidth
                 size="small"
                 value={formData.buttonColor}
-                onChange={onInputChange}
-                inputProps={{ style: { cursor: "pointer", height: 40 } }}
+                onChange={onColorChange("buttonColor")}
+                debounceMs={100}
+                slotProps={{
+                  htmlInput: { style: { cursor: "pointer", height: 40 } }
+                }}
               />
             </Box>
           </Box>
@@ -941,14 +963,16 @@ const BannerFormDialog = React.memo(function BannerFormDialog({
               >
                 Màu tiêu đề phụ
               </Typography>
-              <TextField
+              <DebouncedColorPicker
                 name="subtitleColor"
-                type="color"
                 fullWidth
                 size="small"
                 value={formData.subtitleColor}
-                onChange={onInputChange}
-                inputProps={{ style: { cursor: "pointer", height: 40 } }}
+                onChange={onColorChange("subtitleColor")}
+                debounceMs={100}
+                slotProps={{
+                  htmlInput: { style: { cursor: "pointer", height: 40 } }
+                }}
               />
             </Box>
             <Box sx={{ flex: 1, display: { xs: "none", sm: "block" } }} />

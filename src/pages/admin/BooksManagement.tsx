@@ -35,6 +35,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { statisticsApi } from "../../features/admin/api/statistics.api";
 import { parseApiError } from "../../shared/lib/errorHandler";
+import logger from "@/shared/lib/logger";
 
 interface Book {
   id: string | number;
@@ -91,11 +92,11 @@ export default function BooksManagement() {
         search: search || undefined,
         status: statusFilter || undefined,
       });
-      console.log("[BooksManagement] Phản hồi từ API: ", response);
+      logger.log("[BooksManagement] Phản hồi từ API: ", response);
       setBooks(response.data.books || []);
       setTotal(response.data.total || 0);
     } catch (err) {
-      console.error("[BooksManagement] Lỗi API:", err);
+      logger.error("[BooksManagement] Lỗi API:", err);
       setError(parseApiError(err));
       setBooks(createMockBooks());
       setTotal(50);
@@ -145,7 +146,7 @@ export default function BooksManagement() {
 
   const handleDelete = () => {
     if (selectedBook) {
-      console.log("Xoá sách:", selectedBook.id);
+      logger.log("Xoá sách:", selectedBook.id);
     }
     handleMenuClose();
   };

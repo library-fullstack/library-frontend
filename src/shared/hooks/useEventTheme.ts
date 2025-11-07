@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useBanner } from "../../context/useBannerContext";
 
 export interface EventThemeConfig {
   eventType?: string;
@@ -7,48 +7,6 @@ export interface EventThemeConfig {
 }
 
 export const useEventTheme = (): string => {
-  const [eventClass, setEventClass] = useState("");
-
-  useEffect(() => {
-    const loadEventTheme = async () => {
-      try {
-        const apiBaseUrl =
-          import.meta.env.VITE_API_URL ?? "http://localhost:4000/api/v1";
-        const response = await fetch(`${apiBaseUrl}/banners/active`);
-
-        if (!response.ok) {
-          setEventClass("");
-          return;
-        }
-
-        const data = await response.json();
-        const banner = data.data || data;
-
-        if (banner?.eventType) {
-          setEventClass(`event-${banner.eventType.toLowerCase()}`);
-        } else {
-          setEventClass("");
-        }
-      } catch (err) {
-        console.error("[useEventTheme] Không thể tải chủ đề sự kiện:", err);
-        setEventClass("");
-      }
-    };
-
-    loadEventTheme();
-
-    const bc = new BroadcastChannel("banner-sync");
-    bc.onmessage = (event) => {
-      if (event.data === "REFRESH_BANNER") {
-        console.log("[useEventTheme] Nhận thông báo REFRESH_BANNER");
-        loadEventTheme();
-      }
-    };
-
-    return () => {
-      bc.close();
-    };
-  }, []);
-
+  const { eventClass } = useBanner();
   return eventClass;
 };

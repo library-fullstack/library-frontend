@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import BookCard from "../../../widgets/book-card/BookCard";
 import { booksApi } from "../../../features/books/api";
 import type { Book } from "../../../features/books/types";
+import logger from "@/shared/lib/logger";
 
 interface RelatedBooksSectionProps {
   currentBookId: number;
@@ -47,7 +48,7 @@ export default function RelatedBooksSection({
         const filtered = books.filter((book) => book.id !== currentBookId);
         setRelatedBooks(filtered);
       } catch (err) {
-        console.error("Lỗi khi lấy sách liên quan:", err);
+        logger.error("Lỗi khi lấy sách liên quan:", err);
         setRelatedBooks([]);
       } finally {
         setLoading(false);

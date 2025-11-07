@@ -4,6 +4,7 @@ import { AliveScope } from "react-activation";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeContextProvider } from "./context/ThemeContext";
+import { BannerProvider } from "./context/BannerContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import App from "./App";
 import "./index.css";
@@ -13,13 +14,15 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <ErrorBoundary>
     <HelmetProvider>
       <ThemeContextProvider>
-        <AuthProvider>
-          <BrowserRouter>
-            <AliveScope>
-              <App />
-            </AliveScope>
-          </BrowserRouter>
-        </AuthProvider>
+        <BannerProvider>
+          <AuthProvider>
+            <BrowserRouter>
+              <AliveScope>
+                <App />
+              </AliveScope>
+            </BrowserRouter>
+          </AuthProvider>
+        </BannerProvider>
       </ThemeContextProvider>
     </HelmetProvider>
   </ErrorBoundary>

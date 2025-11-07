@@ -27,6 +27,7 @@ import { motion } from "framer-motion";
 import { useEventTheme } from "../../shared/hooks/useEventTheme";
 import EventFallingElements from "../../shared/components/EventFallingElements";
 import "../../styles/eventTheme.css";
+import logger from "@/shared/lib/logger";
 
 const MotionCard = motion.create(Card);
 
@@ -55,7 +56,7 @@ const FeaturedBooks: React.FC = () => {
         });
         if (isMounted) setBooks(Array.isArray(list) ? list : []);
       } catch (err) {
-        console.error("Lỗi tải sách:", err);
+        logger.error("Lỗi tải sách:", err);
         if (isMounted) setError("Không thể tải danh sách sách nổi bật.");
       } finally {
         if (isMounted) setLoading(false);

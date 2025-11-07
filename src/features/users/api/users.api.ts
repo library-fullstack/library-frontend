@@ -1,4 +1,5 @@
 import axiosClient from "../../../shared/api/axiosClient";
+import StorageUtil from "../../../shared/lib/storage";
 
 export interface User {
   id: string;
@@ -26,9 +27,8 @@ export interface UpdateProfileRequest {
 }
 
 export const usersApi = {
-  // lấy thông tin người dùng hiện tại
   getMe: async () => {
-    const token = localStorage.getItem("token");
+    const token = StorageUtil.getItem("token");
     if (!token) throw new Error("No token available for getMe()");
     return axiosClient.get<User>("/users/profile");
   },

@@ -50,6 +50,7 @@ export function AuthProvider({ children }: Props): ReactNode {
   const [token, setToken] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
   const isRefreshingRef = React.useRef(false);
+  const hasInitializedRef = React.useRef(false);
 
   // làm mới user
   const refreshUser = useCallback(async () => {
@@ -78,6 +79,12 @@ export function AuthProvider({ children }: Props): ReactNode {
 
   // localstorage
   useEffect(() => {
+    if (hasInitializedRef.current) {
+      logger.log("[AuthProvider] Already initialized, skip duplicate call");
+      return;
+    }
+    hasInitializedRef.current = true;
+
     const initAuth = async () => {
       try {
         const storedUser = StorageUtil.getItem("user");
@@ -91,7 +98,17 @@ export function AuthProvider({ children }: Props): ReactNode {
             StorageUtil.setJSON("user", res.data);
           } catch (err) {
             logger.warn("[AuthProvider] getMe failed:", err);
-            if (storedUser) setUser(JSON.parse(storedUser));
+            if (storedUser) {
+              try {
+                setUser(JSON.parse(storedUser));
+              } catch (parseErr) {
+                logger.error(
+                  "[AuthProvider] Failed to parse stored user:",
+                  parseErr
+                );
+                StorageUtil.removeItem("user");
+              }
+            }
           }
         }
       } catch (err) {
@@ -116,21 +133,38 @@ export function AuthProvider({ children }: Props): ReactNode {
   // đồng bộ realtime user
   useEffect(() => {
     let focusTimeout: ReturnType<typeof setTimeout>;
+    let lastFocusTime = 0;
+    const FOCUS_DEBOUNCE_MS = 10000;
 
     const handleFocus = () => {
+      const now = Date.now();
+      if (now - lastFocusTime < FOCUS_DEBOUNCE_MS) {
+        logger.log("[AuthProvider] Focus debounced, skip refresh");
+        return;
+      }
+
       clearTimeout(focusTimeout);
       focusTimeout = setTimeout(() => {
-        refreshUser();
+        if (document.visibilityState === "visible") {
+          lastFocusTime = Date.now();
+          logger.log("[AuthProvider] Refreshing user on focus");
+          refreshUser();
+        }
       }, 500);
     };
 
-    window.addEventListener("focus", handleFocus);
+    if (token) {
+      window.addEventListener("focus", handleFocus);
+    }
 
     const bc = new BroadcastChannel("user-sync");
     bc.onmessage = (event) => {
       if (event.data === "REFRESH_USER") {
         logger.log("[AuthProvider] Received REFRESH_USER broadcast");
-        refreshUser();
+        clearTimeout(focusTimeout);
+        focusTimeout = setTimeout(() => {
+          refreshUser();
+        }, 800);
       }
     };
 
@@ -139,7 +173,7 @@ export function AuthProvider({ children }: Props): ReactNode {
       clearTimeout(focusTimeout);
       bc.close();
     };
-  }, [refreshUser]);
+  }, [refreshUser, token]);
 
   // login / logout
   const login = useCallback(async (identifier: string, password: string) => {
@@ -172,4 +206,3 @@ export function AuthProvider({ children }: Props): ReactNode {
 }
 
 export default AuthContext;
-

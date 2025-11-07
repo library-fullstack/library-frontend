@@ -21,6 +21,9 @@ export default defineConfig(({ mode }) => {
     ],
     resolve: {
       dedupe: ["react", "react-dom", "@emotion/react", "@emotion/styled"],
+      alias: {
+        "@": "/src",
+      },
     },
     server: {
       port: 5173,

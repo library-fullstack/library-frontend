@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { settingsApi } from "../../features/admin/api/settings.api";
+import StorageUtil from "../lib/storage";
+import logger from "@/shared/lib/logger";
 
 export const useEventEffectsSetting = (): boolean => {
   const [isEnabled, setIsEnabled] = useState(true);
@@ -9,18 +11,23 @@ export const useEventEffectsSetting = (): boolean => {
       try {
         const setting = await settingsApi.getSetting("disable_event_effects");
         if (setting) {
-          const isDisabled = JSON.parse(setting.setting_value) as boolean;
-          setIsEnabled(!isDisabled);
-          localStorage.setItem(
-            "disable_event_effects",
-            JSON.stringify(isDisabled)
-          );
+          try {
+            const isDisabled = JSON.parse(setting.setting_value) as boolean;
+            setIsEnabled(!isDisabled);
+            StorageUtil.setItem(
+              "disable_event_effects",
+              JSON.stringify(isDisabled)
+            );
+          } catch (parseErr) {
+            logger.error("Failed to parse event effects setting:", parseErr);
+            setIsEnabled(true);
+          }
         } else {
           setIsEnabled(true);
-          localStorage.setItem("disable_event_effects", JSON.stringify(false));
+          StorageUtil.setItem("disable_event_effects", JSON.stringify(false));
         }
       } catch (error) {
-        console.error("Lỗi khi lấy cài đặt hiệu ứng sự kiện:", error);
+        logger.error("Error fetching event effects setting:", error);
         setIsEnabled(true);
       }
     };
@@ -28,10 +35,15 @@ export const useEventEffectsSetting = (): boolean => {
     fetchSetting();
 
     const handleStorageChange = () => {
-      const stored = localStorage.getItem("disable_event_effects");
+      const stored = StorageUtil.getItem("disable_event_effects");
       if (stored) {
-        const isDisabled = JSON.parse(stored) as boolean;
-        setIsEnabled(!isDisabled);
+        try {
+          const isDisabled = JSON.parse(stored) as boolean;
+          setIsEnabled(!isDisabled);
+        } catch (parseErr) {
+          logger.error("Failed to parse stored event effects setting:", parseErr);
+          setIsEnabled(true);
+        }
       }
     };
 

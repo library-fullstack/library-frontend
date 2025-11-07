@@ -111,12 +111,11 @@ export interface PasswordValidation {
 
 // kiểm tra mật khẩu
 export function validatePassword(password: string): PasswordValidation {
-  const hasMinLength = password.length >= 6;
+  const hasMinLength = password.length >= 8;
   const hasUpperCase = /[A-Z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
   const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
-  // tính số lượng điều kiện mật khẩu thoả mãn
   const validCount = [
     hasMinLength,
     hasUpperCase,
@@ -124,15 +123,12 @@ export function validatePassword(password: string): PasswordValidation {
     hasSpecialChar,
   ].filter(Boolean).length;
 
-  // nếu hợp lệ cả 3 yêu cầu thì cho nó valid
   const isValid = hasMinLength && hasUpperCase && hasNumber && hasSpecialChar;
 
-  // mức độ mạnh theo chữ
   let strength: "weak" | "medium" | "strong" = "weak";
   if (validCount >= 4) strength = "strong";
   else if (validCount >= 3) strength = "medium";
 
-  // trả về tất cả
   return {
     hasMinLength,
     hasUpperCase,

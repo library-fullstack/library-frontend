@@ -24,6 +24,7 @@ import AvatarCropDialog from "../../shared/ui/AvatarCropDialog";
 import ChangePasswordSection from "../../features/auth/components/ChangePasswordSection";
 import { LoadingButton } from "@mui/lab";
 import { CircularProgress } from "@mui/material";
+import logger from "@/shared/lib/logger";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -66,7 +67,7 @@ export default function Profile(): React.ReactElement {
 
     // ngăn upload 2 lần
     if (uploadingRef.current) {
-      console.log("[Upload Avatar] Upload already in progress, skipping...");
+      logger.log("[Upload Avatar] Upload already in progress, skipping...");
       return;
     }
 
@@ -114,7 +115,7 @@ export default function Profile(): React.ReactElement {
         bc.close();
       }, 500);
     } catch (err) {
-      console.error("[Upload Avatar Error]", err);
+      logger.error("[Upload Avatar Error]", err);
       const msg =
         (err as { response?: { data?: { message?: string } } }).response?.data
           ?.message || "Tải ảnh thất bại!";
