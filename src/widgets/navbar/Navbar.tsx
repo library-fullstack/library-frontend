@@ -34,7 +34,7 @@ import {
   X,
   LayoutDashboard,
 } from "lucide-react";
-import { useCart } from "../../features/borrow/hooks/useCart";
+import { useCart } from "../../features/borrow/components/hooks/useCart";
 import { useCurrentUser } from "../../features/users/hooks/useUser";
 
 export default function Navbar(): React.ReactElement {

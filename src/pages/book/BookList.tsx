@@ -18,7 +18,10 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import BookCatalogFilters from "../../widgets/book-catalog-filters/BookCatalogFilters";
 import BookCatalogGrid from "../../widgets/book-catalog-grid/BookCatalogGrid";
 import SeoMetaTags from "../../shared/components/SeoMetaTags";
-import { useAddToCart, useCart } from "../../features/borrow/hooks/useCart";
+import {
+  useAddToCart,
+  useCart,
+} from "../../features/borrow/components/hooks/useCart";
 import type { BookFilters, SortOption } from "../../features/books/types";
 import logger from "@/shared/lib/logger";
 import {

@@ -20,7 +20,7 @@ import {
   useRemoveFromCart,
   useUpdateCartQuantity,
   useClearCart,
-} from "../../features/borrow/hooks/useCart";
+} from "../../features/borrow/components/hooks/useCart";
 import BorrowCartItem from "../../features/borrow/components/BorrowCartItem";
 import BorrowCartSummary from "../../features/borrow/components/BorrowCartSummary";
 import { borrowApi } from "../../features/borrow/api/borrow.api";

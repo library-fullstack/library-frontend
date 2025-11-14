@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useAddToCart, useCart } from "../hooks/useCart";
+import { useAddToCart, useCart } from "./hooks/useCart";
 import logger from "../../../shared/lib/logger";
 import { useCurrentUser } from "../../users/hooks/useUser";
 

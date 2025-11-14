@@ -4,7 +4,7 @@ import axiosClient from "../../../shared/api/axiosClient";
 import StorageUtil from "../../../shared/lib/storage";
 import logger from "../../../shared/lib/logger";
 import { userKeys } from "../../users/hooks/useUser";
-import { cartKeys } from "../../borrow/hooks/useCart";
+import { cartKeys } from "../../borrow/components/hooks/useCart";
 import type { User } from "../../users/api/users.api";
 
 interface LoginResponse {

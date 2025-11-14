@@ -1,4 +1,4 @@
-import { useCart as useCartRQ } from "../../features/borrow/hooks/useCart";
+import { useCart as useCartRQ } from "../../features/borrow/components/hooks/useCart";
 import useAuth from "../../features/auth/hooks/useAuth";
 
 export function useCartQuery() {

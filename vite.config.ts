@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   const isProduction = mode === "production";
 
   return {
-    base: "./",
+    base: "/",
 
     plugins: [
       react({

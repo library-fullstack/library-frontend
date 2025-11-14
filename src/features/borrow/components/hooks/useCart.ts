@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { borrowApi } from "../api/borrow.api";
-import logger from "../../../shared/lib/logger";
-import type { CartItem } from "../types/borrow.types";
+import { borrowApi } from "../../api/borrow.api";
+import logger from "../../../../shared/lib/logger";
+import type { CartItem } from "../../types/borrow.types";
 
 export const cartKeys = {
   all: ["cart"] as const,
@@ -103,7 +103,7 @@ export function useAddToCart() {
         totalCopies: 0,
       };
 
-      const { CartService } = await import("../services/cart.service");
+      const { CartService } = await import("../../services/cart.service");
       return await CartService.addToCart(
         params.bookId,
         params.quantity,

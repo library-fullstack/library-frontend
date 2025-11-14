@@ -1,6 +1,6 @@
-export { useCart as useCartQuery } from "../features/borrow/hooks/useCart";
+export { useCart as useCartQuery } from "../features/borrow/components/hooks/useCart";
 
-import { useCart as useReactQueryCart } from "../features/borrow/hooks/useCart";
+import { useCart as useReactQueryCart } from "../features/borrow/components/hooks/useCart";
 
 export const useCart = () => {
   const { data: cart, isLoading: loading } = useReactQueryCart();
