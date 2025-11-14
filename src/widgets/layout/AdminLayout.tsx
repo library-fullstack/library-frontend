@@ -21,15 +21,15 @@ import {
   Sun,
 } from "lucide-react";
 import { Outlet, useNavigate } from "react-router-dom";
-import AuthContext from "../../context/AuthContext";
+import useAuth from "../../features/auth/hooks/useAuth";
 import { useThemeMode } from "../../shared/hooks/useThemeMode";
 import { useZoomLevel } from "../../shared/hooks/useZoomLevel";
 import AdminSidebar from "./AdminSidebar";
+import { useCurrentUser } from "../../features/users/hooks/useUser";
 
 function AdminLayout() {
-  const authContext = React.useContext(AuthContext);
-  const user = authContext?.user;
-  const logout = authContext?.logout || (() => {});
+  const { data: user } = useCurrentUser();
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const theme = useTheme();
   const { mode, toggleTheme } = useThemeMode();
@@ -141,6 +141,14 @@ function AdminLayout() {
 
           <Box
             onClick={handleMenuOpen}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                handleMenuOpen(e as unknown as React.MouseEvent<HTMLElement>);
+              }
+            }}
+            aria-label="Mở menu người dùng"
             sx={{
               display: "flex",
               alignItems: "center",
@@ -245,7 +253,8 @@ function AdminLayout() {
           bgcolor: "background.default",
           minHeight: "calc(var(--vh, 1vh) * 100)",
           overflowX: "auto",
-          overflowY: "hidden",
+          // overflowY: "hidden",
+          overflowY: "auto",
           transition: "width 300ms cubic-bezier(0.4, 0, 0.2, 1) 150ms",
         }}
       >

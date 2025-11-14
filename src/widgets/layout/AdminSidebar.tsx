@@ -23,10 +23,11 @@ import {
   Building2,
   ArrowLeft,
   Image,
+  Activity,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import AuthContext from "../../context/AuthContext";
 import Logo from "../../shared/ui/icons/Logo";
+import { useCurrentUser } from "../../features/users/hooks/useUser";
 
 interface AdminSidebarProps {
   drawerWidth: number;
@@ -53,8 +54,7 @@ export default function AdminSidebar({
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  const authContext = React.useContext(AuthContext);
-  const user = authContext?.user;
+  const { data: user } = useCurrentUser();
   const isCollapsed = !sidebarOpen;
 
   const menuItems: MenuItem[] = [
@@ -107,6 +107,12 @@ export default function AdminSidebar({
       roles: ["ADMIN"],
     },
     {
+      title: "Giám sát hiệu suất",
+      icon: <Activity size={20} />,
+      path: "/admin/performance",
+      roles: ["ADMIN"],
+    },
+    {
       title: "Cài đặt hệ thống",
       icon: <Settings size={20} />,
       path: "/admin/settings",
@@ -144,6 +150,7 @@ export default function AdminSidebar({
           borderBottom: "1px solid",
           borderColor: "divider",
           minHeight: 80,
+          flexShrink: 0,
           overflow: "hidden",
           transition: "all 300ms cubic-bezier(0.4, 0, 0.2, 1)",
         }}
@@ -169,14 +176,12 @@ export default function AdminSidebar({
         )}
       </Box>
 
-      <List
+      <Box
         sx={{
-          px: 2,
-          py: 2,
-          flexGrow: 1,
-          transition: "all 300ms cubic-bezier(0.4, 0, 0.2, 1)",
-          overflow: "hidden",
-          overflowY: "hidden",
+          flex: "1 1 0",
+          minHeight: 0,
+          overflowY: "auto",
+          overflowX: "hidden",
           scrollbarWidth: "none",
           msOverflowStyle: "none",
           "&::-webkit-scrollbar": {
@@ -184,108 +189,116 @@ export default function AdminSidebar({
           },
         }}
       >
-        {filteredMenuItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          const button = (
-            <ListItemButton
-              onClick={() => handleNavigation(item.path)}
-              disableRipple
-              sx={{
-                borderRadius: 2,
-                justifyContent: isCollapsed ? "center" : "flex-start",
-                alignItems: "center",
-                gap: isCollapsed ? 0 : 1.5,
-                px: isCollapsed ? 0 : 2,
-                py: isCollapsed ? 0 : 1.25,
-                minHeight: isCollapsed ? 0 : 44,
-                bgcolor: isActive
-                  ? theme.palette.mode === "dark"
-                    ? "rgba(129, 140, 248, 0.15)"
-                    : "rgba(79, 70, 229, 0.08)"
-                  : "transparent",
-                color: isActive ? "primary.main" : "text.primary",
-                fontWeight: isActive ? 600 : 400,
-                transition:
-                  "all 250ms cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease",
-                "&:hover": {
+        <List
+          sx={{
+            px: 2,
+            py: 2,
+            transition: "all 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
+        >
+          {filteredMenuItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            const button = (
+              <ListItemButton
+                onClick={() => handleNavigation(item.path)}
+                disableRipple
+                sx={{
+                  borderRadius: 2,
+                  justifyContent: isCollapsed ? "center" : "flex-start",
+                  alignItems: "center",
+                  gap: isCollapsed ? 0 : 1.5,
+                  px: isCollapsed ? 0 : 2,
+                  py: isCollapsed ? 0 : 1.25,
+                  minHeight: isCollapsed ? 0 : 44,
                   bgcolor: isActive
                     ? theme.palette.mode === "dark"
-                      ? "rgba(129, 140, 248, 0.25)"
-                      : "rgba(79, 70, 229, 0.12)"
-                    : theme.palette.mode === "dark"
-                    ? "rgba(255, 255, 255, 0.05)"
-                    : "rgba(0, 0, 0, 0.04)",
-                },
-
-                ...(isCollapsed && {
-                  width: 45,
-                  height: 42,
-                  minHeight: "unset",
-                  p: 0,
-                  m: "4px auto",
-                  borderRadius: 1.5,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
+                      ? "rgba(129, 140, 248, 0.15)"
+                      : "rgba(79, 70, 229, 0.08)"
+                    : "transparent",
+                  color: isActive ? "primary.main" : "text.primary",
+                  fontWeight: isActive ? 600 : 400,
+                  transition:
+                    "all 250ms cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease",
                   "&:hover": {
-                    transform: "scale(1.05)",
+                    bgcolor: isActive
+                      ? theme.palette.mode === "dark"
+                        ? "rgba(129, 140, 248, 0.25)"
+                        : "rgba(79, 70, 229, 0.12)"
+                      : theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.05)"
+                      : "rgba(0, 0, 0, 0.04)",
                   },
-                }),
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: "auto",
-                  color: isActive ? "primary.main" : "text.secondary",
-                  justifyContent: "center",
-                  transition: "color 0.2s ease",
-                  display: "flex",
-                  alignItems: "center",
+
                   ...(isCollapsed && {
-                    m: 0,
+                    width: 45,
+                    height: 42,
+                    minHeight: "unset",
+                    p: 0,
+                    m: "4px auto",
+                    borderRadius: 1.5,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    "&:hover": {
+                      transform: "scale(1.05)",
+                    },
                   }),
                 }}
               >
-                {item.icon}
-              </ListItemIcon>
-
-              {!isCollapsed && (
-                <ListItemText
-                  primary={item.title}
-                  primaryTypographyProps={{
-                    fontSize: "0.875rem",
-                    fontWeight: isActive ? 600 : 500,
-                    noWrap: true,
+                <ListItemIcon
+                  sx={{
+                    minWidth: "auto",
+                    color: isActive ? "primary.main" : "text.secondary",
+                    justifyContent: "center",
+                    transition: "color 0.2s ease",
+                    display: "flex",
+                    alignItems: "center",
+                    ...(isCollapsed && {
+                      m: 0,
+                    }),
                   }}
-                />
-              )}
-            </ListItemButton>
-          );
+                >
+                  {item.icon}
+                </ListItemIcon>
 
-          return (
-            <ListItem
-              key={item.path}
-              disablePadding
-              sx={{
-                mb: 0.5,
-                transition: "all 300ms cubic-bezier(0.4, 0, 0.2, 1)",
-              }}
-            >
-              {isCollapsed ? (
-                <Tooltip title={item.title} placement="right" arrow>
-                  {button}
-                </Tooltip>
-              ) : (
-                button
-              )}
-            </ListItem>
-          );
-        })}
-      </List>
+                {!isCollapsed && (
+                  <ListItemText
+                    primary={item.title}
+                    primaryTypographyProps={{
+                      fontSize: "0.875rem",
+                      fontWeight: isActive ? 600 : 500,
+                      noWrap: true,
+                    }}
+                  />
+                )}
+              </ListItemButton>
+            );
 
-      <Divider />
+            return (
+              <ListItem
+                key={item.path}
+                disablePadding
+                sx={{
+                  mb: 0.5,
+                  transition: "all 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              >
+                {isCollapsed ? (
+                  <Tooltip title={item.title} placement="right" arrow>
+                    {button}
+                  </Tooltip>
+                ) : (
+                  button
+                )}
+              </ListItem>
+            );
+          })}
+        </List>
+      </Box>
 
-      <List sx={{ px: 2, py: 2 }}>
+      <Divider sx={{ flexShrink: 0 }} />
+
+      <List sx={{ px: 2, py: 2, flexShrink: 0 }}>
         <ListItem disablePadding sx={{ mb: 0.5 }}>
           <Tooltip
             title="Về trang chủ"
@@ -380,13 +393,17 @@ export default function AdminSidebar({
             borderColor: "divider",
             position: "fixed",
             top: { xs: 56, sm: 64 },
-            height: {
-              xs: "calc(var(--vh, 1vh) * 100 - 56px)",
-              sm: "calc(var(--vh, 1vh) * 100 - 64px)",
+
+            maxHeight: {
+              xs: "calc(100vh - 56px)",
+              sm: "calc(100vh - 64px)",
             },
-            overflow: "hidden",
-            overflowY: "auto",
+            bottom: 0,
+            height: "auto",
+            overflow: "auto",
+            overflowX: "hidden",
             overscrollBehavior: "contain",
+            WebkitOverflowScrolling: "touch",
             scrollbarWidth: "thin",
             msOverflowStyle: "auto",
             "&::-webkit-scrollbar": {
@@ -418,18 +435,16 @@ export default function AdminSidebar({
             bgcolor: "background.paper",
             borderRight: "1px solid",
             borderColor: "divider",
-            top: { xs: 56, sm: 64 },
-            height: { xs: "calc(100dvh - 56px)", sm: "calc(100dvh - 64px)" },
-            transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-            overflowX: "hidden",
+            position: "fixed",
+            top: 64,
+            bottom: 0,
+            left: 0,
+            height: "calc(100vh - 64px)",
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 0,
             overflow: "hidden",
-            overflowY: "hidden",
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-            "&::-webkit-scrollbar": {
-              display: "none",
-            },
-            willChange: "width",
+            transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
           },
         }}
       >

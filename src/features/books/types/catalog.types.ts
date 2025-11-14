@@ -6,6 +6,7 @@ export interface BookFilters {
   status?: BookStatus;
   format?: BookFormat | null;
   language_code?: string | null;
+  searchType?: "all" | "author" | "title" | "publisher";
 }
 
 export type SortOption =
@@ -24,7 +25,6 @@ export interface CatalogState {
   limit: number;
 }
 
-// hằng số
 export const ITEMS_PER_PAGE_OPTIONS = [12, 24, 48, 96];
 export const DEFAULT_ITEMS_PER_PAGE = 24;
 

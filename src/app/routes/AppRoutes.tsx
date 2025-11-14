@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { lazy, Suspense } from "react";
-import { Box, CircularProgress } from "@mui/material";
+import { lazy, Suspense, ComponentType } from "react";
+import { Box, CircularProgress, Alert, Button } from "@mui/material";
 import { KeepAlive } from "react-activation";
 import MainLayout from "../../widgets/layout/MainLayout";
 import AdminLayout from "../../widgets/layout/AdminLayout";
@@ -17,30 +17,149 @@ import ProtectedRoute from "../../widgets/routing/ProtectedRoute";
 import PublicRoute from "../../widgets/routing/PublicRoute";
 import NotFound from "../../shared/ui/NotFound";
 import ConfirmStudentInfo from "../../features/auth/components/ConfirmStudentInfo";
+import logger from "../../shared/lib/logger";
+
+const lazyWithErrorBoundary = (
+  importFunc: () => Promise<{
+    default: ComponentType<Record<string, unknown>>;
+  }>,
+  componentName: string
+) => {
+  const LazyComponent = lazy(() =>
+    importFunc().catch(async (error) => {
+      logger.error(`Failed to load ${componentName} (attempt 1):`, error);
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      try {
+        logger.info(`Retrying to load ${componentName}...`);
+        return await importFunc();
+      } catch (retryError) {
+        logger.error(
+          `Failed to load ${componentName} (attempt 2):`,
+          retryError
+        );
+
+        return {
+          default: () => (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: "60vh",
+                gap: 2,
+                p: 2,
+              }}
+            >
+              <Alert severity="error" sx={{ maxWidth: 500 }}>
+                <strong>Lỗi tải {componentName}</strong>
+                <div style={{ fontSize: "0.875rem", marginTop: "0.5rem" }}>
+                  Không thể tải trang. Vui lòng kiểm tra kết nối mạng hoặc thử
+                  lại.
+                </div>
+              </Alert>
+              <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                <Button
+                  variant="contained"
+                  onClick={() => window.location.reload()}
+                >
+                  Tải lại toàn trang
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => window.history.back()}
+                >
+                  Quay lại
+                </Button>
+              </Box>
+            </Box>
+          ),
+        };
+      }
+    })
+  );
+  return LazyComponent;
+};
 
 // lazy
-const BookList = lazy(() => import("../../pages/book/BookList"));
-const BookDetail = lazy(() => import("../../pages/book/BookDetail"));
-const Cart = lazy(() => import("../../pages/borrow/Cart"));
-const Checkout = lazy(() => import("../../pages/borrow/Checkout"));
-const BorrowList = lazy(() => import("../../pages/borrow/BorrowList"));
-const OrderList = lazy(() => import("../../pages/borrow/OrderList"));
-const AdminDashboard = lazy(() => import("../../pages/admin/AdminDashboard"));
-const BooksManagement = lazy(() => import("../../pages/admin/BooksManagement"));
-const UsersManagement = lazy(() => import("../../pages/admin/UsersManagement"));
-const BorrowManagement = lazy(
-  () => import("../../pages/admin/BorrowManagement")
+const BookList = lazyWithErrorBoundary(
+  () => import("../../pages/book/BookList"),
+  "Danh sách sách"
 );
-const AnalyticsPage = lazy(() => import("../../pages/admin/AnalyticsPage"));
-const BannerManagement = lazy(
-  () => import("../../pages/admin/BannerManagement")
+const BookDetail = lazyWithErrorBoundary(
+  () => import("../../pages/book/BookDetail"),
+  "Chi tiết sách"
 );
-const Services = lazy(() => import("../../pages/common/Services"));
-const News = lazy(() => import("../../pages/common/News"));
-const About = lazy(() => import("../../pages/common/About"));
-const Contact = lazy(() => import("../../pages/common/Contact"));
-const Forum = lazy(() => import("../../pages/common/Forum"));
-const Favorites = lazy(() => import("../../pages/common/Favorites"));
+const Cart = lazyWithErrorBoundary(
+  () => import("../../pages/borrow/Cart"),
+  "Giỏ sách"
+);
+const Checkout = lazyWithErrorBoundary(
+  () => import("../../pages/borrow/Checkout"),
+  "Thanh toán"
+);
+const BorrowList = lazyWithErrorBoundary(
+  () => import("../../pages/borrow/BorrowList"),
+  "Danh sách mượn"
+);
+const OrderList = lazyWithErrorBoundary(
+  () => import("../../pages/borrow/OrderList"),
+  "Danh sách đơn hàng"
+);
+const AdminDashboard = lazyWithErrorBoundary(
+  () => import("../../pages/admin/AdminDashboard"),
+  "Dashboard Admin"
+);
+const BooksManagement = lazyWithErrorBoundary(
+  () => import("../../pages/admin/BooksManagement"),
+  "Quản lý sách"
+);
+const UsersManagement = lazyWithErrorBoundary(
+  () => import("../../pages/admin/UsersManagement"),
+  "Quản lý người dùng"
+);
+const BorrowManagement = lazyWithErrorBoundary(
+  () => import("../../pages/admin/BorrowManagement"),
+  "Quản lý mượn"
+);
+const AnalyticsPage = lazyWithErrorBoundary(
+  () => import("../../pages/admin/AnalyticsPage"),
+  "Phân tích"
+);
+const BannerManagement = lazyWithErrorBoundary(
+  () => import("../../pages/admin/BannerManagement"),
+  "Quản lý banner"
+);
+const PerformanceMonitoring = lazyWithErrorBoundary(
+  () => import("../../pages/admin/PerformanceMonitoring"),
+  "Giám sát hiệu suất"
+);
+const Services = lazyWithErrorBoundary(
+  () => import("../../pages/common/Services"),
+  "Dịch vụ"
+);
+const News = lazyWithErrorBoundary(
+  () => import("../../pages/common/News"),
+  "Tin tức"
+);
+const About = lazyWithErrorBoundary(
+  () => import("../../pages/common/About"),
+  "Về chúng tôi"
+);
+const Contact = lazyWithErrorBoundary(
+  () => import("../../pages/common/Contact"),
+  "Liên hệ"
+);
+const Forum = lazyWithErrorBoundary(
+  () => import("../../pages/common/Forum"),
+  "Diễn đàn"
+);
+const Favorites = lazyWithErrorBoundary(
+  () => import("../../pages/common/Favorites"),
+  "Yêu thích"
+);
 
 const PageLoader = () => (
   <Box
@@ -51,11 +170,11 @@ const PageLoader = () => (
       minHeight: "60vh",
     }}
   >
-    <CircularProgress />
+    <CircularProgress size={56} thickness={3.5} />
   </Box>
 );
 
-export default function AppRoutes() {
+export default function AppRoutes(): JSX.Element {
   return (
     <Routes>
       {/* chuyển hướng auth */}
@@ -80,15 +199,7 @@ export default function AppRoutes() {
 
       {/* layout chính */}
       <Route element={<MainLayout />}>
-        {/* keep alive */}
-        <Route
-          path="/"
-          element={
-            <KeepAlive id="home" name="home">
-              <HomePage />
-            </KeepAlive>
-          }
-        />
+        <Route path="/" element={<HomePage />} />
         <Route
           path="/catalog"
           element={
@@ -171,6 +282,16 @@ export default function AppRoutes() {
         />
         <Route
           path="/cart"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <ProtectedRoute>
+                <Cart />
+              </ProtectedRoute>
+            </Suspense>
+          }
+        />
+        <Route
+          path="/borrow/cart"
           element={
             <Suspense fallback={<PageLoader />}>
               <ProtectedRoute>
@@ -276,6 +397,16 @@ export default function AppRoutes() {
             <ProtectedRoute roles={["ADMIN"]}>
               <Suspense fallback={<PageLoader />}>
                 <BannerManagement />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="performance"
+          element={
+            <ProtectedRoute roles={["ADMIN"]}>
+              <Suspense fallback={<PageLoader />}>
+                <PerformanceMonitoring />
               </Suspense>
             </ProtectedRoute>
           }

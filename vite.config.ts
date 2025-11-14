@@ -8,6 +8,8 @@ export default defineConfig(({ mode }) => {
   const isProduction = mode === "production";
 
   return {
+    base: "./",
+
     plugins: [
       react({
         jsxRuntime: "automatic",
@@ -19,16 +21,22 @@ export default defineConfig(({ mode }) => {
       imagetools(),
       ...(isProduction ? [injectPreloadTags()] : []),
     ],
+
     resolve: {
-      dedupe: ["react", "react-dom", "@emotion/react", "@emotion/styled"],
-      alias: {
-        "@": "/src",
-      },
+      alias: { "@": "/src" },
     },
+
     server: {
       port: 5173,
       host: "0.0.0.0",
+      hmr: {
+        protocol: "ws",
+        host: "localhost",
+        port: 5173,
+      },
+      cors: true,
     },
+
     build: {
       outDir: "dist",
       chunkSizeWarningLimit: 2000,
@@ -36,36 +44,47 @@ export default defineConfig(({ mode }) => {
       target: "es2020",
       minify: "esbuild",
       cssCodeSplit: true,
-      cssMinify: true,
+      reportCompressedSize: false,
+
       rollupOptions: {
         output: {
-          manualChunks: (id) => {
+          manualChunks(id) {
             if (id.includes("node_modules")) {
-              if (id.includes("swiper")) {
-                return "swiper";
-              }
-
+              if (id.includes("@mui/icons-material")) return "mui-icons";
+              if (id.includes("@mui/x-charts")) return "mui-charts";
+              if (id.includes("@mui")) return "mui-vendor";
+              if (id.includes("@emotion")) return "emotion";
+              if (id.includes("react-dom")) return "react-vendor";
+              if (id.includes("react-router")) return "react-router";
+              if (id.includes("@tanstack/react-query")) return "react-query";
+              if (id.includes("swiper")) return "swiper";
+              if (id.includes("framer-motion")) return "framer-motion";
+              if (id.includes("axios")) return "axios";
+              if (id.includes("react")) return "react-vendor";
               return "vendor";
             }
           },
-          assetFileNames: (assetInfo) => {
-            if (
-              assetInfo.name &&
-              /\.(woff2?|ttf|otf|eot)$/.test(assetInfo.name)
-            ) {
+
+          assetFileNames(assetInfo) {
+            const name = assetInfo.name ?? "";
+
+            if (/\.(woff2?|ttf|otf|eot)(\?.*)?$/.test(name)) {
               return "assets/fonts/[name]-[hash][extname]";
             }
-            if (
-              assetInfo.name &&
-              /\.(png|jpe?g|svg|gif|webp|avif)$/.test(assetInfo.name)
-            ) {
+
+            if (/\.(png|jpe?g|svg|gif|webp|avif)(\?.*)?$/.test(name)) {
               return "assets/img/[name]-[hash][extname]";
             }
+
             return "assets/[name]-[hash][extname]";
           },
+
+          chunkFileNames: "assets/js/[name]-[hash].js",
+          entryFileNames: "assets/js/[name]-[hash].js",
         },
       },
     },
+
     optimizeDeps: {
       include: [
         "react",
@@ -76,11 +95,14 @@ export default defineConfig(({ mode }) => {
         "@emotion/react",
         "@emotion/styled",
         "framer-motion",
+        "@tanstack/react-query",
+        "axios",
       ],
       esbuildOptions: {
         target: "es2020",
       },
     },
+
     define: {
       __API_URL__: JSON.stringify(env.VITE_API_URL),
     },

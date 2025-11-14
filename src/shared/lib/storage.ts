@@ -1,9 +1,17 @@
 import logger from "./logger";
+import { obfuscate, deobfuscate, shouldObfuscate } from "./obfuscation";
 
 class StorageUtil {
   static getItem(key: string, storage: Storage = localStorage): string | null {
     try {
-      return storage.getItem(key);
+      const value = storage.getItem(key);
+      if (!value) return null;
+
+      if (shouldObfuscate(key)) {
+        return deobfuscate(value);
+      }
+
+      return value;
     } catch (error) {
       logger.error(`[Storage] Error getting item "${key}":`, error);
       return null;
@@ -16,7 +24,8 @@ class StorageUtil {
     storage: Storage = localStorage
   ): boolean {
     try {
-      storage.setItem(key, value);
+      const valueToStore = shouldObfuscate(key) ? obfuscate(value) : value;
+      storage.setItem(key, valueToStore);
       return true;
     } catch (error) {
       if (error instanceof DOMException) {
@@ -54,7 +63,7 @@ class StorageUtil {
 
   static getJSON<T>(key: string, storage: Storage = localStorage): T | null {
     try {
-      const item = storage.getItem(key);
+      const item = this.getItem(key, storage);
       if (!item) return null;
       return JSON.parse(item) as T;
     } catch (error) {

@@ -8,7 +8,13 @@ import {
   Chip,
   Skeleton,
 } from "@mui/material";
-import { Database, HardDrive, Zap, CheckCircle, AlertCircle } from "lucide-react";
+import {
+  Database,
+  HardDrive,
+  Zap,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
 
 interface SystemHealthData {
   databaseStatus: "healthy" | "warning" | "error";
@@ -42,7 +48,9 @@ export default function SystemHealth({
     );
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (
+    status: string
+  ): "success" | "warning" | "error" | "default" => {
     switch (status) {
       case "healthy":
         return "success";
@@ -55,7 +63,7 @@ export default function SystemHealth({
     }
   };
 
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (status: string): string => {
     switch (status) {
       case "healthy":
         return "Hoạt động tốt";
@@ -68,13 +76,15 @@ export default function SystemHealth({
     }
   };
 
-  const getStorageColor = (usage: number) => {
+  const getStorageColor = (usage: number): "success" | "warning" | "error" => {
     if (usage < 60) return "success";
     if (usage < 80) return "warning";
     return "error";
   };
 
-  const getResponseTimeColor = (time: number) => {
+  const getResponseTimeColor = (
+    time: number
+  ): "success" | "warning" | "error" => {
     if (time < 200) return "success";
     if (time < 500) return "warning";
     return "error";
@@ -119,7 +129,7 @@ export default function SystemHealth({
                 }
                 label={getStatusLabel(mockData.databaseStatus)}
                 size="small"
-                color={getStatusColor(mockData.databaseStatus) as any}
+                color={getStatusColor(mockData.databaseStatus)}
                 sx={{ fontWeight: 600 }}
               />
             </Box>
@@ -154,7 +164,7 @@ export default function SystemHealth({
             <LinearProgress
               variant="determinate"
               value={mockData.storageUsage}
-              color={getStorageColor(mockData.storageUsage) as any}
+              color={getStorageColor(mockData.storageUsage)}
               sx={{
                 height: 8,
                 borderRadius: 1,
@@ -164,7 +174,11 @@ export default function SystemHealth({
                     : "rgba(0,0,0,0.08)",
               }}
             />
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ mt: 0.5, display: "block" }}
+            >
               {(mockData.storageUsage * 10).toFixed(1)} GB / 1 TB sử dụng
             </Typography>
           </Box>
@@ -187,7 +201,7 @@ export default function SystemHealth({
               <Chip
                 label={`${mockData.apiResponseTime}ms`}
                 size="small"
-                color={getResponseTimeColor(mockData.apiResponseTime) as any}
+                color={getResponseTimeColor(mockData.apiResponseTime)}
                 sx={{ fontWeight: 600 }}
               />
             </Box>

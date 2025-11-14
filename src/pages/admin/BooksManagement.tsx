@@ -180,20 +180,25 @@ export default function BooksManagement() {
   };
 
   return (
-    <Box sx={{ maxWidth: "100%" }}>
+    <Box sx={{ maxWidth: "100%", px: { xs: 0, sm: 0 } }}>
       <Box>
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: { xs: "flex-start", sm: "center" },
-            mb: 4,
+            mb: { xs: 2, sm: 3, md: 4 },
             flexDirection: { xs: "column", sm: "row" },
             gap: { xs: 2, sm: 3 },
           }}
         >
           <Box>
-            <Typography variant="h4" fontWeight={800} gutterBottom>
+            <Typography
+              variant="h4"
+              fontWeight={800}
+              gutterBottom
+              sx={{ fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" } }}
+            >
               Quản lý sách
             </Typography>
             <Typography variant="body1" color="text.secondary">

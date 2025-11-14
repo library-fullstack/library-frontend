@@ -41,13 +41,6 @@ export interface BannerListResponse {
   };
 }
 
-const activeBannerCache = { data: null as BannerData | null, timestamp: 0 };
-const ACTIVE_BANNER_TTL = 5 * 60 * 1000; // 5 minutes
-
-const isBannerCacheValid = (): boolean => {
-  return Date.now() - activeBannerCache.timestamp < ACTIVE_BANNER_TTL;
-};
-
 export const bannerApi = {
   async getAllBanners(
     page: number = 1,
@@ -72,11 +65,6 @@ export const bannerApi = {
 
   async getActiveBanner(): Promise<BannerData | null> {
     try {
-      if (isBannerCacheValid() && activeBannerCache.data) {
-        logger.log("[BannerAPI] Using cached active banner");
-        return activeBannerCache.data;
-      }
-
       const response = await axiosClient.get<BannerResponse>(`/banners/active`);
       const banner = response.data.data as BannerData | undefined;
       if (!banner) return null;
@@ -84,9 +72,6 @@ export const bannerApi = {
       const convertedBanner = snakeToCamel(
         banner as unknown as Record<string, unknown>
       ) as BannerData;
-
-      activeBannerCache.data = convertedBanner;
-      activeBannerCache.timestamp = Date.now();
 
       return convertedBanner;
     } catch (error) {
@@ -100,9 +85,7 @@ export const bannerApi = {
       const response = await axiosClient.get<BannerResponse>(`/banners/${id}`);
       const banner = response.data.data as BannerData | undefined;
       if (!banner) return null;
-      return snakeToCamel(
-        banner as unknown as Record<string, unknown>
-      ) as BannerData;
+      return snakeToCamel(banner) as BannerData;
     } catch (error) {
       logger.error("Không thể lấy banner từ API:", error);
       throw error;
@@ -137,20 +120,13 @@ export const bannerApi = {
     try {
       const response = await axiosClient.post<BannerResponse>(
         `/admin/banners`,
-        camelToSnake(banner as unknown as Record<string, unknown>)
+        camelToSnake(banner)
       );
       const data = response.data.data as BannerData | undefined;
 
-      activeBannerCache.data = null;
-      activeBannerCache.timestamp = 0;
-
       return {
         ...response.data,
-        data: data
-          ? (snakeToCamel(
-              data as unknown as Record<string, unknown>
-            ) as BannerData)
-          : undefined,
+        data: data ? (snakeToCamel(data) as BannerData) : undefined,
       };
     } catch (error) {
       logger.error("Không thể tạo banner từ API:", error);
@@ -165,20 +141,13 @@ export const bannerApi = {
     try {
       const response = await axiosClient.put<BannerResponse>(
         `/admin/banners/${id}`,
-        camelToSnake(banner as unknown as Record<string, unknown>)
+        camelToSnake(banner)
       );
       const data = response.data.data as BannerData | undefined;
 
-      activeBannerCache.data = null;
-      activeBannerCache.timestamp = 0;
-
       return {
         ...response.data,
-        data: data
-          ? (snakeToCamel(
-              data as unknown as Record<string, unknown>
-            ) as BannerData)
-          : undefined,
+        data: data ? (snakeToCamel(data) as BannerData) : undefined,
       };
     } catch (error) {
       logger.error("Không thể cập nhật banner từ API:", error);
@@ -191,9 +160,6 @@ export const bannerApi = {
       const response = await axiosClient.delete<BannerResponse>(
         `/admin/banners/${id}`
       );
-
-      activeBannerCache.data = null;
-      activeBannerCache.timestamp = 0;
 
       return response.data as BannerResponse;
     } catch (error) {
@@ -213,25 +179,13 @@ export const bannerApi = {
       );
       const data = response.data.data as BannerData | undefined;
 
-      activeBannerCache.data = null;
-      activeBannerCache.timestamp = 0;
-
       return {
         ...response.data,
-        data: data
-          ? (snakeToCamel(
-              data as unknown as Record<string, unknown>
-            ) as BannerData)
-          : undefined,
+        data: data ? (snakeToCamel(data) as BannerData) : undefined,
       };
     } catch (error) {
       logger.error("Không thể thay đổi trạng thái banner từ API:", error);
       throw error;
     }
-  },
-
-  clearCache(): void {
-    activeBannerCache.data = null;
-    activeBannerCache.timestamp = 0;
   },
 };

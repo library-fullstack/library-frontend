@@ -265,12 +265,21 @@ export default function AdminDashboard() {
   }, [displayStats?.monthlyStats]);
 
   return (
-    <Box sx={{ maxWidth: "100%" }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" fontWeight={800} gutterBottom>
+    <Box sx={{ maxWidth: "100%", px: { xs: 0, sm: 0 } }}>
+      <Box sx={{ mb: { xs: 2, sm: 3, md: 4 } }}>
+        <Typography
+          variant="h4"
+          fontWeight={800}
+          gutterBottom
+          sx={{ fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" } }}
+        >
           Tổng quan Dashboard
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ fontSize: { xs: "0.875rem", sm: "1rem" } }}
+        >
           Chào mừng quay trở lại! Đây là thống kê hoạt động hệ thống thư viện.
         </Typography>
       </Box>
@@ -281,7 +290,7 @@ export default function AdminDashboard() {
         </Alert>
       )}
 
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <StatCard
             title="Tổng số sách"
@@ -365,13 +374,7 @@ export default function AdminDashboard() {
                   justifyContent: "center",
                 }}
               >
-                <React.Suspense
-                  fallback={
-                    <Box sx={{ height: { xs: 280, sm: 320, md: 360 } }}>
-                      <Skeleton variant="rectangular" height="100%" />
-                    </Box>
-                  }
-                >
+                <React.Suspense fallback={null}>
                   <TrendChart data={borrowTrendData} />
                 </React.Suspense>
               </Box>
@@ -433,19 +436,7 @@ export default function AdminDashboard() {
                   minHeight: { xs: 420, sm: 420, md: 420 },
                 }}
               >
-                <React.Suspense
-                  fallback={
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Skeleton variant="circular" width={100} height={100} />
-                    </Box>
-                  }
-                >
+                <React.Suspense fallback={null}>
                   <CategoryPieChart data={categoryData} />
                 </React.Suspense>
               </Box>
@@ -495,13 +486,7 @@ export default function AdminDashboard() {
                   justifyContent: "center",
                 }}
               >
-                <React.Suspense
-                  fallback={
-                    <Box sx={{ height: { xs: 280, sm: 320, md: 360 } }}>
-                      <Skeleton variant="rectangular" height="100%" />
-                    </Box>
-                  }
-                >
+                <React.Suspense fallback={null}>
                   <MonthlyBarChart data={monthlyData} />
                 </React.Suspense>
               </Box>
@@ -510,9 +495,7 @@ export default function AdminDashboard() {
         </Grid>
 
         <Grid size={{ xs: 12, md: 6 }}>
-          <React.Suspense
-            fallback={<Skeleton variant="rectangular" height={400} />}
-          >
+          <React.Suspense fallback={null}>
             <RecentActivity
               activities={displayStats.recentBorrows}
               loading={loading}

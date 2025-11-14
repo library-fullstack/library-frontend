@@ -23,7 +23,7 @@ interface RelatedBooksSectionProps {
 export default function RelatedBooksSection({
   currentBookId,
   categoryId,
-  categoryName,
+  categoryName: _categoryName, // Không dùng nhưng giữ lại interface
 }: RelatedBooksSectionProps): React.ReactElement | null {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -44,7 +44,7 @@ export default function RelatedBooksSection({
 
       setLoading(true);
       try {
-        const books = await booksApi.getBooksByCategory(categoryId, 20, 0);
+        const books = await booksApi.getBooksByCategory(categoryId, 100, 0);
         const filtered = books.filter((book) => book.id !== currentBookId);
         setRelatedBooks(filtered);
       } catch (err) {
@@ -96,13 +96,7 @@ export default function RelatedBooksSection({
   const displayedBooks = relatedBooks.slice(0, displayCount);
 
   const handleViewAll = () => {
-    if (categoryId && categoryName) {
-      navigate(
-        `/catalog?search=${encodeURIComponent(
-          categoryName
-        )}&category=${categoryId}`
-      );
-    } else if (categoryId) {
+    if (categoryId) {
       navigate(`/catalog?category=${categoryId}`);
     }
   };

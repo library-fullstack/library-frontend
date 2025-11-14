@@ -9,7 +9,7 @@ import {
   Skeleton,
   Divider,
 } from "@mui/material";
-import { Clock, BookOpen, User } from "lucide-react";
+import { Clock, BookOpen } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 
@@ -27,7 +27,9 @@ interface RecentActivityProps {
   loading?: boolean;
 }
 
-const getStatusColor = (status: string) => {
+const getStatusColor = (
+  status: string
+): "primary" | "success" | "error" | "default" => {
   switch (status.toUpperCase()) {
     case "BORROWED":
       return "primary";
@@ -157,7 +159,7 @@ export default function RecentActivity({
                   <Chip
                     label={getStatusLabel(activity.status)}
                     size="small"
-                    color={getStatusColor(activity.status) as any}
+                    color={getStatusColor(activity.status)}
                     sx={{ height: 22, fontSize: "0.75rem", fontWeight: 600 }}
                   />
                 </Box>

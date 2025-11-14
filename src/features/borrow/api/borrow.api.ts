@@ -1,4 +1,8 @@
 import axiosClient from "../../../shared/api/axiosClient";
+import type {
+  CreateBorrowRequest,
+  CreateBorrowResponse,
+} from "../types/borrow.types";
 
 export interface BorrowRequest {
   book_id: string;
@@ -21,8 +25,17 @@ export interface BorrowRecord {
   };
 }
 
-// api cho mượn sách - chưa làm gì cả
 export const borrowApi = {
+  createBorrow: async (data: CreateBorrowRequest) => {
+    const res = await axiosClient.post<CreateBorrowResponse>("/borrows", {
+      items: data.items.map((item) => ({
+        book_id: item.book_id,
+        quantity: item.quantity,
+      })),
+    });
+    return res.data;
+  },
+
   create: (data: BorrowRequest) => axiosClient.post("/borrows", data),
 
   getMyBorrows: () => axiosClient.get<BorrowRecord[]>("/borrows/my"),
@@ -30,4 +43,27 @@ export const borrowApi = {
   returnBook: (id: string) => axiosClient.patch(`/borrows/${id}/return`),
 
   renewBook: (id: string) => axiosClient.patch(`/borrows/${id}/renew`),
+
+  getCart: () => axiosClient.get("/cart"),
+
+  addToCart: (bookId: number, quantity: number) =>
+    axiosClient.post("/cart/add", { bookId, quantity }),
+
+  updateCartQuantity: (bookId: number, quantity: number) =>
+    axiosClient.patch("/cart/update", { bookId, quantity }),
+
+  removeFromCart: (bookId: number) =>
+    axiosClient.request({
+      method: "DELETE",
+      url: "/cart/remove",
+      data: { bookId },
+    }),
+
+  clearCart: () =>
+    axiosClient.request({
+      method: "DELETE",
+      url: "/cart/clear",
+    }),
+
+  getCartSummary: () => axiosClient.get("/cart/summary"),
 };

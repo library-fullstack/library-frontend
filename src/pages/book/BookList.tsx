@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Container,
@@ -18,14 +18,15 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import BookCatalogFilters from "../../widgets/book-catalog-filters/BookCatalogFilters";
 import BookCatalogGrid from "../../widgets/book-catalog-grid/BookCatalogGrid";
 import SeoMetaTags from "../../shared/components/SeoMetaTags";
-import { booksApi, categoriesApi } from "../../features/books/api";
-import type {
-  Book,
-  Category,
-  BookFilters,
-  SortOption,
-} from "../../features/books/types";
+import { useAddToCart, useCart } from "../../features/borrow/hooks/useCart";
+import type { BookFilters, SortOption } from "../../features/books/types";
 import logger from "@/shared/lib/logger";
+import {
+  useBooksInfinite,
+  useBookCount,
+} from "@/features/books/hooks/useBooks";
+import { useCategories } from "@/features/books/hooks/useCategories";
+import { useCurrentUser } from "@/features/users/hooks/useUser";
 
 export default function BookList(): React.ReactElement {
   const theme = useTheme();
@@ -33,39 +34,81 @@ export default function BookList(): React.ReactElement {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [searchParams] = useSearchParams();
 
-  // states
-  const [books, setBooks] = useState<Book[]>([]);
-  // sách đang hiển thị
-  const [displayedBooks, setDisplayedBooks] = useState<Book[]>([]);
-  // tổng số sách trong database
-  const [totalBooksInDB, setTotalBooksInDB] = useState<number>(0);
-  const [loading, setLoading] = useState(true);
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
-
-  // số lượng sách mỗi lần tải là 12
-  const BOOKS_PER_BATCH = 12;
-
-  // filter state
   const [filters, setFilters] = useState<BookFilters>({
     keyword: "",
     category_id: null,
     status: undefined,
     format: null,
     language_code: null,
+    searchType: undefined,
   });
   const [sortBy, setSortBy] = useState<SortOption>("newest-published");
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error" | "info" | "warning";
+  }>({ open: false, message: "", severity: "success" });
 
-  // theo dõi loại tìm kiếm (author, category, publisher)
-  const [searchType, setSearchType] = useState<
-    "author" | "category" | "publisher" | null
-  >(null);
+  const { data: categoriesData = [], isLoading: categoriesLoading } =
+    useCategories();
+  const { data: bookCount } = useBookCount();
+  const totalBooksInDB = bookCount?.total || 0;
 
-  // search keyword từ URL params
-  useEffect(() => {
+  const sortByMap: Record<
+    SortOption,
+    | "newest"
+    | "oldest"
+    | "newest_added"
+    | "oldest_added"
+    | "title_asc"
+    | "title_desc"
+    | "popular"
+  > = {
+    "newest-published": "newest",
+    "oldest-published": "oldest",
+    "newest-added": "newest_added",
+    "oldest-added": "oldest_added",
+    "title-asc": "title_asc",
+    "title-desc": "title_desc",
+    popular: "popular",
+  };
+
+  const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } =
+    useBooksInfinite({
+      keyword: filters.keyword?.trim() || undefined,
+      categoryId: filters.category_id || undefined,
+      status: filters.status || undefined,
+      searchType: filters.searchType || undefined,
+      sort_by: sortByMap[sortBy],
+      limit: 12,
+    });
+
+  const allBooks = React.useMemo(() => {
+    if (!data?.pages) return [];
+    const seen = new Set<number>();
+    const result: (typeof data.pages)[0] = [];
+
+    data.pages.forEach((page) => {
+      if (Array.isArray(page)) {
+        page.forEach((book) => {
+          if (!seen.has(book.id)) {
+            seen.add(book.id);
+            result.push(book);
+          }
+        });
+      }
+    });
+
+    return result;
+  }, [data]);
+
+  React.useLayoutEffect(() => {
     const searchQuery = searchParams.get("search");
     const categoryQuery = searchParams.get("category");
-    const searchTypeQuery = searchParams.get("type");
+    const searchTypeQuery =
+      searchParams.get("searchType") || searchParams.get("type");
 
     setFilters({
       keyword: searchQuery || "",
@@ -73,289 +116,203 @@ export default function BookList(): React.ReactElement {
       status: undefined,
       format: null,
       language_code: null,
+      searchType:
+        (searchTypeQuery as
+          | "author"
+          | "title"
+          | "publisher"
+          | "all"
+          | undefined) || undefined,
     });
-
-    // xác định loại tìm kiếm dựa vào URL params
-    let newSearchType: "author" | "category" | "publisher" | null = null;
-    if (categoryQuery) {
-      newSearchType = "category";
-    } else if (searchTypeQuery) {
-      const normalizedType = (
-        searchTypeQuery as "author" | "category" | "publisher"
-      ).toLowerCase() as "author" | "category" | "publisher";
-      newSearchType = normalizedType;
-    } else if (searchQuery) {
-      newSearchType = "author";
-    } else {
-      newSearchType = null;
-    }
-
-    setSearchType(newSearchType);
   }, [searchParams]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [searchParams]);
 
-  // drawer mobile
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-
-  // nút scroll đến đầu trang
-  const [showScrollTop, setShowScrollTop] = useState(false);
-
-  // loại sách
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(true);
-
-  // thông báo
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: "success" | "error" | "info";
-  }>({ open: false, message: "", severity: "success" });
-
-  // fetch tổng số lượng sách từ api
   useEffect(() => {
-    const fetchTotalBooks = async () => {
-      try {
-        const count = await booksApi.getPublicBookCount();
-        setTotalBooksInDB(count.total);
-      } catch (err) {
-        logger.error("Error fetching book count:", err);
-      }
-    };
-
-    fetchTotalBooks();
-  }, []);
-
-  // fetch loại sách
-  useEffect(() => {
-    const fetchCategories = async () => {
-      setCategoriesLoading(true);
-      try {
-        const data = await categoriesApi.getAllCategories();
-        setCategories(data);
-      } catch (err) {
-        logger.error("Error fetching categories:", err);
-        setCategories([]);
-      } finally {
-        setCategoriesLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    const fetchBooks = async () => {
-      setLoading(true);
-      setPage(1);
-      setDisplayedBooks([]);
-
-      try {
-        // lấy sort từ backend
-        // khá lag ở phần này. cần phải xử lí
-        const params: {
-          keyword?: string;
-          categoryId?: number;
-          status?: string;
-          limit: number;
-          offset: number;
-          sort_by?:
-            | "newest"
-            | "oldest"
-            | "newest_added"
-            | "oldest_added"
-            | "title_asc"
-            | "title_desc"
-            | "popular";
-        } = {
-          limit: 500,
-          offset: 0,
-        };
-
-        if (filters.keyword?.trim()) params.keyword = filters.keyword.trim();
-        if (filters.category_id) params.categoryId = filters.category_id;
-        if (filters.status) params.status = filters.status;
-
-        // sort bằng gì ...
-        switch (sortBy) {
-          case "newest-published":
-            params.sort_by = "newest";
-            break;
-          case "oldest-published":
-            params.sort_by = "oldest";
-            break;
-          case "newest-added":
-            params.sort_by = "newest_added";
-            break;
-          case "oldest-added":
-            params.sort_by = "oldest_added";
-            break;
-          case "title-asc":
-            params.sort_by = "title_asc";
-            break;
-          case "title-desc":
-            params.sort_by = "title_desc";
-            break;
-          case "popular":
-            params.sort_by = "popular";
-            break;
-        }
-
-        const data = await booksApi.getAllBooks(params);
-
-        let filteredBooks = Array.isArray(data) ? data : [];
-
-        if (filters.format) {
-          filteredBooks = filteredBooks.filter(
-            (book) => book.format === filters.format
-          );
-        }
-
-        if (filters.language_code) {
-          filteredBooks = filteredBooks.filter(
-            (book) => book.language_code === filters.language_code
-          );
-        }
-
-        const needClientSort = !!(filters.format || filters.language_code);
-
-        if (needClientSort) {
-          switch (sortBy) {
-            case "newest-published":
-              filteredBooks.sort((a, b) => {
-                const yearA = a.publication_year || 0;
-                const yearB = b.publication_year || 0;
-                if (yearB !== yearA) return yearB - yearA;
-                return (
-                  new Date(b.created_at || 0).getTime() -
-                  new Date(a.created_at || 0).getTime()
-                );
-              });
-              break;
-            case "oldest-published":
-              filteredBooks.sort((a, b) => {
-                const yearA = a.publication_year || 9999;
-                const yearB = b.publication_year || 9999;
-                if (yearA !== yearB) return yearA - yearB;
-                return (
-                  new Date(a.created_at || 0).getTime() -
-                  new Date(b.created_at || 0).getTime()
-                );
-              });
-              break;
-            case "newest-added":
-              filteredBooks.sort(
-                (a, b) =>
-                  new Date(b.created_at || 0).getTime() -
-                  new Date(a.created_at || 0).getTime()
-              );
-              break;
-            case "oldest-added":
-              filteredBooks.sort(
-                (a, b) =>
-                  new Date(a.created_at || 0).getTime() -
-                  new Date(b.created_at || 0).getTime()
-              );
-              break;
-            case "title-asc":
-              filteredBooks.sort((a, b) =>
-                a.title.localeCompare(b.title, "vi")
-              );
-              break;
-            case "title-desc":
-              filteredBooks.sort((a, b) =>
-                b.title.localeCompare(a.title, "vi")
-              );
-              break;
-            case "popular":
-              filteredBooks.sort(
-                (a, b) => (b.copies_count || 0) - (a.copies_count || 0)
-              );
-              break;
-          }
-        }
-
-        setBooks(filteredBooks);
-
-        const firstBatch = filteredBooks.slice(0, BOOKS_PER_BATCH);
-        setDisplayedBooks(firstBatch);
-        setHasMore(filteredBooks.length > BOOKS_PER_BATCH);
-      } catch (err) {
-        logger.error("Error fetching books:", err);
-        setBooks([]);
-        setDisplayedBooks([]);
-        setHasMore(false);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBooks();
-  }, [filters, sortBy]);
-
-  const handleLoadMore = React.useCallback(() => {
-    const nextPage = page + 1;
-    const startIndex = page * BOOKS_PER_BATCH;
-    const endIndex = startIndex + BOOKS_PER_BATCH;
-    const nextBatch = books.slice(startIndex, endIndex);
-
-    if (nextBatch.length > 0) {
-      setDisplayedBooks((prev) => [...prev, ...nextBatch]);
-      setPage(nextPage);
-      setHasMore(endIndex < books.length);
-    } else {
-      setHasMore(false);
-    }
-  }, [page, books, BOOKS_PER_BATCH]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 400);
-    };
-
+    const handleScroll = () => setShowScrollTop(window.scrollY > 400);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleFiltersChange = React.useCallback(
-    (newFilters: BookFilters) => {
-      const params = new URLSearchParams();
-      if (newFilters.keyword?.trim()) {
-        params.set("search", newFilters.keyword.trim());
-      }
-      if (newFilters.category_id) {
-        params.set("category", String(newFilters.category_id));
-      }
-
-      const queryString = params.toString();
-      navigate(`/catalog${queryString ? "?" + queryString : ""}`, {
-        replace: true,
-      });
-    },
-    [navigate]
-  );
-
-  const handleSortChange = React.useCallback((newSort: SortOption) => {
-    setSortBy(newSort);
-  }, []);
-
-  const handleAddToCart = React.useCallback(
-    (bookId: number) => {
-      const book = books.find((b) => b.id === bookId);
-      setSnackbar({
-        open: true,
-        message: `Đã thêm "${book?.title}" vào giỏ sách`,
-        severity: "success",
-      });
-    },
-    [books]
-  );
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  const handleFiltersChange = (newFilters: BookFilters) => {
+    const params = new URLSearchParams();
+    if (newFilters.keyword?.trim())
+      params.set("search", newFilters.keyword.trim());
+    if (newFilters.category_id)
+      params.set("category", String(newFilters.category_id));
+    navigate(`/catalog${params.toString() ? "?" + params.toString() : ""}`, {
+      replace: true,
+    });
   };
+
+  const { data: user } = useCurrentUser();
+  const { data: cart } = useCart(!!user);
+  const { mutateAsync: addItem } = useAddToCart();
+  const [addingBookId, setAddingBookId] = useState<number | null>(null);
+
+  const handleAddToCart = useCallback(
+    async (bookId: number) => {
+      const book = allBooks.find((b) => b.id === bookId);
+      if (!book) {
+        logger.warn(`[BookList.handleAddToCart] Book ${bookId} not found`);
+        return;
+      }
+
+      if (addingBookId === bookId) {
+        logger.debug(
+          `[BookList.handleAddToCart] Already adding book ${bookId}, blocking duplicate click`
+        );
+        return;
+      }
+
+      const existingItem = cart?.items.find((item) => item.bookId === bookId);
+
+      const availableCount =
+        existingItem?.available_count ??
+        (typeof book.available_count === "string"
+          ? parseInt(book.available_count, 10)
+          : book.available_count || 0);
+
+      const currentQuantityInCart = existingItem?.quantity || 0;
+      const totalAfterAdd = currentQuantityInCart + 1;
+
+      if (availableCount <= 0) {
+        const maxTitleLength = 30;
+        const displayTitle =
+          book.title.length > maxTitleLength
+            ? book.title.substring(0, maxTitleLength) + "..."
+            : book.title;
+
+        setSnackbar({
+          open: true,
+          message: `"${displayTitle}" đã hết`,
+          severity: "warning",
+        });
+        return;
+      }
+
+      if (totalAfterAdd > availableCount) {
+        const maxTitleLength = 30;
+        const displayTitle =
+          book.title.length > maxTitleLength
+            ? book.title.substring(0, maxTitleLength) + "..."
+            : book.title;
+
+        setSnackbar({
+          open: true,
+          message: `Bạn đã thêm hết "${displayTitle}" vào giỏ! (${currentQuantityInCart}/${availableCount} quyển)`,
+          severity: "warning",
+        });
+        return;
+      }
+
+      setAddingBookId(bookId);
+      const startTime = performance.now();
+
+      logger.debug(
+        `[BookList.handleAddToCart] Adding book ${bookId} - ${book.title}, available: ${availableCount}`
+      );
+
+      try {
+        await addItem({
+          bookId,
+          quantity: 1,
+          bookAvailableCount: availableCount,
+          bookData: {
+            title: book.title,
+            author_names: book.author_names || null,
+            thumbnail_url: book.thumbnail_url || "",
+            bookAvailableCount: availableCount,
+          },
+        });
+
+        const maxTitleLength = 35;
+        const displayTitle =
+          book.title.length > maxTitleLength
+            ? book.title.substring(0, maxTitleLength) + "..."
+            : book.title;
+
+        const endTime = performance.now();
+        const duration = endTime - startTime;
+
+        logger.info(
+          `[BookList.handleAddToCart] Successfully added book ${bookId} in ${duration.toFixed(
+            0
+          )}ms`
+        );
+
+        setAddingBookId(null);
+        setSnackbar({
+          open: true,
+          message: `Đã thêm "${displayTitle}" vào giỏ`,
+          severity: "success",
+        });
+      } catch (error: unknown) {
+        logger.error("[BookList.handleAddToCart] Error:", error);
+
+        const validationError = error as {
+          success?: boolean;
+          error?: {
+            code?: string;
+            message?: string;
+            currentInCart?: number;
+            available?: number;
+          };
+        };
+
+        if (validationError?.success === false && validationError?.error) {
+          const err = validationError.error;
+          const maxTitleLength = 30;
+          const displayTitle =
+            book.title.length > maxTitleLength
+              ? book.title.substring(0, maxTitleLength) + "..."
+              : book.title;
+
+          let message = "";
+          if (
+            err.code === "ALREADY_AT_MAX" ||
+            err.code === "INSUFFICIENT_STOCK"
+          ) {
+            message = `Bạn đã thêm hết "${displayTitle}" vào giỏ! (${err.currentInCart}/${err.available} quyển)`;
+          } else if (err.code === "OUT_OF_STOCK") {
+            message = `"${displayTitle}" đã hết`;
+          } else {
+            message = err.message || "Không thể thêm vào giỏ";
+          }
+
+          setAddingBookId(null);
+          setSnackbar({
+            open: true,
+            message,
+            severity: "warning",
+          });
+        } else {
+          const err = error as { response?: { data?: { message?: string } } };
+          const errorMessage =
+            err?.response?.data?.message ||
+            "Không thể thêm sách vào giỏ. Vui lòng thử lại.";
+
+          setAddingBookId(null);
+          setSnackbar({
+            open: true,
+            message: errorMessage,
+            severity: "error",
+          });
+        }
+      }
+    },
+    [allBooks, addItem, addingBookId, cart?.items]
+  );
+
+  const handleLoadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage().catch((err) =>
+        logger.error("Error fetching next page:", err)
+      );
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <Box
@@ -368,23 +325,15 @@ export default function BookList(): React.ReactElement {
     >
       <SeoMetaTags
         title="Danh sách sách - Thư viện trực tuyến HBH"
-        description="Duyệt và tìm kiếm hàng nghìn cuốn sách trong thư viện. Lọc theo danh mục, tác giả, nhà xuất bản."
+        description="Duyệt và tìm kiếm hàng nghìn cuốn sách trong thư viện."
         keywords="danh sách sách, tìm sách, lọc sách, thư viện"
       />
-      <Container
-        maxWidth="xl"
-        sx={{
-          px: { xs: 1.5, sm: 2, md: 3 },
-        }}
-      >
-        {/* breadcum */}
+
+      <Container maxWidth="xl" sx={{ px: { xs: 1.5, sm: 2, md: 3 } }}>
         <Breadcrumbs
           sx={{
             mb: { xs: 2, sm: 2.5, md: 3 },
             fontSize: { xs: "0.8rem", sm: "0.875rem" },
-            "& .MuiBreadcrumbs-separator": {
-              mx: { xs: 0.5, sm: 1 },
-            },
           }}
         >
           <Link
@@ -395,27 +344,18 @@ export default function BookList(): React.ReactElement {
               alignItems: "center",
               gap: 0.5,
               color: "text.secondary",
-              textDecoration: "none",
               cursor: "pointer",
-              fontSize: { xs: "0.8rem", sm: "0.875rem" },
               "&:hover": { color: "primary.main" },
             }}
           >
-            <Home sx={{ fontSize: { xs: 18, sm: 18 } }} />
+            <Home sx={{ fontSize: 18 }} />
             Trang chủ
           </Link>
-          <Typography
-            sx={{
-              color: "text.primary",
-              fontWeight: 600,
-              fontSize: { xs: "0.8rem", sm: "0.875rem" },
-            }}
-          >
+          <Typography sx={{ color: "text.primary", fontWeight: 600 }}>
             Danh mục sách
           </Typography>
         </Breadcrumbs>
 
-        {/* header trang*/}
         <Box sx={{ mb: { xs: 2.5, sm: 3, md: 4 } }}>
           <Box
             sx={{
@@ -436,55 +376,35 @@ export default function BookList(): React.ReactElement {
                     : "linear-gradient(135deg, #818CF8 0%, #A78BFA 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                fontSize: { xs: "1.25rem", sm: "1.5rem", md: "2rem" },
                 flex: 1,
-                minWidth: 0,
               }}
             >
               {filters.category_id
-                ? `Tìm kiếm theo thể loại: "${
-                    categories.find((c) => c.id === filters.category_id)
-                      ?.name || "Không tìm thấy"
+                ? `Thể loại: "${
+                    categoriesData.find((c) => c.id === filters.category_id)
+                      ?.name || "?"
                   }"`
-                : filters.keyword && searchType === "author"
-                ? `Tìm kiếm theo tác giả: "${filters.keyword}"`
-                : filters.keyword && searchType === "publisher"
-                ? `Tìm kiếm theo nhà xuất bản: "${filters.keyword}"`
                 : filters.keyword
                 ? `Tìm kiếm: "${filters.keyword}"`
                 : "Thư viện sách"}
-            </Typography>{" "}
+            </Typography>
             {isMobile && (
               <IconButton
                 onClick={() => setMobileFiltersOpen(true)}
-                sx={{
-                  bgcolor: "primary.main",
-                  color: "#fff",
-                  flexShrink: 0,
-                  mr: 0.8,
-                  "&:hover": { bgcolor: "primary.dark" },
-                }}
+                aria-label="Mở bộ lọc tìm kiếm"
+                sx={{ bgcolor: "primary.main", color: "#fff" }}
               >
                 <TuneOutlined />
               </IconButton>
             )}
           </Box>
-
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{
-              fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
-            }}
-          >
-            {filters.keyword || filters.category_id
-              ? `Hiển thị ${books.length} kết quả`
-              : "Khám phá kho tàng tri thức với hàng nghìn đầu sách phong phú"}
+          <Typography color="text.secondary">
+            {allBooks.length > 0
+              ? `Hiển thị ${allBooks.length} kết quả`
+              : "Khám phá kho tàng tri thức..."}
           </Typography>
         </Box>
 
-        {/* nội dung chính */}
         <Box
           sx={{
             display: "flex",
@@ -492,55 +412,51 @@ export default function BookList(): React.ReactElement {
             alignItems: "flex-start",
           }}
         >
-          {/* filter navbar - trên desktop */}
           {!isMobile && (
             <Box sx={{ width: 280, flexShrink: 0 }}>
               <BookCatalogFilters
                 filters={filters}
                 sortBy={sortBy}
                 onFiltersChange={handleFiltersChange}
-                onSortChange={handleSortChange}
-                categories={categories}
+                onSortChange={setSortBy}
+                categories={categoriesData}
                 categoriesLoading={categoriesLoading}
               />
             </Box>
           )}
 
-          {/* filter drawer - trên mobile */}
           {isMobile && (
             <BookCatalogFilters
               filters={filters}
               sortBy={sortBy}
               onFiltersChange={handleFiltersChange}
-              onSortChange={handleSortChange}
-              categories={categories}
+              onSortChange={setSortBy}
+              categories={categoriesData}
               categoriesLoading={categoriesLoading}
               mobileOpen={mobileFiltersOpen}
               onMobileClose={() => setMobileFiltersOpen(false)}
             />
           )}
 
-          {/* book scroll vô hạn */}
           <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
             <BookCatalogGrid
-              books={displayedBooks}
-              loading={loading}
-              hasMore={hasMore}
+              books={allBooks}
+              loading={isLoading && allBooks.length === 0}
+              hasMore={hasNextPage}
               onLoadMore={handleLoadMore}
               onAddToCart={handleAddToCart}
               totalBooks={totalBooksInDB}
+              addingBookId={addingBookId}
             />
           </Box>
         </Box>
       </Container>
 
-      {/* nút scroll từ chỗ bấm lên đầu trang*/}
       <Zoom in={showScrollTop}>
         <Fab
           size="medium"
-          onClick={scrollToTop}
-          tabIndex={showScrollTop ? 0 : -1}
-          aria-hidden={!showScrollTop}
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Cuộn lên đầu trang"
           sx={{
             position: "fixed",
             bottom: { xs: 80, md: 24 },
@@ -548,25 +464,37 @@ export default function BookList(): React.ReactElement {
             bgcolor: "primary.main",
             color: "#fff",
             "&:hover": { bgcolor: "primary.dark" },
-            boxShadow: 3,
           }}
         >
           <KeyboardArrowUp />
         </Fab>
       </Zoom>
 
-      {/* thông báo */}
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={3000}
+        autoHideDuration={2500}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        sx={{ mt: 8 }}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: isMobile ? "center" : "right",
+        }}
+        TransitionProps={{
+          timeout: 200,
+        }}
+        sx={{
+          top: { xs: "60px", sm: "140px" },
+          zIndex: 9999,
+          willChange: "transform, opacity",
+        }}
       >
         <Alert
           onClose={() => setSnackbar({ ...snackbar, open: false })}
           severity={snackbar.severity}
-          sx={{ width: "100%" }}
+          variant="filled"
+          sx={{
+            fontWeight: 600,
+            willChange: "opacity",
+          }}
         >
           {snackbar.message}
         </Alert>

@@ -20,6 +20,7 @@ interface BookCatalogGridProps {
   onLoadMore?: () => void;
   onAddToCart?: (bookId: number) => void;
   totalBooks?: number;
+  addingBookId?: number | null;
 }
 
 export default function BookCatalogGrid({
@@ -29,31 +30,31 @@ export default function BookCatalogGrid({
   onLoadMore,
   onAddToCart,
   totalBooks,
+  addingBookId = null,
 }: BookCatalogGridProps): React.ReactElement {
   const theme = useTheme();
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  // dùng API Intersection Observer để tự động phát hiện khi người dùng cuộn đến cuối danh sách
   // giúp scroll vô hạn ( cho đến khi hết sách )
   useEffect(() => {
     if (!hasMore || loading || !onLoadMore) {
       return;
     }
 
-    const handleIntersect = (entries: IntersectionObserverEntry[]) => {
-      const [entry] = entries;
-
-      if (entry.isIntersecting) {
-        logger.log("Load more triggered");
-        onLoadMore();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting) {
+          logger.log("Load more triggered");
+          onLoadMore();
+        }
+      },
+      {
+        root: null,
+        rootMargin: "200px",
+        threshold: 0.1,
       }
-    };
-
-    const observer = new IntersectionObserver(handleIntersect, {
-      root: null,
-      rootMargin: "200px",
-      threshold: 0.1,
-    });
+    );
 
     const currentLoadMoreRef = loadMoreRef.current;
     if (currentLoadMoreRef) {
@@ -64,8 +65,6 @@ export default function BookCatalogGrid({
       observer.disconnect();
     };
   }, [hasMore, loading, onLoadMore]);
-
-  // loading skeleton
   if (loading && books.length === 0) {
     return (
       <Box sx={{ width: "100%", maxWidth: "100%", overflow: "hidden" }}>
@@ -90,7 +89,7 @@ export default function BookCatalogGrid({
               md: "repeat(4, minmax(0, 1fr))",
               lg: "repeat(5, minmax(0, 1fr))",
             },
-            gap: { xs: 1.5, sm: 2, md: 2.5, lg: 3 },
+            gap: { xs: 1, sm: 1.5, md: 2 },
             alignItems: "stretch",
             gridAutoRows: "1fr",
             justifyItems: "stretch",
@@ -222,7 +221,7 @@ export default function BookCatalogGrid({
             md: "repeat(3, minmax(0, 1fr))",
             lg: "repeat(4, minmax(0, 1fr))",
           },
-          gap: { xs: 1.5, sm: 2, md: 2.5 },
+          gap: { xs: 1, sm: 1, md: 1 },
           width: "100%",
         }}
       >
@@ -234,7 +233,11 @@ export default function BookCatalogGrid({
               minWidth: 0,
             }}
           >
-            <BookCard book={book} onAddToCart={onAddToCart} />
+            <BookCard
+              book={book}
+              onAddToCart={onAddToCart}
+              isAddingToCart={addingBookId === book.id}
+            />
           </Box>
         ))}
       </Box>
@@ -259,8 +262,8 @@ export default function BookCatalogGrid({
             }}
           >
             <CircularProgress
-              size={40}
-              thickness={4}
+              size={56}
+              thickness={3.5}
               sx={{
                 color: "primary.main",
               }}

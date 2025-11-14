@@ -10,7 +10,7 @@ import Footer from "../../shared/ui/Footer";
 import SeoMetaTags from "../../shared/components/SeoMetaTags";
 
 // homepage
-const HomePage: React.FC = React.memo(() => {
+const HomePage: React.FC = () => {
   return (
     <Box
       sx={{
@@ -40,8 +40,6 @@ const HomePage: React.FC = React.memo(() => {
       <Footer />
     </Box>
   );
-});
-
-HomePage.displayName = "HomePage";
+};
 
 export default HomePage;

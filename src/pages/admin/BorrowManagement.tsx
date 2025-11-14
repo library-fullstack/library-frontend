@@ -193,10 +193,15 @@ export default function BorrowManagement() {
   };
 
   return (
-    <Box sx={{ maxWidth: "100%" }}>
+    <Box sx={{ maxWidth: "100%", px: { xs: 0, sm: 0 } }}>
       <Box>
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" fontWeight={800} gutterBottom>
+        <Box sx={{ mb: { xs: 2, sm: 3, md: 4 } }}>
+          <Typography
+            variant="h4"
+            fontWeight={800}
+            gutterBottom
+            sx={{ fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" } }}
+          >
             Quản lý mượn trả
           </Typography>
           <Typography variant="body1" color="text.secondary">

@@ -10,15 +10,22 @@ import {
   Typography,
   InputAdornment,
   IconButton,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { Visibility, VisibilityOff, Check, Close } from "@mui/icons-material";
+import type { ApiError } from "../../../shared/types/api-error";
 import { usersApi } from "../../users/api/users.api";
 import useAuth from "../../../features/auth/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { CircularProgress } from "@mui/material";
+import { STORAGE_KEYS } from "../../../shared/lib/storageKeys";
 
 export default function ChangePasswordSection() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const [current, setCurrent] = useState("");
   const [newPass, setNewPass] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -39,18 +46,17 @@ export default function ChangePasswordSection() {
     severity: "success" | "error";
   }>({ open: false, message: "", severity: "success" });
 
-  // giữ step và otp khi reload
   useEffect(() => {
-    sessionStorage.setItem("changePassStep", step);
-    sessionStorage.setItem("changePassOtp", otp);
+    sessionStorage.setItem(STORAGE_KEYS.session.changePassStep, step);
+    sessionStorage.setItem(STORAGE_KEYS.session.changePassOtp, otp);
   }, [step, otp]);
 
   useEffect(() => {
-    const savedStep = sessionStorage.getItem("changePassStep") as
-      | "form"
-      | "otp"
-      | null;
-    const savedOtp = sessionStorage.getItem("changePassOtp") || "";
+    const savedStep = sessionStorage.getItem(
+      STORAGE_KEYS.session.changePassStep
+    ) as "form" | "otp" | null;
+    const savedOtp =
+      sessionStorage.getItem(STORAGE_KEYS.session.changePassOtp) || "";
     if (savedStep) setStep(savedStep);
     if (savedOtp) setOtp(savedOtp);
   }, []);
@@ -94,7 +100,7 @@ export default function ChangePasswordSection() {
       });
       setResendTimer(60);
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
+      const err = error as ApiError;
       const msg =
         err.response?.data?.message || "Mật khẩu hiện tại không đúng.";
       setSnackbar({ open: true, message: msg, severity: "error" });
@@ -126,7 +132,6 @@ export default function ChangePasswordSection() {
         severity: "success",
       });
 
-      // reset form
       setCurrent("");
       setNewPass("");
       setConfirm("");
@@ -138,7 +143,7 @@ export default function ChangePasswordSection() {
 
       setTimeout(() => handleLogout(), 1200);
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
+      const err = error as ApiError;
       const msg =
         err.response?.data?.message ||
         "Không thể đổi mật khẩu. Vui lòng thử lại.";
@@ -163,7 +168,7 @@ export default function ChangePasswordSection() {
       });
       setResendTimer(60);
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
+      const err = error as ApiError;
       const msg = err.response?.data?.message || "Không thể gửi lại mã OTP.";
       setSnackbar({ open: true, message: msg, severity: "error" });
     } finally {
@@ -392,8 +397,14 @@ export default function ChangePasswordSection() {
         open={snackbar.open}
         autoHideDuration={4000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        sx={{ mt: 8 }}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: isMobile ? "center" : "right",
+        }}
+        sx={{
+          top: { xs: "60px", sm: "140px" },
+          zIndex: 9999,
+        }}
       >
         <Alert
           onClose={() => setSnackbar({ ...snackbar, open: false })}

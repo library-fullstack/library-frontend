@@ -19,11 +19,13 @@ import type { Book } from "../../features/books/types";
 interface BookCardProps {
   book: Book;
   onAddToCart?: (bookId: number) => void;
+  isAddingToCart?: boolean;
 }
 
 export default function BookCard({
   book,
   onAddToCart,
+  isAddingToCart = false,
 }: BookCardProps): React.ReactElement {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -178,17 +180,25 @@ export default function BookCard({
               </Tooltip>
 
               <Tooltip
-                title={isAvailable ? "Thêm vào giỏ" : "Hết sách"}
+                title={
+                  isAddingToCart
+                    ? "Đang thêm..."
+                    : isAvailable
+                    ? "Thêm vào giỏ"
+                    : "Hết sách"
+                }
                 arrow
                 placement="top"
               >
                 <span style={{ flex: 1 }}>
                   <IconButton
                     size="small"
-                    disabled={!isAvailable}
-                    onClick={(e) => {
+                    disabled={!isAvailable || isAddingToCart}
+                    onClick={async (e) => {
                       e.stopPropagation();
-                      if (isAvailable) onAddToCart?.(book.id);
+                      if (isAvailable && !isAddingToCart && onAddToCart) {
+                        onAddToCart(book.id);
+                      }
                     }}
                     sx={{
                       bgcolor: "background.paper",
@@ -207,6 +217,7 @@ export default function BookCard({
                       },
                       "&.Mui-disabled": {
                         bgcolor: "rgba(0,0,0,0.08)",
+                        opacity: isAddingToCart ? 0.6 : 0.4,
                       },
                     }}
                   >
@@ -214,6 +225,9 @@ export default function BookCard({
                       size={18}
                       style={{
                         filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.1))",
+                        animation: isAddingToCart
+                          ? "pulse 1.5s ease-in-out infinite"
+                          : undefined,
                       }}
                     />
                   </IconButton>
@@ -349,7 +363,11 @@ export default function BookCard({
                   width: 7,
                   height: 7,
                   borderRadius: "50%",
-                  bgcolor: isAvailable ? "#10B981" : "#EF4444",
+                  bgcolor: !isAvailable
+                    ? "#EF4444"
+                    : (book.available_count ?? 0) <= 3
+                    ? "#F59E0B"
+                    : "#10B981",
                   flexShrink: 0,
                   transform: "translateY(0.5px)",
                   mb: 0.3,
@@ -358,13 +376,21 @@ export default function BookCard({
               <Typography
                 variant="caption"
                 sx={{
-                  color: isAvailable ? "#10B981" : "#EF4444",
+                  color: !isAvailable
+                    ? "#EF4444"
+                    : (book.available_count ?? 0) <= 3
+                    ? "#F59E0B"
+                    : "#10B981",
                   fontWeight: 600,
                   fontSize: "0.8rem",
                   lineHeight: 1,
                 }}
               >
-                {isAvailable ? `Còn ${book.available_count} cuốn` : "Hết sách"}
+                {!isAvailable
+                  ? "Hết sách"
+                  : (book.available_count ?? 0) <= 3
+                  ? `Sắp hết - Còn ${book.available_count} cuốn`
+                  : `Còn ${book.available_count} cuốn`}
               </Typography>
             </Box>
           </Box>

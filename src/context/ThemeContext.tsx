@@ -2,13 +2,14 @@ import React, { useState, useMemo, useEffect } from "react";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { ThemeContext } from "./ThemeContext.context";
 import type { ThemeMode } from "./ThemeContext.types";
-import { lightTheme, darkTheme } from "../app/theme/palette";
+import { STORAGE_KEYS } from "../shared/lib/storageKeys";
+import { getLightTheme, getDarkTheme } from "../app/theme/palette";
 
 export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [mode, setMode] = useState<ThemeMode>(() => {
-    const saved = localStorage.getItem("themeMode");
+    const saved = localStorage.getItem(STORAGE_KEYS.theme.mode);
     if (saved) {
       return saved as ThemeMode;
     }
@@ -42,18 +43,16 @@ export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const toggleTheme = () => {
     setMode((prev) => {
       const newMode = prev === "light" ? "dark" : "light";
-      localStorage.setItem("themeMode", newMode);
+      localStorage.setItem(STORAGE_KEYS.theme.mode, newMode);
       return newMode;
     });
   };
 
-  // ghi nhớ (memoize) theme để tránh tạo lại nhiều lần
   const theme = useMemo(
-    () => (mode === "light" ? lightTheme : darkTheme),
+    () => (mode === "light" ? getLightTheme() : getDarkTheme()),
     [mode]
   );
 
-  // ghi nhớ (memoize) context value
   const contextValue = useMemo(() => ({ mode, toggleTheme }), [mode]);
 
   return (

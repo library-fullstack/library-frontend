@@ -164,7 +164,7 @@ export default function SearchResultsPanel({
                   py: 4,
                 }}
               >
-                <CircularProgress size={32} />
+                <CircularProgress size={56} thickness={3.5} />
               </Box>
             ) : results.length > 0 ? (
               <>

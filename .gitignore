@@ -18,8 +18,10 @@ vite.config.local.*
 .env
 .env.local
 .env.*.local
+.env.production
 
 # IDE & Editor
+.claude/
 .vscode/
 .idea/
 *.swp
@@ -65,3 +67,4 @@ screenshots/
 !tsconfig*.json
 !eslint.config.js
 !README.md
+

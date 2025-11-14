@@ -1,26 +1,29 @@
 import React from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "../navbar/Navbar";
 import MenuBar from "../menubar/MenuBar";
-import { Box, Snackbar, Alert } from "@mui/material";
+import { Box, Snackbar, Alert, useMediaQuery, useTheme } from "@mui/material";
 import ScrollMemory from "../../components/ScrollMemory";
+import OfflineSupport from "../../shared/components/OfflineSupport";
+import { STORAGE_KEYS } from "../../shared/lib/storageKeys";
 
 export default function MainLayout() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const location = useLocation();
-  const navigate = useNavigate();
   const isAuthPage = location.pathname.startsWith("/auth");
-  const [loginSnackOpen, setLoginSnackOpen] = React.useState(false);
+  const [logoutSnackOpen, setLogoutSnackOpen] = React.useState(false);
 
   React.useEffect(() => {
-    const state = location.state as { loginSuccess?: boolean } | null;
-    const fromState = Boolean(state?.loginSuccess);
-    const fromSession = sessionStorage.getItem("loginSuccessOnce") === "1";
-    if (fromState || fromSession) {
-      setLoginSnackOpen(true);
-      if (fromSession) sessionStorage.removeItem("loginSuccessOnce");
-      navigate(location.pathname + location.search, { replace: true });
+    const logoutFlag = sessionStorage.getItem(
+      STORAGE_KEYS.session.logoutSuccess
+    );
+
+    if (logoutFlag === "1") {
+      sessionStorage.removeItem(STORAGE_KEYS.session.logoutSuccess);
+      setLogoutSnackOpen(true);
     }
-  }, [location, navigate]);
+  }, [location.pathname]);
 
   return (
     <Box
@@ -30,30 +33,35 @@ export default function MainLayout() {
         position: "relative",
       }}
     >
+      <OfflineSupport />
       <ScrollMemory />
 
       {!isAuthPage && <Navbar />}
       {!isAuthPage && <MenuBar />}
       <Outlet />
 
-      {!isAuthPage && (
-        <Snackbar
-          open={loginSnackOpen}
-          autoHideDuration={2500}
-          onClose={() => setLoginSnackOpen(false)}
-          anchorOrigin={{ vertical: "top", horizontal: "right" }}
-          sx={{ mt: 8 }}
+      <Snackbar
+        open={logoutSnackOpen}
+        autoHideDuration={2500}
+        onClose={() => setLogoutSnackOpen(false)}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: isMobile ? "center" : "right",
+        }}
+        sx={{
+          top: { xs: "60px", sm: "140px" },
+          zIndex: 99999,
+        }}
+      >
+        <Alert
+          onClose={() => setLogoutSnackOpen(false)}
+          severity="success"
+          variant="filled"
+          sx={{ width: "100%" }}
         >
-          <Alert
-            onClose={() => setLoginSnackOpen(false)}
-            severity="success"
-            variant="filled"
-            sx={{ width: "100%" }}
-          >
-            Đăng nhập thành công!
-          </Alert>
-        </Snackbar>
-      )}
+          Đã đăng xuất thành công!
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

@@ -26,7 +26,7 @@ export interface LoginResponse {
     email: string;
     role: "STUDENT" | "LIBRARIAN" | "MODERATOR" | "ADMIN";
   };
-  token: string;
+  accessToken: string;
 }
 
 export interface RegisterResponse {

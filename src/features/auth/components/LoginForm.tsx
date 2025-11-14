@@ -13,6 +13,7 @@ import { LoadingButton } from "@mui/lab";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
+import type { LocationState } from "../../../shared/types/router";
 import useAuth from "../hooks/useAuth";
 import { parseApiError } from "../../../shared/lib/errorHandler";
 import { CircularProgress } from "@mui/material";
@@ -29,8 +30,7 @@ export default function LoginForm(): React.ReactElement {
   const [isLoggingIn, setIsLoggingIn] = React.useState(false);
 
   // lấy cái trang lúc bấm mà bị redirect về login
-  const from =
-    (location.state as { from?: { pathname: string } })?.from?.pathname || "/";
+  const from = (location.state as LocationState)?.from?.pathname || "/";
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -45,8 +45,7 @@ export default function LoginForm(): React.ReactElement {
     try {
       await login(identifier, password);
 
-      sessionStorage.setItem("loginSuccessOnce", "1");
-      navigate(from || "/", { replace: true, state: { loginSuccess: true } });
+      navigate(from, { replace: true, state: { loginSuccess: true } });
     } catch (err) {
       setError(parseApiError(err));
     } finally {
