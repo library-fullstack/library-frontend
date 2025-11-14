@@ -2,8 +2,8 @@ import React, { useState, useMemo, useEffect } from "react";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { ThemeContext } from "./ThemeContext.context";
 import type { ThemeMode } from "./ThemeContext.types";
-import { lightTheme, darkTheme } from "../app/theme/palette";
 import { STORAGE_KEYS } from "../shared/lib/storageKeys";
+import { getLightTheme, getDarkTheme } from "../app/theme/palette";
 
 export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -49,7 +49,7 @@ export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const theme = useMemo(
-    () => (mode === "light" ? lightTheme : darkTheme),
+    () => (mode === "light" ? getLightTheme() : getDarkTheme()),
     [mode]
   );
 

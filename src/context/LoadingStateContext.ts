@@ -4,8 +4,12 @@ interface LoadingStateContextType {
   isInitialLoaderHidden: boolean;
 }
 
-const LoadingStateContext = createContext<LoadingStateContextType | undefined>(
-  undefined
-);
+const defaultValue: LoadingStateContextType = {
+  isInitialLoaderHidden: false,
+};
 
+const LoadingStateContext =
+  createContext<LoadingStateContextType>(defaultValue);
+
+export type { LoadingStateContextType };
 export default LoadingStateContext;

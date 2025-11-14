@@ -3,7 +3,16 @@
 
   "headers": [
     {
-      "source": "**/*.{js,css,png,jpg,jpeg,gif,svg,woff,woff2,ttf,eot,ico}",
+      "source": "**/*.{js,css}",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "**/*.{png,jpg,jpeg,gif,svg,woff,woff2,ttf,eot,ico}",
       "headers": [
         {
           "key": "Cache-Control",
