@@ -1,23 +1,79 @@
 import * as React from "react";
-import { Box, Container, Typography, Button } from "@mui/material";
+import { Box, Container, Typography, Button, Skeleton } from "@mui/material";
 import { ArrowForward } from "@mui/icons-material";
 
 import { useBanner } from "../../context/useBannerContext";
 import EventFallingElements from "../../shared/components/EventFallingElements";
 import "../../styles/eventTheme.css";
 
-export default function HeroBanner(): React.ReactElement {
+export default function HeroBanner(): React.ReactElement | null {
   const [activeSlide, setActiveSlide] = React.useState(0);
   const { bannerConfig, eventClass, isLoading } = useBanner();
+  const [canRender, setCanRender] = React.useState(false);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setCanRender(true);
+    }, 850);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading && !canRender) {
+    return null;
+  }
 
   if (isLoading) {
     return (
       <Box
         sx={{
+          position: "relative",
           py: { xs: 8, md: 10 },
           minHeight: { xs: "auto", md: "100vh" },
+          display: "flex",
+          alignItems: "center",
+          width: "100%",
+          maxWidth: "100vw",
+          overflow: "hidden",
         }}
-      />
+      >
+        <Container
+          maxWidth="lg"
+          sx={{
+            position: "relative",
+            zIndex: 1,
+            py: { xs: 6, md: 8 },
+            px: { xs: 2, sm: 3 },
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: { xs: 4, md: 6 },
+              flexDirection: { xs: "column", md: "row" },
+            }}
+          >
+            <Box
+              sx={{
+                flex: 1,
+                maxWidth: { xs: "100%", md: 520 },
+                mb: { xs: 6, md: 0 },
+                width: "100%",
+              }}
+            >
+              <Skeleton width="100%" height={60} sx={{ mb: 2 }} />
+              <Skeleton width="100%" height={100} sx={{ mb: 3 }} />
+              <Skeleton width={150} height={44} sx={{ mb: 4 }} />
+              <Box sx={{ display: "flex", gap: 1 }}>
+                {[0, 1, 2].map((i) => (
+                  <Skeleton key={i} width={10} height={10} variant="circular" />
+                ))}
+              </Box>
+            </Box>
+          </Box>
+        </Container>
+      </Box>
     );
   }
 

@@ -65,3 +65,5 @@ screenshots/
 !tsconfig*.json
 !eslint.config.js
 !README.md
+
+.claude/

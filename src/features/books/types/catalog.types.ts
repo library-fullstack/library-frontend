@@ -6,6 +6,7 @@ export interface BookFilters {
   status?: BookStatus;
   format?: BookFormat | null;
   language_code?: string | null;
+  searchType?: "all" | "author" | "title" | "publisher";
 }
 
 export type SortOption =

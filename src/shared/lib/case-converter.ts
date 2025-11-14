@@ -6,16 +6,16 @@ const parseDateString = (dateStr: unknown): Date | string => {
   return dateStr as string;
 };
 
-export const snakeToCamel = (obj: Record<string, unknown>): unknown => {
+export const snakeToCamel = (obj: unknown): unknown => {
   if (Array.isArray(obj)) {
-    return obj.map(snakeToCamel);
+    return obj.map((item) => snakeToCamel(item));
   } else if (obj !== null && typeof obj === "object") {
-    return Object.keys(obj).reduce(
+    return Object.keys(obj as Record<string, unknown>).reduce(
       (result: Record<string, unknown>, key: string) => {
-        const camelKey = key.replace(/_([a-z])/g, (_, letter) =>
-          (letter as string).toUpperCase()
+        const camelKey = key.replace(/_([a-z])/g, (_, letter: string) =>
+          letter.toUpperCase()
         );
-        const value = obj[key];
+        const value = (obj as Record<string, unknown>)[key];
 
         if (
           (camelKey === "startDate" || camelKey === "endDate") &&
@@ -23,7 +23,7 @@ export const snakeToCamel = (obj: Record<string, unknown>): unknown => {
         ) {
           result[camelKey] = parseDateString(value);
         } else if (value !== null && typeof value === "object") {
-          result[camelKey] = snakeToCamel(value as Record<string, unknown>);
+          result[camelKey] = snakeToCamel(value);
         } else {
           result[camelKey] = value;
         }
@@ -35,17 +35,17 @@ export const snakeToCamel = (obj: Record<string, unknown>): unknown => {
   return obj;
 };
 
-export const camelToSnake = (obj: Record<string, unknown>): unknown => {
+export const camelToSnake = (obj: unknown): unknown => {
   if (Array.isArray(obj)) {
-    return obj.map(camelToSnake);
+    return obj.map((item) => camelToSnake(item));
   } else if (obj !== null && typeof obj === "object") {
-    return Object.keys(obj).reduce(
+    return Object.keys(obj as Record<string, unknown>).reduce(
       (result: Record<string, unknown>, key: string) => {
         const snakeKey = key.replace(
           /[A-Z]/g,
           (letter) => `_${letter.toLowerCase()}`
         );
-        const value = obj[key];
+        const value = (obj as Record<string, unknown>)[key];
 
         if (
           (snakeKey === "start_date" || snakeKey === "end_date") &&
@@ -53,7 +53,7 @@ export const camelToSnake = (obj: Record<string, unknown>): unknown => {
         ) {
           result[snakeKey] = value.toISOString().split("T")[0];
         } else if (value !== null && typeof value === "object") {
-          result[snakeKey] = camelToSnake(value as Record<string, unknown>);
+          result[snakeKey] = camelToSnake(value);
         } else {
           result[snakeKey] = value;
         }

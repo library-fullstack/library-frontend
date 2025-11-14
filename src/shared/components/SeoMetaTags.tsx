@@ -40,7 +40,6 @@ export default function SeoMetaTags({
 
   return (
     <Helmet>
-      {/* Basic SEO */}
       <title>{sanitizedData.title}</title>
       <meta name="description" content={sanitizedData.description} />
       <meta name="keywords" content={sanitizedData.keywords} />

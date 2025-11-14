@@ -14,33 +14,38 @@ export default function ProtectedRoute({
   children,
   roles,
 }: ProtectedRouteProps): React.ReactElement {
-  const { user, token } = useAuth();
+  const { user, token, isInitialized } = useAuth();
   const location = useLocation();
 
-  // chưa đăng nhập, chưa có token thì route đến đăng nhập
-  // lưu location hiện tại để redirect về sau khi đăng nhập
-  if (!token || !user) {
-    logger.log(
-      "[ProtectedRoute] Chưa xác thực, đang chuyển hướng đến trang đăng nhập. Vị trí hiện tại:",
-      location.pathname
+  if (!isInitialized) {
+    logger.debug("[ProtectedRoute] Waiting for auth initialization...");
+    return <div />;
+  }
+
+  if (import.meta.env.DEV && !user && token) {
+    logger.debug(
+      "[ProtectedRoute] Dev mode: have token but no user yet, waiting..."
     );
-    return <Navigate to="/auth/login" state={{ from: location }} replace />;
+    return <div />;
+  }
+
+  if (!token || !user) {
+    logger.debug("[ProtectedRoute] Unauthenticated user, redirecting to login");
+    return (
+      <Navigate
+        to="/auth/login"
+        state={{ from: { pathname: location.pathname } }}
+        replace
+      />
+    );
   }
 
   // kiểm tra role nếu có yêu cầu
   if (roles && !roles.includes(user.role)) {
-    logger.log(
-      "[ProtectedRoute] Quyền truy cập không đủ. Vai trò người dùng:",
-      user.role,
-      "Yêu cầu:",
-      roles
-    );
+    logger.warn("[ProtectedRoute] User role not authorized for this route");
     return <Unauthorized />;
   }
 
-  logger.log(
-    "[ProtectedRoute] Quyền truy cập được cấp cho:",
-    location.pathname
-  );
+  logger.debug("[ProtectedRoute] Access granted");
   return children;
 }

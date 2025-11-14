@@ -30,11 +30,21 @@ export const usersApi = {
   getMe: async () => {
     const token = StorageUtil.getItem("token");
     if (!token) throw new Error("No token available for getMe()");
-    return axiosClient.get<User>("/users/profile");
+
+    try {
+      return await axiosClient.get<User>("/users/profile");
+    } catch (error) {
+      // Nếu 401, token đã hết hạn hoặc invalid
+      if (error instanceof Error && error.message.includes("401")) {
+        StorageUtil.removeItem("token");
+        StorageUtil.removeItem("user");
+        throw new Error("Token invalid or expired - 401");
+      }
+      throw error;
+    }
   },
 
   // cập nhật thông tin người dùng
-  // KHOÁ
   updateProfile: (data: UpdateProfileRequest) =>
     axiosClient.patch<User>("/users/profile", data),
 

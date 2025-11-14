@@ -4,37 +4,42 @@ import {
   Typography,
   Card,
   CardContent,
-  Button,
   Container,
-  Rating,
   Skeleton,
-  Stack,
   useTheme,
   IconButton,
   useMediaQuery,
 } from "@mui/material";
-import { InfoOutlined, ArrowBack, ArrowForward } from "@mui/icons-material";
-import { ShoppingBag } from "lucide-react";
+import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import type { Swiper as SwiperType } from "swiper";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { useNavigate, useNavigationType } from "react-router-dom";
-import { booksApi } from "../../features/books/api";
 import type { Book } from "../../features/books/types";
 import { motion } from "framer-motion";
 import { useEventTheme } from "../../shared/hooks/useEventTheme";
 import EventFallingElements from "../../shared/components/EventFallingElements";
 import "../../styles/eventTheme.css";
-import logger from "@/shared/lib/logger";
+import { useBooks } from "@/features/books/hooks/useBooks";
 
 const MotionCard = motion.create(Card);
 
 const FeaturedBooks: React.FC = () => {
-  const [books, setBooks] = React.useState<Book[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+  const {
+    data: booksData,
+    isLoading: loading,
+    error: queryError,
+  } = useBooks({
+    limit: 10,
+    sort_by: "popular",
+  });
+
+  const books = booksData || [];
+  const error = queryError ? "Không thể tải danh sách sách nổi bật." : null;
+
   const theme = useTheme();
   const navigate = useNavigate();
   const navigationType = useNavigationType();
@@ -46,81 +51,151 @@ const FeaturedBooks: React.FC = () => {
   const prevRef = React.useRef<HTMLButtonElement | null>(null);
   const nextRef = React.useRef<HTMLButtonElement | null>(null);
 
-  React.useEffect(() => {
-    let isMounted = true;
-    const fetchBooks = async () => {
-      try {
-        const list = await booksApi.getAllBooks({
-          limit: 10,
-          sort_by: "popular",
-        });
-        if (isMounted) setBooks(Array.isArray(list) ? list : []);
-      } catch (err) {
-        logger.error("Lỗi tải sách:", err);
-        if (isMounted) setError("Không thể tải danh sách sách nổi bật.");
-      } finally {
-        if (isMounted) setLoading(false);
+  const handleSwiperInit = React.useCallback((swiper: SwiperType) => {
+    if (typeof swiper.params.navigation !== "boolean") {
+      const nav = swiper.params.navigation;
+      if (nav && prevRef.current && nextRef.current) {
+        nav.prevEl = prevRef.current;
+        nav.nextEl = nextRef.current;
+        swiper.navigation.init();
+        swiper.navigation.update();
       }
-    };
-    fetchBooks();
-    return () => {
-      isMounted = false;
-    };
+    }
   }, []);
+  const SkeletonCard = () => (
+    <Card
+      sx={{
+        borderRadius: 2,
+        border: 1,
+        borderColor: "divider",
+        boxShadow: "none",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <Skeleton
+        variant="rectangular"
+        width="100%"
+        height={320}
+        sx={{ borderTopLeftRadius: 8, borderTopRightRadius: 8 }}
+      />
+      <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, flex: 1 }}>
+        <Skeleton height={24} width="80%" sx={{ mb: 0.5 }} />
+        <Skeleton height={16} width="60%" sx={{ mb: 1 }} />
+        <Skeleton height={32} width="100%" sx={{ mb: 0.75 }} />
+        <Skeleton height={36} width="100%" sx={{ mb: 0.5 }} />
+        <Skeleton height={36} width="100%" />
+      </CardContent>
+    </Card>
+  );
 
-  if (loading || error)
+  if (loading) {
     return (
-      <Box sx={{ py: 8, bgcolor: "background.default" }}>
-        <Container
-          maxWidth="lg"
-          sx={{
-            transform: { xs: "scale(0.9)", md: "scale(1)" },
-            transformOrigin: "top center",
-          }}
-        >
+      <Box sx={{ py: 8, bgcolor: "background.default", position: "relative" }}>
+        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
           <Typography
             variant="h4"
             fontWeight={700}
             textAlign="center"
-            mb={5}
+            mb={1}
             color="text.primary"
           >
             Sách nổi bật
           </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            textAlign="center"
+            mb={5}
+          >
+            Khám phá những đầu sách được yêu thích nhất
+          </Typography>
 
-          {isMobile ? (
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "1fr",
-                gap: 2,
-              }}
-            >
-              <Card>
-                <Skeleton variant="rectangular" width="100%" height={320} />
-                <CardContent>
-                  <Skeleton height={24} width="80%" />
-                  <Skeleton height={18} width="60%" />
-                </CardContent>
-              </Card>
-            </Box>
-          ) : (
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              textAlign="center"
-            >
-              Đang tải dữ liệu...
-            </Typography>
-          )}
+          <Box
+            sx={{
+              display: "flex",
+              gap: 3,
+              overflow: "hidden",
+              pb: 2,
+            }}
+          >
+            {[...Array(isMobile ? 1 : 8)].map((_, idx) => (
+              <Box
+                key={idx}
+                sx={{
+                  flex: isMobile ? "0 0 100%" : "0 0 calc(25% - 18px)",
+                  minWidth: 0,
+                }}
+              >
+                <SkeletonCard />
+              </Box>
+            ))}
+          </Box>
         </Container>
       </Box>
     );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ py: 8, bgcolor: "background.default", position: "relative" }}>
+        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
+          <Typography
+            variant="h4"
+            fontWeight={700}
+            textAlign="center"
+            mb={1}
+            color="text.primary"
+          >
+            Sách nổi bật
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            textAlign="center"
+            mb={5}
+          >
+            Khám phá những đầu sách được yêu thích nhất
+          </Typography>
+
+          <Box
+            sx={{
+              display: "flex",
+              gap: 3,
+              overflow: "hidden",
+              pb: 2,
+            }}
+          >
+            {[...Array(4)].map((_, idx) => (
+              <Box key={idx} sx={{ flex: "0 0 calc(25% - 18px)", minWidth: 0 }}>
+                <SkeletonCard />
+              </Box>
+            ))}
+          </Box>
+
+          <Typography
+            variant="body2"
+            color="error"
+            textAlign="center"
+            sx={{ mt: 4 }}
+          >
+            {error}
+          </Typography>
+        </Container>
+      </Box>
+    );
+  }
 
   // swiper
   const CardItem = (book: Book) => {
+    const handleCardClick = () => {
+      navigate(`/books/${book.id}`);
+    };
+
     const cardBase = (
       <Card
+        onClick={handleCardClick}
         sx={{
           borderRadius: 2,
           border: 1,
@@ -130,6 +205,7 @@ const FeaturedBooks: React.FC = () => {
           display: "flex",
           flexDirection: "column",
           transition: "none",
+          cursor: "pointer",
           "&:hover": isMobile
             ? {}
             : { boxShadow: "0 8px 20px rgba(0,0,0,0.1)" },
@@ -194,49 +270,54 @@ const FeaturedBooks: React.FC = () => {
           >
             {book.author_names || "Chưa rõ tác giả"}
           </Typography>
-          <Box
-            sx={{ display: "flex", alignItems: "center", mb: { xs: 1, sm: 2 } }}
-          >
-            <Rating value={4} readOnly size="small" precision={0.5} />
-            <Typography
-              variant="caption"
-              sx={{ ml: 0.5, fontSize: { xs: "0.7rem", sm: "0.75rem" } }}
-              color="text.secondary"
-            >
-              (4.0)
-            </Typography>
-          </Box>
 
-          <Stack spacing={{ xs: 0.75, sm: 1 }}>
-            <Button
-              variant="outlined"
-              startIcon={<InfoOutlined />}
-              onClick={() => navigate(`/books/${book.id}`)}
+          <Box sx={{ pt: { xs: 0.5, sm: 0.75 }, mt: "auto" }}>
+            <Box
               sx={{
-                textTransform: "none",
-                fontWeight: 600,
-                fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                display: "flex",
+                alignItems: "center",
+                gap: 0.6,
                 py: { xs: 0.5, sm: 0.75 },
-                "&:hover": { bgcolor: "action.hover" },
               }}
             >
-              Xem chi tiết
-            </Button>
-            <Button
-              variant="contained"
-              startIcon={<ShoppingBag />}
-              sx={{
-                textTransform: "none",
-                fontWeight: 600,
-                fontSize: { xs: "0.8rem", sm: "0.875rem" },
-                py: { xs: 0.5, sm: 0.75 },
-                boxShadow: "0 2px 6px rgba(99,102,241,0.25)",
-                "&:hover": { transform: "translateY(-1px)" },
-              }}
-            >
-              Thêm vào giỏ
-            </Button>
-          </Stack>
+              <Box
+                sx={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  bgcolor:
+                    !book.available_count || book.available_count === 0
+                      ? "#EF4444"
+                      : book.available_count <= 3
+                      ? "#F59E0B"
+                      : "#10B981",
+                  flexShrink: 0,
+                  transform: "translateY(0.5px)",
+                  mb: 0.3,
+                }}
+              />
+              <Typography
+                variant="caption"
+                sx={{
+                  color:
+                    !book.available_count || book.available_count === 0
+                      ? "#EF4444"
+                      : book.available_count <= 3
+                      ? "#F59E0B"
+                      : "#10B981",
+                  fontWeight: 600,
+                  fontSize: { xs: "0.75rem", sm: "0.8rem" },
+                  lineHeight: 1,
+                }}
+              >
+                {!book.available_count || book.available_count === 0
+                  ? "Hết sách"
+                  : book.available_count <= 3
+                  ? `Sắp hết - Còn ${book.available_count} cuốn`
+                  : `Còn ${book.available_count} cuốn`}
+              </Typography>
+            </Box>
+          </Box>
         </CardContent>
       </Card>
     );
@@ -248,6 +329,7 @@ const FeaturedBooks: React.FC = () => {
         layout={false}
         whileHover={{ y: -6 }}
         transition={{ duration: 0.3 }}
+        onClick={handleCardClick}
         sx={{
           borderRadius: 2,
           border: 1,
@@ -256,6 +338,8 @@ const FeaturedBooks: React.FC = () => {
           height: "100%",
           display: "flex",
           flexDirection: "column",
+          cursor: "pointer",
+          pointerEvents: "auto",
           "&:hover": { boxShadow: "0 8px 20px rgba(0,0,0,0.1)" },
         }}
       >
@@ -354,6 +438,7 @@ const FeaturedBooks: React.FC = () => {
           {/* swiper */}
           <Swiper
             modules={[Navigation, Pagination, Autoplay]}
+            onSwiper={handleSwiperInit}
             onBeforeInit={(swiper) => {
               if (typeof swiper.params.navigation !== "boolean") {
                 const nav = swiper.params.navigation;
@@ -362,10 +447,6 @@ const FeaturedBooks: React.FC = () => {
                   nav.nextEl = nextRef.current;
                 }
               }
-            }}
-            navigation={{
-              prevEl: prevRef.current,
-              nextEl: nextRef.current,
             }}
             pagination={{ clickable: true }}
             autoplay={{
@@ -376,8 +457,9 @@ const FeaturedBooks: React.FC = () => {
             slidesPerView={4.5}
             breakpoints={{
               0: { slidesPerView: 1.2, spaceBetween: 12 },
-              640: { slidesPerView: 2.2, spaceBetween: 16 },
-              900: { slidesPerView: 3.3, spaceBetween: 20 },
+              640: { slidesPerView: 2, spaceBetween: 16 },
+              900: { slidesPerView: 3, spaceBetween: 20 },
+              1024: { slidesPerView: 3.5, spaceBetween: 20 },
               1280: { slidesPerView: 4.5, spaceBetween: 24 },
             }}
             style={{ paddingBottom: 50 }}
@@ -424,7 +506,7 @@ const FeaturedBooks: React.FC = () => {
             border-radius: 8px;
             background: ${theme.palette.primary.main};
           }
-        `}</style>
+          `}</style>
         </Container>
       </Box>
     </>

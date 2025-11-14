@@ -1,20 +1,14 @@
 import axiosClient from "../../../shared/api/axiosClient";
 import type { Book, BookInputFull } from "../types";
 
-// export interface PaginatedResponse<T> {
-//   data: T[];
-//   total?: number;
-//   page?: number;
-//   limit?: number;
-// }
-
-// gọi api lấy tất cả danh sách sách, có phân trang và tìm kiếm
 const getAllBooks = async (params?: {
   keyword?: string;
   category_id?: number;
   status?: string;
   limit?: number;
   offset?: number;
+  cursor?: number | string | null;
+  searchType?: "all" | "author" | "title" | "publisher";
   sort_by?:
     | "newest"
     | "oldest"
@@ -25,10 +19,33 @@ const getAllBooks = async (params?: {
     | "popular";
   order?: "asc" | "desc";
 }) => {
+  const cleanParams = Object.fromEntries(
+    Object.entries(params || {}).filter(
+      ([, value]) => value !== null && value !== undefined
+    )
+  );
+
+  if (typeof window !== "undefined" && cleanParams.limit) {
+    console.log(
+      `[Books API] Fetching books with limit=${cleanParams.limit}, offset=${
+        cleanParams.offset || 0
+      }`
+    );
+  }
+
   const res = await axiosClient.get<Book[]>("/books", {
-    params,
+    params: cleanParams,
     headers: { "Cache-Control": "no-cache" },
   });
+
+  if (typeof window !== "undefined") {
+    console.log(
+      `[Books API] Received ${res.data?.length || 0} books (limit was ${
+        cleanParams.limit
+      })`
+    );
+  }
+
   return res.data;
 };
 
@@ -47,7 +64,7 @@ const checkBookAvailable = async (book_id: number) => {
   return res.data;
 };
 
-// Tìm sách theo danh mục
+// timf sách theo danh mục
 const getBooksByCategory = async (
   category_id: number,
   limit = 10,
@@ -56,7 +73,7 @@ const getBooksByCategory = async (
   return getAllBooks({ category_id, limit, offset });
 };
 
-// Tìm sách theo từ khoá
+// tìm sách theo từ khoá
 const getBooksByKeyword = async (keyword: string, limit = 10, offset = 0) => {
   return getAllBooks({ keyword, limit, offset });
 };

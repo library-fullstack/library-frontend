@@ -26,17 +26,19 @@ import {
   FavoriteBorder,
   Share,
 } from "@mui/icons-material";
-import { ShoppingBag } from "lucide-react";
-import { booksApi } from "../../features/books/api";
 import { checkBookAvailable } from "../../features/books/api/books.api";
-import type { Book } from "../../features/books/types";
+import type { ApiError } from "../../shared/types/api-error";
 import BookInfoCard from "./components/BookInfoCard";
 import RelatedBooksSection from "./components/RelatedBooksSection";
 import SameAuthorBooksSection from "./components/SameAuthorBooksSection";
 import RecentBorrowersSection from "./components/RecentBorrowersSection";
 import BookImageGallery from "./components/BookImageGallery";
 import BookCopiesSection from "./components/BookCopiesSection";
+import AddToBorrowButton from "../../features/borrow/components/AddToBorrowButton";
 import logger from "@/shared/lib/logger";
+import { useBook } from "@/features/books/hooks/useBooks";
+import StorageUtil from "../../shared/lib/storage";
+import { STORAGE_KEYS } from "../../shared/lib/storageKeys";
 
 export default function BookDetail(): React.ReactElement {
   const { id } = useParams<{ id: string }>();
@@ -44,53 +46,54 @@ export default function BookDetail(): React.ReactElement {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  const [book, setBook] = useState<Book | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data: book,
+    isLoading: loading,
+    error: queryError,
+  } = useBook(id ? Number(id) : 0);
+
   const [available, setAvailable] = useState<boolean>(false);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
-    severity: "success" | "error" | "info";
+    severity: "success" | "error" | "info" | "warning";
   }>({ open: false, message: "", severity: "success" });
 
+  const error = queryError
+    ? "Không thể tải thông tin sách. Vui lòng thử lại sau."
+    : null;
+
   useEffect(() => {
-    const fetchBookDetail = async () => {
-      if (!id) return;
+    if (!book || !id) return;
 
-      setLoading(true);
-      setError(null);
-
-      try {
-        const bookData = await booksApi.getBookById(Number(id));
-        setBook(bookData);
-
+    const checkAvailability = async () => {
+      const token = StorageUtil.getItem(STORAGE_KEYS.auth.token);
+      if (token) {
         setCheckingAvailability(true);
         try {
           const availabilityData = await checkBookAvailable(Number(id));
           setAvailable(availabilityData.available);
         } catch (err) {
           logger.error("Lỗi khi kiểm tra tình trạng sẵn có:", err);
-          setAvailable(false);
+          const isAuthError = (err as ApiError)?.response?.status === 401;
+          if (isAuthError && book.available_count && book.available_count > 0) {
+            setAvailable(true);
+          } else {
+            setAvailable(false);
+          }
         } finally {
           setCheckingAvailability(false);
         }
-      } catch (err) {
-        logger.error("Lỗi khi lấy dữ liệu sách:", err);
-        setError("Không thể tải thông tin sách. Vui lòng thử lại sau.");
-      } finally {
-        setLoading(false);
+      } else {
+        setAvailable((book.available_count ?? 0) > 0);
+        setCheckingAvailability(false);
       }
     };
 
-    fetchBookDetail();
-  }, [id]);
-
-  const handleBorrowBook = () => {
-    navigate("/cart");
-  };
+    checkAvailability();
+  }, [book, id]);
 
   const handleToggleFavorite = () => {
     setIsFavorite(!isFavorite);
@@ -110,19 +113,74 @@ export default function BookDetail(): React.ReactElement {
       url: window.location.href,
     };
 
+    const manualCopy = () => {
+      const textArea = document.createElement("textarea");
+      textArea.value = window.location.href;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        const successful = document.execCommand("copy");
+        document.body.removeChild(textArea);
+        if (successful) {
+          setSnackbar({
+            open: true,
+            message: "Đã sao chép link vào clipboard",
+            severity: "success",
+          });
+        } else {
+          throw new Error("execCommand copy failed");
+        }
+      } catch {
+        document.body.removeChild(textArea);
+        setSnackbar({
+          open: true,
+          message: `Link: ${window.location.href}`,
+          severity: "info",
+        });
+      }
+    };
+
     try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
+      if (
+        navigator.share &&
+        navigator.canShare &&
+        navigator.canShare(shareData)
+      ) {
+        try {
+          await navigator.share(shareData);
+          setSnackbar({
+            open: true,
+            message: "Chia sẻ thành công",
+            severity: "success",
+          });
+          return;
+        } catch (shareErr) {
+          if ((shareErr as Error).name === "AbortError") {
+            logger.log("Share cancelled by user");
+            return;
+          }
+          logger.warn("Share failed, falling back to clipboard:", shareErr);
+        }
+      }
+
+      try {
         await navigator.clipboard.writeText(window.location.href);
         setSnackbar({
           open: true,
           message: "Đã sao chép link vào clipboard",
           severity: "success",
         });
+      } catch (clipboardErr) {
+        logger.warn("Clipboard API failed, trying manual copy:", clipboardErr);
+        manualCopy();
       }
-    } catch (err) {
-      logger.error("Lỗi khi chia sẻ:", err);
+    } catch (_err) {
+      logger.error("All share methods failed:", _err);
+      manualCopy();
     }
   };
 
@@ -178,17 +236,13 @@ export default function BookDetail(): React.ReactElement {
   };
 
   const handleAuthorClick = (authorName: string) => {
-    navigate(`/catalog?search=${encodeURIComponent(authorName)}&type=author`);
+    navigate(
+      `/catalog?search=${encodeURIComponent(authorName)}&searchType=author`
+    );
   };
 
   const handleCategoryClick = () => {
-    if (book?.category_id && book?.category_name) {
-      navigate(
-        `/catalog?search=${encodeURIComponent(book.category_name)}&category=${
-          book.category_id
-        }`
-      );
-    } else if (book?.category_id) {
+    if (book?.category_id) {
       navigate(`/catalog?category=${book.category_id}`);
     }
   };
@@ -278,15 +332,15 @@ export default function BookDetail(): React.ReactElement {
       sx={{
         minHeight: "100vh",
         bgcolor: "background.default",
-        pt: { xs: 2, sm: 3, md: 4 },
-        pb: { xs: 4, sm: 5, md: 6 },
+        pt: { xs: 1.5, sm: 2, md: 3 },
+        pb: { xs: 3, sm: 4, md: 6 },
       }}
     >
-      <Container maxWidth="xl">
+      <Container maxWidth="lg">
         <Breadcrumbs
           sx={{
-            mb: { xs: 2, sm: 3 },
-            fontSize: { xs: "0.8rem", sm: "0.875rem" },
+            mb: { xs: 1.5, sm: 2, md: 3 },
+            fontSize: { xs: "0.75rem", sm: "0.8rem", md: "0.875rem" },
           }}
         >
           <Link
@@ -331,15 +385,22 @@ export default function BookDetail(): React.ReactElement {
         <Box
           sx={{
             display: "flex",
-            gap: { xs: 3, md: 4 },
+            gap: { xs: 2, sm: 3, md: 3, lg: 4 },
             flexDirection: { xs: "column", md: "row" },
           }}
         >
-          <Box sx={{ width: { xs: "100%", md: "33.33%" } }}>
+          <Box
+            sx={{
+              width: { xs: "100%", md: "auto" },
+              minWidth: { md: 0 },
+              flexBasis: { md: "35%" },
+              flexShrink: 0,
+            }}
+          >
             <Paper
               elevation={0}
               sx={{
-                p: 2,
+                p: { xs: 1.5, sm: 2 },
                 borderRadius: 1.5,
                 bgcolor: "background.paper",
                 border: `1px solid ${theme.palette.divider}`,
@@ -428,19 +489,26 @@ export default function BookDetail(): React.ReactElement {
                   size="large"
                   fullWidth
                   disabled={!available || book.status !== "ACTIVE"}
-                  startIcon={<ShoppingBag />}
-                  onClick={handleBorrowBook}
+                  onClick={() => {}}
                   sx={{
-                    mt: 2,
-                    py: 1.5,
-                    fontWeight: 700,
-                    borderRadius: 1,
-                    textTransform: "none",
-                    fontSize: "1rem",
+                    display: "none",
                   }}
                 >
                   {available ? "Mượn sách" : "Không khả dụng"}
                 </Button>
+
+                <AddToBorrowButton
+                  bookId={book.id}
+                  bookTitle={book.title}
+                  available_count={book.available_count}
+                  variant="contained"
+                  size="large"
+                  fullWidth
+                  quantity={1}
+                  onNotify={(message, severity) =>
+                    setSnackbar({ open: true, message, severity })
+                  }
+                />
 
                 <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
                   <Button
@@ -489,14 +557,15 @@ export default function BookDetail(): React.ReactElement {
           </Box>
 
           <Box sx={{ flex: 1 }}>
-            <Box sx={{ mb: 4 }}>
+            <Box sx={{ mb: { xs: 2, sm: 3, md: 4 } }}>
               <Typography
                 variant={isMobile ? "h4" : "h3"}
                 fontWeight={700}
                 sx={{
-                  mb: 2,
+                  mb: { xs: 1.5, sm: 2 },
                   lineHeight: 1.3,
                   color: "text.primary",
+                  fontSize: { xs: "1.5rem", sm: "2rem", md: "2.5rem" },
                 }}
               >
                 {book.title}
@@ -731,13 +800,17 @@ export default function BookDetail(): React.ReactElement {
         open={snackbar.open}
         autoHideDuration={3000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        sx={{ mt: 8 }}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: isMobile ? "center" : "right",
+        }}
+        sx={{ top: { xs: "60px", sm: "140px" }, zIndex: 9999 }}
       >
         <Alert
           onClose={() => setSnackbar({ ...snackbar, open: false })}
           severity={snackbar.severity}
-          sx={{ width: "100%" }}
+          variant="filled"
+          sx={{ fontWeight: 600 }}
         >
           {snackbar.message}
         </Alert>

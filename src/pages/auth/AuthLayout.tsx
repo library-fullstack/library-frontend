@@ -13,6 +13,12 @@ import { Home } from "@mui/icons-material";
 import { AnimatePresence } from "framer-motion";
 import DisintegrationTransition from "../../shared/ui/DisintegrationTransition";
 import { AuthSnackbarContext } from "./AuthSnackbarContext";
+import { STORAGE_KEYS } from "../../shared/lib/storageKeys";
+
+interface AuthLayoutState {
+  message?: string;
+  severity?: "success" | "error" | "info";
+}
 
 export default function AuthLayout(): React.ReactElement {
   const location = useLocation();
@@ -33,19 +39,30 @@ export default function AuthLayout(): React.ReactElement {
     []
   );
 
-  // Xử lý snackbar message từ navigation state
   React.useEffect(() => {
-    const state = location.state as {
-      message?: string;
-      severity?: "success" | "error" | "info";
+    const state = location.state as AuthLayoutState & {
+      from?: { pathname: string };
     };
     if (state?.message) {
       setTimeout(() => {
         showSnackbar(state.message || "", state.severity || "info");
       }, 450);
-      navigate(location.pathname, { replace: true, state: {} });
+      navigate(location.pathname, {
+        replace: true,
+        state: state.from ? { from: state.from } : {},
+      });
     }
   }, [location, navigate, showSnackbar]);
+
+  React.useEffect(() => {
+    const logoutFlag = sessionStorage.getItem(
+      STORAGE_KEYS.session.logoutSuccess
+    );
+    if (logoutFlag === "1") {
+      sessionStorage.removeItem(STORAGE_KEYS.session.logoutSuccess);
+      showSnackbar("Bạn đã đăng xuất", "success");
+    }
+  }, [showSnackbar]);
 
   // ẩn scrollbar của body khi ở trang auth
   React.useEffect(() => {
@@ -84,97 +101,96 @@ export default function AuthLayout(): React.ReactElement {
           left: 0,
         }}
       >
-      {/* button quay về trang chủ */}
-      <Tooltip title="Về trang chủ" placement="right">
-        <IconButton
-          onClick={() => navigate("/")}
-          sx={{
-            position: "absolute",
-            top: { xs: 16, sm: 24 },
-            left: { xs: 16, sm: 24 },
-            zIndex: 10,
-            backgroundColor: (theme) => theme.palette.background.paper,
-            border: (theme) => `1px solid ${theme.palette.divider}`,
-            boxShadow: (theme) =>
-              theme.palette.mode === "light"
-                ? "0 2px 8px rgba(15,23,42,0.06)"
-                : "0 2px 8px rgba(0,0,0,0.3)",
-            "&:hover": {
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark" ? "#2A2B33" : "#F1F5F9",
-              transform: "translateY(-2px)",
+        {/* button quay về trang chủ */}
+        <Tooltip title="Về trang chủ" placement="right">
+          <IconButton
+            onClick={() => navigate("/")}
+            sx={{
+              position: "absolute",
+              top: { xs: 16, sm: 24 },
+              left: { xs: 16, sm: 24 },
+              zIndex: 10,
+              backgroundColor: (theme) => theme.palette.background.paper,
+              border: (theme) => `1px solid ${theme.palette.divider}`,
               boxShadow: (theme) =>
                 theme.palette.mode === "light"
-                  ? "0 4px 12px rgba(15,23,42,0.1)"
-                  : "0 4px 12px rgba(0,0,0,0.4)",
-            },
-            transition: "all 0.2s ease",
-          }}
-        >
-          <Home sx={{ fontSize: { xs: 20, sm: 22 } }} />
-        </IconButton>
-      </Tooltip>
-
-      <Box
-        sx={{
-          width: "100%",
-          maxWidth: { xs: 440, sm: 420 },
-          backgroundColor: (theme) => theme.palette.background.paper,
-          borderRadius: 1.5,
-          boxShadow: (theme) =>
-            theme.palette.mode === "light"
-              ? "0 4px 20px rgba(15,23,42,0.06)"
-              : "0 4px 20px rgba(0,0,0,0.3)",
-          p: { xs: 3, sm: 3.5 },
-          border: (theme) => `1px solid ${theme.palette.divider}`,
-        }}
-      >
-        <AnimatePresence mode="wait">
-          <DisintegrationTransition
-            key={location.pathname}
-            uniqueKey={location.pathname}
+                  ? "0 2px 8px rgba(15,23,42,0.06)"
+                  : "0 2px 8px rgba(0,0,0,0.3)",
+              "&:hover": {
+                backgroundColor: (theme) =>
+                  theme.palette.mode === "dark" ? "#2A2B33" : "#F1F5F9",
+                transform: "translateY(-2px)",
+                boxShadow: (theme) =>
+                  theme.palette.mode === "light"
+                    ? "0 4px 12px rgba(15,23,42,0.1)"
+                    : "0 4px 12px rgba(0,0,0,0.4)",
+              },
+              transition: "all 0.2s ease",
+            }}
           >
-            <Outlet />
-          </DisintegrationTransition>
-        </AnimatePresence>
-      </Box>
+            <Home sx={{ fontSize: { xs: 20, sm: 22 } }} />
+          </IconButton>
+        </Tooltip>
 
-      {/* Global Snackbar - nằm ngoài animated content */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={
-          isMobile
-            ? { vertical: "top", horizontal: "center" }
-            : { vertical: "top", horizontal: "right" }
-        }
-        sx={{
-          mt: isMobile ? 1 : 2,
-          mr: isMobile ? 0 : 2,
-          "& .MuiPaper-root": {
-            borderRadius: 2,
-            boxShadow: theme.shadows[6],
-            minWidth: isMobile ? "90%" : 320,
-          },
-        }}
-      >
-        <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity={snackbar.severity}
-          variant="filled"
+        <Box
           sx={{
             width: "100%",
-            borderRadius: 2,
-            px: 2,
-            py: 1,
-            fontSize: 14,
+            maxWidth: { xs: 440, sm: 420 },
+            backgroundColor: (theme) => theme.palette.background.paper,
+            borderRadius: 1.5,
+            boxShadow: (theme) =>
+              theme.palette.mode === "light"
+                ? "0 4px 20px rgba(15,23,42,0.06)"
+                : "0 4px 20px rgba(0,0,0,0.3)",
+            p: { xs: 3, sm: 3.5 },
+            border: (theme) => `1px solid ${theme.palette.divider}`,
           }}
         >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+          <AnimatePresence mode="wait">
+            <DisintegrationTransition
+              key={location.pathname}
+              uniqueKey={location.pathname}
+            >
+              <Outlet />
+            </DisintegrationTransition>
+          </AnimatePresence>
+        </Box>
+
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          anchorOrigin={{
+            vertical: "top",
+            horizontal: isMobile ? "center" : "right",
+          }}
+          sx={{
+            top: { xs: "60px", sm: "140px" },
+            mr: isMobile ? 0 : 2,
+            zIndex: 9999,
+            "& .MuiPaper-root": {
+              borderRadius: 2,
+              boxShadow: theme.shadows[6],
+              minWidth: isMobile ? "90%" : 320,
+            },
+          }}
+        >
+          <Alert
+            onClose={() => setSnackbar({ ...snackbar, open: false })}
+            severity={snackbar.severity}
+            variant="filled"
+            sx={{
+              width: "100%",
+              borderRadius: 2,
+              px: 2,
+              py: 1,
+              fontSize: 14,
+            }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </Box>
     </AuthSnackbarContext.Provider>
   );
 }

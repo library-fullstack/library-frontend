@@ -8,8 +8,6 @@ import {
   InputAdornment,
   Container,
   IconButton,
-  Snackbar,
-  Alert,
   Drawer,
   List,
   ListItem,
@@ -22,11 +20,11 @@ import {
 
 import { Search, Menu as MenuIcon } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
-import useAuth from "../../features/auth/hooks/useAuth";
 import { useThemeMode } from "../../shared/hooks/useThemeMode";
 import { useBookSearch } from "../../shared/hooks/useBookSearch";
 import SearchResultsPanel from "./SearchResultsPanel";
 import Logo from "../../shared/ui/icons/Logo";
+import CartBadge from "../../shared/components/CartBadge";
 import {
   Heart,
   ShoppingBag,
@@ -36,16 +34,17 @@ import {
   X,
   LayoutDashboard,
 } from "lucide-react";
+import { useCart } from "../../features/borrow/hooks/useCart";
+import { useCurrentUser } from "../../features/users/hooks/useUser";
 
 export default function Navbar(): React.ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { data: user } = useCurrentUser();
   const { mode, toggleTheme } = useThemeMode();
+  const { data: borrowCart } = useCart(!!user);
   const isMobile = useMediaQuery("(max-width:700px)");
 
-  const [snack, setSnack] = React.useState<"cart" | "favorite" | null>(null);
-  const [openSnack, setOpenSnack] = React.useState(false);
   const [drawerOpen, setDrawerOpen] = React.useState(false);
 
   const {
@@ -78,29 +77,21 @@ export default function Navbar(): React.ReactElement {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isOpen, setIsOpen]);
 
-  const showSnack = React.useCallback((type: "cart" | "favorite") => {
-    setSnack(type);
-    setOpenSnack(true);
-  }, []);
-
-  const handleCloseSnack = React.useCallback(
-    (_?: React.SyntheticEvent | Event, reason?: string) => {
-      if (reason === "clickaway") return;
-      setOpenSnack(false);
-      setTimeout(() => setSnack(null), 300);
-    },
-    []
-  );
-
   const handleFavouriteClick = () => {
     if (user) navigate("/favorites");
-    else showSnack("favorite");
+    else
+      navigate("/auth/login", {
+        state: { from: { pathname: "/favorites" } },
+      });
     setDrawerOpen(false);
   };
 
   const handleCartClick = () => {
-    if (user) navigate("/cart");
-    else showSnack("cart");
+    if (user) navigate("/borrow/cart");
+    else
+      navigate("/auth/login", {
+        state: { from: { pathname: "/borrow/cart" } },
+      });
     setDrawerOpen(false);
   };
 
@@ -117,6 +108,14 @@ export default function Navbar(): React.ReactElement {
 
   const isAdminOrLibrarian =
     user && (user.role === "ADMIN" || user.role === "LIBRARIAN");
+
+  const cartBadgeValue = React.useMemo(() => {
+    if (!user) return undefined;
+
+    return borrowCart && borrowCart.totalBooks > 0
+      ? borrowCart.totalBooks
+      : undefined;
+  }, [borrowCart, user]);
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && query.trim().length >= 2) {
@@ -364,6 +363,7 @@ export default function Navbar(): React.ReactElement {
                     label: "Giỏ mượn",
                     icon: <ShoppingBag size={19} />,
                     onClick: handleCartClick,
+                    badge: cartBadgeValue,
                   },
                   {
                     label: "Yêu thích",
@@ -404,6 +404,7 @@ export default function Navbar(): React.ReactElement {
                         cursor: "pointer",
                         transition: "all 0.2s ease",
                         flexShrink: 0,
+                        position: "relative",
                         "&:hover": {
                           bgcolor:
                             mode === "light"
@@ -412,7 +413,11 @@ export default function Navbar(): React.ReactElement {
                         },
                       }}
                     >
-                      {item.icon}
+                      {item.badge ? (
+                        <CartBadge count={item.badge}>{item.icon}</CartBadge>
+                      ) : (
+                        item.icon
+                      )}
                       <Typography
                         sx={{
                           color: "text.primary",
@@ -545,6 +550,27 @@ export default function Navbar(): React.ReactElement {
                     },
                   }}
                 />
+                {(cartBadgeValue ?? 0) > 0 && (
+                  <Box
+                    sx={{
+                      bgcolor: "error.main",
+                      color: "white",
+                      borderRadius: "12px",
+                      px: 0.75,
+                      py: 0.25,
+                      fontSize: "0.75rem",
+                      fontWeight: 700,
+                      minWidth: 20,
+                      height: 20,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      mr: 1,
+                    }}
+                  >
+                    {cartBadgeValue}
+                  </Box>
+                )}
               </ListItemButton>
             </ListItem>
 
@@ -639,32 +665,6 @@ export default function Navbar(): React.ReactElement {
           </Box>
         </Box>
       </Drawer>
-
-      {/* snackbar thông báo */}
-      <Snackbar
-        open={openSnack}
-        autoHideDuration={2000}
-        onClose={handleCloseSnack}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        sx={{
-          "&.MuiSnackbar-root": {
-            left: "auto !important",
-            right: "24px !important",
-            transform: "none !important",
-            top: "20%",
-            bottom: "auto",
-            translate: "0 -50%",
-          },
-        }}
-      >
-        <Alert severity="warning" variant="filled" sx={{ width: "100%" }}>
-          {snack === "cart"
-            ? "Vui lòng đăng nhập để xem giỏ mượn!"
-            : snack === "favorite"
-            ? "Vui lòng đăng nhập để xem các cuốn sách yêu thích!"
-            : ""}
-        </Alert>
-      </Snackbar>
     </>
   );
 }
