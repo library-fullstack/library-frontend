@@ -33,12 +33,13 @@ export function AuthProvider({ children }: Props): ReactNode {
   const [initialized, setInitialized] = useState(false);
   const isRefreshingRef = React.useRef(false);
   const hasInitializedRef = React.useRef(false);
+  const refreshPromiseRef = React.useRef<Promise<void> | null>(null);
 
   // làm mới user
   const refreshUser = useCallback(async () => {
-    if (isRefreshingRef.current) {
-      logger.debug("[AuthProvider] refreshUser skipped (already running)");
-      return;
+    if (refreshPromiseRef.current) {
+      logger.debug("[AuthProvider] refreshUser: waiting for existing refresh");
+      return refreshPromiseRef.current;
     }
 
     const storedToken = StorageUtil.getItem(STORAGE_KEYS.auth.token);
@@ -47,37 +48,40 @@ export function AuthProvider({ children }: Props): ReactNode {
       return;
     }
 
-    try {
-      isRefreshingRef.current = true;
-      const userPromise = usersApi.getMe();
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("User load timeout")), 3000)
-      );
+    refreshPromiseRef.current = (async () => {
+      try {
+        isRefreshingRef.current = true;
+        const userPromise = usersApi.getMe();
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("User load timeout")), 3000)
+        );
 
-      const res = (await Promise.race([
-        userPromise,
-        timeoutPromise,
-      ])) as unknown as { data: User };
-      setUser(res.data);
-      // DON'T save to localStorage - causes stale data issues
-    } catch (err) {
-      logger.error("[AuthProvider] refreshUser failed:", err);
+        const res = (await Promise.race([
+          userPromise,
+          timeoutPromise,
+        ])) as unknown as { data: User };
+        setUser(res.data);
+      } catch (err) {
+        logger.error("[AuthProvider] refreshUser failed:", err);
 
-      // Check nếu là 401 error (token invalid/expired)
-      const errorMsg = err instanceof Error ? err.message : String(err);
-      if (
-        errorMsg.includes("401") ||
-        errorMsg.includes("Token invalid") ||
-        errorMsg.includes("token might be invalid")
-      ) {
-        logger.warn("[AuthProvider] Token invalid, clearing auth data");
-        StorageUtil.removeItem(STORAGE_KEYS.auth.token);
-        setToken(null);
-        setUser(null);
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        if (
+          errorMsg.includes("401") ||
+          errorMsg.includes("Token invalid") ||
+          errorMsg.includes("token might be invalid")
+        ) {
+          logger.warn("[AuthProvider] Token invalid, clearing auth data");
+          StorageUtil.removeItem(STORAGE_KEYS.auth.token);
+          setToken(null);
+          setUser(null);
+        }
+      } finally {
+        isRefreshingRef.current = false;
+        refreshPromiseRef.current = null;
       }
-    } finally {
-      isRefreshingRef.current = false;
-    }
+    })();
+
+    return refreshPromiseRef.current;
   }, []);
 
   // localstorage
@@ -94,8 +98,7 @@ export function AuthProvider({ children }: Props): ReactNode {
 
         if (storedToken) {
           setToken(storedToken);
-          // CRITICAL: After restoring token from localStorage, fetch user data
-          // This ensures user data loads after page refresh
+
           logger.debug("[AuthProvider] Token restored, fetching user data...");
           const userPromise = usersApi.getMe();
           const timeoutPromise = new Promise((_, reject) =>
@@ -113,7 +116,6 @@ export function AuthProvider({ children }: Props): ReactNode {
             );
           } catch (err) {
             logger.error("[AuthProvider] Failed to load user on init:", err);
-            // Token is invalid, clear it
             StorageUtil.removeItem(STORAGE_KEYS.auth.token);
             setToken(null);
           }
@@ -137,7 +139,6 @@ export function AuthProvider({ children }: Props): ReactNode {
       setInitialized(true);
     };
 
-    // CRITICAL: In dev mode with HMR, if already initialized, don't reset
     if (import.meta.env.DEV && initialized) {
       logger.debug("[AuthProvider] HMR detected, keeping initialized state");
       return;
@@ -150,11 +151,10 @@ export function AuthProvider({ children }: Props): ReactNode {
   useEffect(() => {
     let focusTimeout: ReturnType<typeof setTimeout>;
     let lastFocusTime = 0;
-    const FOCUS_DEBOUNCE_MS = 30000; // Tăng từ 10s lên 30s để giảm số lần gọi API
+    const FOCUS_DEBOUNCE_MS = 30000;
     let visibilityChangeTimeout: ReturnType<typeof setTimeout>;
 
     const handleFocus = () => {
-      // Skip trong development để tránh CORS errors
       if (import.meta.env.DEV) {
         logger.debug("[AuthProvider] Skip auto-refresh in development");
         return;
@@ -177,31 +177,25 @@ export function AuthProvider({ children }: Props): ReactNode {
     };
 
     const handleVisibilityChange = () => {
-      // CRITICAL: When app comes back from being paused/backgrounded
       clearTimeout(visibilityChangeTimeout);
 
       if (document.visibilityState === "visible") {
         logger.debug("[AuthProvider] App is now visible, checking auth state");
 
-        // Quick check after visibility change
         visibilityChangeTimeout = setTimeout(() => {
           const storedToken = StorageUtil.getItem(STORAGE_KEYS.auth.token);
 
-          // If we have a token, verify it's still valid
           if (storedToken && token) {
             logger.debug(
               "[AuthProvider] Token exists, checking if still valid"
             );
 
-            // Verify token on visibility (more aggressive than focus)
             const now = Date.now();
             if (now - lastFocusTime >= FOCUS_DEBOUNCE_MS) {
               lastFocusTime = Date.now();
               refreshUser();
             }
           } else if (!storedToken && user) {
-            // Token was removed but we still have user in state
-            // This means logout happened in another tab
             logger.warn(
               "[AuthProvider] Token missing but user exists, clearing"
             );
@@ -212,7 +206,6 @@ export function AuthProvider({ children }: Props): ReactNode {
       }
     };
 
-    // Listen for logout event from axiosClient (when refresh token is invalid)
     const handleLogout = () => {
       logger.debug("[AuthProvider] Received logout event from axiosClient");
       setUser(null);
@@ -227,9 +220,6 @@ export function AuthProvider({ children }: Props): ReactNode {
 
     window.addEventListener("auth-logout", handleLogout);
 
-    // BroadcastChannel để sync giữa các tab
-    // Nhưng chỉ nên refresh nếu token vẫn còn valid
-    // Skip BroadcastChannel trong dev mode để tránh interference từ hot reload
     const bc = new BroadcastChannel("user-sync");
     bc.onmessage = (event) => {
       const message = event.data;

@@ -107,11 +107,7 @@ export default function AddToBorrowButton({
   const freshAvailableCount =
     currentItemInCart?.available_count ?? available_count ?? 0;
 
-  console.log(`[AddToBorrowButton] Book ${bookId}:`, {
-    freshAvailableCount,
-    currentItemQuantity: currentItemInCart?.quantity,
-    available_count,
-  });
+  // SECURITY FIX: Removed console.log
 
   const isDisabled = freshAvailableCount <= 0 || isAdding;
 

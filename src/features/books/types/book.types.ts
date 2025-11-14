@@ -16,7 +16,6 @@ export interface Book {
   description?: string | null;
   thumbnail_url?: string | null;
 
-  // Relations (từ API)
   author_names?: string | null;
   category_name?: string | null;
   publisher_name?: string | null;
@@ -26,12 +25,10 @@ export interface Book {
   copies_count?: number | null;
   available_count?: number | null;
 
-  // Extended relations
   authors?: Author[];
   images?: BookImage[];
   copies?: BookCopy[];
 
-  // Timestamps
   created_at?: string;
   updated_at?: string;
 }
@@ -56,11 +53,6 @@ export interface BookInputFull extends BookInput {
 export type BookFormat = "PAPERBACK" | "HARDCOVER" | "OTHER";
 export type BookStatus = "ACTIVE" | "INACTIVE" | "DRAFT";
 
-/**
- * Extended book detail with additional information
- * Used for book detail page
- */
 export interface BookDetail extends Book {
-  // Metadata có thể cần thêm từ API nếu có
   author_count?: number;
 }

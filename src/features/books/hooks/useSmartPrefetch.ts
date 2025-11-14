@@ -13,21 +13,11 @@ const bookKeys = {
   detail: (id: number) => [...bookKeys.details(), id] as const,
 };
 
-/**
- * Hook for intelligent query prefetching
- * - Prefetch on hover
- * - Prefetch related books
- * - Prefetch list before route change
- */
 export function useSmartPrefetch() {
   const queryClient = useQueryClient();
   const hoverTimeoutRef = useRef<NodeJS.Timeout>();
   const navigate = useNavigate();
 
-  /**
-   * Prefetch book detail on hover
-   * Debounced to avoid excessive requests
-   */
   const prefetchBookOnHover = useCallback(
     (bookId: number, delayMs: number = 500) => {
       if (hoverTimeoutRef.current) {
@@ -40,25 +30,19 @@ export function useSmartPrefetch() {
         queryClient.prefetchQuery({
           queryKey: bookKeys.detail(bookId),
           queryFn: () => booksApi.getBookById(bookId),
-          staleTime: 10 * 60 * 1000, // 10 minutes
+          staleTime: 10 * 60 * 1000,
         });
       }, delayMs);
     },
     [queryClient]
   );
 
-  /**
-   * Cancel hover prefetch
-   */
   const cancelPrefetch = useCallback(() => {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
     }
   }, []);
 
-  /**
-   * Prefetch related books by category
-   */
   const prefetchRelatedBooks = useCallback(
     async (categoryId: number, limit: number = 10) => {
       try {
@@ -74,7 +58,7 @@ export function useSmartPrefetch() {
               limit,
               sort_by: "newest",
             }),
-          staleTime: 15 * 60 * 1000, // 15 minutes
+          staleTime: 15 * 60 * 1000,
         });
       } catch (err) {
         logger.error("[Prefetch] Failed to prefetch related books:", err);
@@ -83,9 +67,6 @@ export function useSmartPrefetch() {
     [queryClient]
   );
 
-  /**
-   * Prefetch books list before route change
-   */
   const prefetchBooksList = useCallback(
     (filters?: Record<string, unknown>) => {
       try {
@@ -97,7 +78,7 @@ export function useSmartPrefetch() {
             booksApi.getAllBooks(
               filters as Parameters<typeof booksApi.getAllBooks>[0]
             ),
-          staleTime: 5 * 60 * 1000, // 5 minutes
+          staleTime: 5 * 60 * 1000,
         });
       } catch (err) {
         logger.error("[Prefetch] Failed to prefetch books list:", err);
@@ -106,9 +87,6 @@ export function useSmartPrefetch() {
     [queryClient]
   );
 
-  /**
-   * Prefetch author books
-   */
   const prefetchAuthorBooks = useCallback(
     async (authorId: number, limit: number = 10) => {
       try {
@@ -129,9 +107,6 @@ export function useSmartPrefetch() {
     [queryClient]
   );
 
-  /**
-   * Prefetch multiple books (e.g., favorites, trending)
-   */
   const prefetchMultipleBooks = useCallback(
     async (bookIds: number[]) => {
       logger.info(`[Prefetch] Prefetching ${bookIds.length} books`);
@@ -156,9 +131,6 @@ export function useSmartPrefetch() {
     [queryClient]
   );
 
-  /**
-   * Link prefetch - prefetch on link hover
-   */
   const linkPrefetch = useCallback(
     (bookId: number, destination: string) => {
       prefetchBookOnHover(bookId, 300);
@@ -183,16 +155,9 @@ export function useSmartPrefetch() {
   };
 }
 
-/**
- * Hook for route-based prefetching
- * Prefetch data needed for a route before navigating
- */
 export function useRoutePrefetch() {
   const queryClient = useQueryClient();
 
-  /**
-   * Prefetch book catalog before navigating to /catalog
-   */
   const prefetchCatalog = useCallback(async () => {
     logger.info("[Prefetch] Prefetching catalog data");
 
@@ -212,18 +177,13 @@ export function useRoutePrefetch() {
     }
   }, [queryClient]);
 
-  /**
-   * Prefetch user favorites before navigating to /favorites
-   */
   const prefetchFavorites = useCallback(async () => {
     logger.info("[Prefetch] Prefetching favorites");
 
     try {
-      // This would need a favorites API endpoint
       queryClient.prefetchQuery({
         queryKey: ["favorites"],
         queryFn: async () => {
-          // Return favorites list
           return [];
         },
         staleTime: 5 * 60 * 1000,
@@ -239,16 +199,9 @@ export function useRoutePrefetch() {
   };
 }
 
-/**
- * Hook for viewport-based prefetching
- * Prefetch when items appear in viewport
- */
 export function useViewportPrefetch() {
   const queryClient = useQueryClient();
 
-  /**
-   * Prefetch books when they enter viewport
-   */
   const observeAndPrefetch = useCallback(
     (element: HTMLElement, bookIds: number[]) => {
       if (!("IntersectionObserver" in window)) {

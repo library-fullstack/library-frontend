@@ -48,9 +48,6 @@ const mapCartResponse = (response: CartResponse): BorrowCart => {
       quantity: item.quantity,
       available_count: item.available_count || 0,
     };
-    console.log(
-      `[mapCartResponse] Book ${item.book_id}: quantity=${item.quantity}, available_count=${item.available_count}`
-    );
     return cartItem;
   });
 

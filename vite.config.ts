@@ -19,27 +19,21 @@ export default defineConfig(({ mode }) => {
       imagetools(),
       ...(isProduction ? [injectPreloadTags()] : []),
     ],
+
     resolve: {
-      dedupe: ["react", "react-dom", "@emotion/react", "@emotion/styled"],
-      alias: {
-        "@": "/src",
-      },
+      alias: { "@": "/src" },
     },
+
     server: {
       port: 5173,
       host: "0.0.0.0",
       hmr: {
-        host: "localhost",
-        port: 5173,
         protocol: "ws",
+        host: "0.0.0.0",
       },
-      middlewareMode: false,
-      cors: {
-        origin: "*",
-        methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
-        allowedHeaders: ["*"],
-      },
+      cors: true,
     },
+
     build: {
       outDir: "dist",
       chunkSizeWarningLimit: 2000,
@@ -47,56 +41,29 @@ export default defineConfig(({ mode }) => {
       target: "es2020",
       minify: "esbuild",
       cssCodeSplit: true,
-      cssMinify: true,
       reportCompressedSize: false,
       rollupOptions: {
         output: {
-          manualChunks: (id) => {
+          manualChunks(id) {
             if (id.includes("node_modules")) {
-              if (id.includes("@mui/material")) {
-                return "mui-material";
-              }
-              if (id.includes("@mui/icons-material")) {
-                return "mui-icons";
-              }
-              if (id.includes("@mui/x-charts")) {
-                return "mui-charts";
-              }
-              if (id.includes("@emotion")) {
-                return "emotion";
-              }
-              if (id.includes("react") || id.includes("react-dom")) {
-                return "react-vendor";
-              }
-              if (id.includes("react-router")) {
-                return "react-router";
-              }
-              if (id.includes("@tanstack/react-query")) {
-                return "react-query";
-              }
-              if (id.includes("swiper")) {
-                return "swiper";
-              }
-              if (id.includes("framer-motion")) {
-                return "framer-motion";
-              }
-              if (id.includes("axios")) {
-                return "axios";
-              }
+              if (id.includes("@mui/material")) return "mui-material";
+              if (id.includes("@mui/icons-material")) return "mui-icons";
+              if (id.includes("@mui/x-charts")) return "mui-charts";
+              if (id.includes("@emotion")) return "emotion";
+              if (id.includes("react")) return "react-vendor";
+              if (id.includes("react-router")) return "react-router";
+              if (id.includes("@tanstack/react-query")) return "react-query";
+              if (id.includes("swiper")) return "swiper";
+              if (id.includes("framer-motion")) return "framer-motion";
+              if (id.includes("axios")) return "axios";
               return "vendor";
             }
           },
-          assetFileNames: (assetInfo) => {
-            if (
-              assetInfo.name &&
-              /\.(woff2?|ttf|otf|eot)$/.test(assetInfo.name)
-            ) {
+          assetFileNames(assetInfo) {
+            if (/\.(woff2?|ttf|otf|eot)$/.test(assetInfo.name ?? "")) {
               return "assets/fonts/[name]-[hash][extname]";
             }
-            if (
-              assetInfo.name &&
-              /\.(png|jpe?g|svg|gif|webp|avif)$/.test(assetInfo.name)
-            ) {
+            if (/\.(png|jpe?g|svg|gif|webp|avif)$/.test(assetInfo.name ?? "")) {
               return "assets/img/[name]-[hash][extname]";
             }
             return "assets/[name]-[hash][extname]";
@@ -106,6 +73,7 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+
     optimizeDeps: {
       include: [
         "react",
@@ -122,8 +90,8 @@ export default defineConfig(({ mode }) => {
       esbuildOptions: {
         target: "es2020",
       },
-      holdDeps: ["react-activation", "react-helmet-async"],
     },
+
     define: {
       __API_URL__: JSON.stringify(env.VITE_API_URL),
     },

@@ -96,7 +96,6 @@ export default function RelatedBooksSection({
   const displayedBooks = relatedBooks.slice(0, displayCount);
 
   const handleViewAll = () => {
-    // Chỉ dùng category filter, không dùng search để tránh conflict
     if (categoryId) {
       navigate(`/catalog?category=${categoryId}`);
     }

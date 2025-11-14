@@ -52,13 +52,13 @@ export const BannerProvider: React.FC<{ children: React.ReactNode }> = ({
   const preloadLinkRef = useRef<HTMLLinkElement | null>(null);
   const refreshDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const loadBannerConfig = useCallback(async () => {
+  const loadBannerConfig = useCallback(async (forceReload = false) => {
     if (isLoadingRef.current) {
       logger.log("[BannerContext] Already loading, skip duplicate call");
       return;
     }
 
-    const cached = getCachedBanner();
+    const cached = forceReload ? null : getCachedBanner();
     if (cached) {
       logger.log("[BannerContext] Using cached banner data");
       if (isMountedRef.current) {
@@ -132,11 +132,12 @@ export const BannerProvider: React.FC<{ children: React.ReactNode }> = ({
       clearTimeout(refreshDebounceRef.current);
     }
 
+    sessionStorage.removeItem(BANNER_CACHE_KEY);
+
     refreshDebounceRef.current = setTimeout(async () => {
       setIsLoading(true);
-      sessionStorage.removeItem(BANNER_CACHE_KEY);
-      await loadBannerConfig();
-    }, 500);
+      await loadBannerConfig(true);
+    }, 300);
   }, [loadBannerConfig]);
 
   useEffect(() => {

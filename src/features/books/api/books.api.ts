@@ -1,5 +1,6 @@
 import axiosClient from "../../../shared/api/axiosClient";
 import type { Book, BookInputFull } from "../types";
+import logger from "../../../shared/lib/logger";
 
 const getAllBooks = async (params?: {
   keyword?: string;
@@ -26,11 +27,10 @@ const getAllBooks = async (params?: {
   );
 
   if (typeof window !== "undefined" && cleanParams.limit) {
-    console.log(
-      `[Books API] Fetching books with limit=${cleanParams.limit}, offset=${
-        cleanParams.offset || 0
-      }`
-    );
+    logger.debug("Books API: Fetching books", {
+      limit: cleanParams.limit,
+      offset: cleanParams.offset || 0,
+    });
   }
 
   const res = await axiosClient.get<Book[]>("/books", {
@@ -39,11 +39,10 @@ const getAllBooks = async (params?: {
   });
 
   if (typeof window !== "undefined") {
-    console.log(
-      `[Books API] Received ${res.data?.length || 0} books (limit was ${
-        cleanParams.limit
-      })`
-    );
+    logger.debug("Books API: Received books", {
+      count: res.data?.length || 0,
+      limit: cleanParams.limit,
+    });
   }
 
   return res.data;

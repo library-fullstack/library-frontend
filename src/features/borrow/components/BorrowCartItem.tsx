@@ -40,14 +40,7 @@ const BorrowCartItem = memo(function BorrowCartItem({
     (newQuantity: number) => {
       const isIncreasing = newQuantity > item.quantity;
 
-      console.log(
-        `[BorrowCartItem] Button clicked: item.quantity=${item.quantity}, newQuantity=${newQuantity}, maxAvailable=${maxAvailable}, isIncreasing=${isIncreasing}`
-      );
-
       if (isIncreasing && newQuantity > maxAvailable) {
-        console.log(
-          `[BorrowCartItem] Trying to exceed limit: newQuantity=${newQuantity}, maxAvailable=${maxAvailable}`
-        );
         setWarning({
           open: true,
           message: `Chỉ có thể mượn tối đa ${maxAvailable} quyển sách này`,
@@ -56,9 +49,6 @@ const BorrowCartItem = memo(function BorrowCartItem({
       }
 
       if (newQuantity !== item.quantity && newQuantity >= 0) {
-        console.log(
-          `[BorrowCartItem] Calling onUpdateQuantity with ${newQuantity}`
-        );
         if (newQuantity === 0) {
           onRemove(item.bookId);
         } else {
@@ -131,7 +121,6 @@ const BorrowCartItem = memo(function BorrowCartItem({
                 {item.author_names || "Đang cập nhật"}
               </Typography>
 
-              {/* Show warning based on availability status */}
               {maxAvailable === 0 && (
                 <Alert
                   severity="error"

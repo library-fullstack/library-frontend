@@ -20,6 +20,7 @@ vite.config.local.*
 .env.*.local
 
 # IDE & Editor
+.claude/
 .vscode/
 .idea/
 *.swp
@@ -66,4 +67,3 @@ screenshots/
 !eslint.config.js
 !README.md
 
-.claude/

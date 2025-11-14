@@ -46,7 +46,6 @@ export default function ChangePasswordSection() {
     severity: "success" | "error";
   }>({ open: false, message: "", severity: "success" });
 
-  // giữ step và otp khi reload
   useEffect(() => {
     sessionStorage.setItem(STORAGE_KEYS.session.changePassStep, step);
     sessionStorage.setItem(STORAGE_KEYS.session.changePassOtp, otp);

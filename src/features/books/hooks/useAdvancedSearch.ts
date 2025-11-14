@@ -28,12 +28,9 @@ interface SearchSuggestion {
 }
 
 class SearchService {
-  /**
-   * Search books with full-text support
-   */
   async searchBooks(params: AdvancedSearchParams): Promise<Book[]> {
     try {
-      logger.info("[Search] Searching with params:", params);
+      logger.info("[Search] Đang tìm kiếm với tham số:", params);
 
       const cleanParams = Object.fromEntries(
         Object.entries(params).filter(
@@ -45,17 +42,14 @@ class SearchService {
         params: cleanParams,
       });
 
-      logger.info("[Search] Found", res.data?.length || 0, "results");
+      logger.info("[Search] Đã tìm thấy", res.data?.length || 0, "kết quả");
       return res.data || [];
     } catch (err) {
-      logger.error("[Search] Failed:", err);
+      logger.error("[Search] Thất bại:", err);
       throw err;
     }
   }
 
-  /**
-   * Get search suggestions (autocomplete)
-   */
   async getSuggestions(keyword: string): Promise<SearchSuggestion[]> {
     try {
       if (!keyword || keyword.length < 2) {
@@ -73,7 +67,7 @@ class SearchService {
 
       return res.data || [];
     } catch (err) {
-      logger.error("[Search] Failed to get suggestions:", err);
+      logger.error("[Search] Thất bại khi lấy gợi ý:", err);
       return [];
     }
   }
@@ -81,12 +75,6 @@ class SearchService {
 
 export const searchService = new SearchService();
 
-/**
- * Hook for advanced book search with debouncing
- *
- * Usage:
- * const { query, setQuery, results, isLoading } = useAdvancedSearch()
- */
 export function useAdvancedSearch(debounceMs: number = 300) {
   const [query, setQuery] = useState("");
   const [params, setParams] = useState<AdvancedSearchParams>({
@@ -94,17 +82,14 @@ export function useAdvancedSearch(debounceMs: number = 300) {
   });
   const debounceTimerRef = useRef<NodeJS.Timeout>();
 
-  // Debounced search function
   const handleSearch = useCallback(
     (searchQuery: string, searchParams?: Partial<AdvancedSearchParams>) => {
       setQuery(searchQuery);
 
-      // Clear previous timeout
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
 
-      // Set new timeout for debounced search
       debounceTimerRef.current = setTimeout(() => {
         setParams((prev) => ({
           ...prev,
@@ -116,7 +101,6 @@ export function useAdvancedSearch(debounceMs: number = 300) {
     [debounceMs]
   );
 
-  // Search query
   const {
     data: results = [],
     isLoading,
@@ -125,11 +109,10 @@ export function useAdvancedSearch(debounceMs: number = 300) {
     queryKey: ["books-search", params],
     queryFn: () => searchService.searchBooks(params),
     enabled: params.keyword.length >= 1,
-    staleTime: 30000, // 30 seconds
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000,
   });
 
-  // Clear search
   const clearSearch = useCallback(() => {
     setQuery("");
     setParams({ keyword: "" });
@@ -149,12 +132,6 @@ export function useAdvancedSearch(debounceMs: number = 300) {
   };
 }
 
-/**
- * Hook for search suggestions/autocomplete
- *
- * Usage:
- * const { suggestions, isLoading } = useSearchSuggestions(query)
- */
 export function useSearchSuggestions(
   keyword: string,
   debounceMs: number = 200
@@ -165,7 +142,6 @@ export function useSearchSuggestions(
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  // Debounced suggestion fetch
   useEffect(() => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);

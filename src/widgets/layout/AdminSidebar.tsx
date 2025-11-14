@@ -393,8 +393,7 @@ export default function AdminSidebar({
             borderColor: "divider",
             position: "fixed",
             top: { xs: 56, sm: 64 },
-            // Sử dụng max-height thay vì height để sidebar co giãn theo viewport
-            // Khi thanh trình duyệt lồi ra, sidebar sẽ tự động co lại
+
             maxHeight: {
               xs: "calc(100vh - 56px)",
               sm: "calc(100vh - 64px)",

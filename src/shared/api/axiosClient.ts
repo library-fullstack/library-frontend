@@ -34,7 +34,7 @@ const processQueue = (error: unknown, token: string | null = null) => {
 
 const _isRetryableError = (error: unknown): boolean => {
   const axiosError = error as Record<string, unknown>;
-  if (!axiosError || !axiosError.response) return true; // Retry network errors
+  if (!axiosError || !axiosError.response) return true;
 
   const status = (axiosError.response as Record<string, unknown>)
     .status as number;

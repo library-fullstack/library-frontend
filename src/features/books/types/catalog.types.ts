@@ -25,7 +25,6 @@ export interface CatalogState {
   limit: number;
 }
 
-// hằng số
 export const ITEMS_PER_PAGE_OPTIONS = [12, 24, 48, 96];
 export const DEFAULT_ITEMS_PER_PAGE = 24;
 

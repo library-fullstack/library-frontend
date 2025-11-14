@@ -34,7 +34,6 @@ export const usersApi = {
     try {
       return await axiosClient.get<User>("/users/profile");
     } catch (error) {
-      // Nếu 401, token đã hết hạn hoặc invalid
       if (error instanceof Error && error.message.includes("401")) {
         StorageUtil.removeItem("token");
         StorageUtil.removeItem("user");

@@ -41,8 +41,6 @@ export interface BannerListResponse {
   };
 }
 
-// OPTIMIZED: Removed manual cache - React Query handles caching now
-
 export const bannerApi = {
   async getAllBanners(
     page: number = 1,

@@ -34,7 +34,6 @@ export default function BookList(): React.ReactElement {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [searchParams] = useSearchParams();
 
-  // State management
   const [filters, setFilters] = useState<BookFilters>({
     keyword: "",
     category_id: null,
@@ -52,13 +51,11 @@ export default function BookList(): React.ReactElement {
     severity: "success" | "error" | "info" | "warning";
   }>({ open: false, message: "", severity: "success" });
 
-  // Data fetching
   const { data: categoriesData = [], isLoading: categoriesLoading } =
     useCategories();
   const { data: bookCount } = useBookCount();
   const totalBooksInDB = bookCount?.total || 0;
 
-  // Sort mapping
   const sortByMap: Record<
     SortOption,
     | "newest"
@@ -78,7 +75,6 @@ export default function BookList(): React.ReactElement {
     popular: "popular",
   };
 
-  // Fetch books with infinite scroll
   const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } =
     useBooksInfinite({
       keyword: filters.keyword?.trim() || undefined,
@@ -108,7 +104,6 @@ export default function BookList(): React.ReactElement {
     return result;
   }, [data]);
 
-  // Update filters from URL search params (memoized to avoid issues)
   React.useLayoutEffect(() => {
     const searchQuery = searchParams.get("search");
     const categoryQuery = searchParams.get("category");
@@ -131,19 +126,16 @@ export default function BookList(): React.ReactElement {
     });
   }, [searchParams]);
 
-  // Scroll to top when filters change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [searchParams]);
 
-  // Show/hide scroll to top button
   useEffect(() => {
     const handleScroll = () => setShowScrollTop(window.scrollY > 400);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Handlers
   const handleFiltersChange = (newFilters: BookFilters) => {
     const params = new URLSearchParams();
     if (newFilters.keyword?.trim())
@@ -168,7 +160,6 @@ export default function BookList(): React.ReactElement {
         return;
       }
 
-      // PREVENT DOUBLE CLICKS: if already adding this book, block
       if (addingBookId === bookId) {
         logger.debug(
           `[BookList.handleAddToCart] Already adding book ${bookId}, blocking duplicate click`
@@ -176,10 +167,8 @@ export default function BookList(): React.ReactElement {
         return;
       }
 
-      // Get cart item if exists (has fresher available_count)
       const existingItem = cart?.items.find((item) => item.bookId === bookId);
 
-      // Use fresh available_count from cart if exists, otherwise from book
       const availableCount =
         existingItem?.available_count ??
         (typeof book.available_count === "string"
@@ -189,7 +178,6 @@ export default function BookList(): React.ReactElement {
       const currentQuantityInCart = existingItem?.quantity || 0;
       const totalAfterAdd = currentQuantityInCart + 1;
 
-      // CLIENT-SIDE PRE-VALIDATION (Fast fail without API call)
       if (availableCount <= 0) {
         const maxTitleLength = 30;
         const displayTitle =
@@ -202,10 +190,9 @@ export default function BookList(): React.ReactElement {
           message: `"${displayTitle}" đã hết`,
           severity: "warning",
         });
-        return; // Stop here - no API call
+        return;
       }
 
-      // CLIENT-SIDE: Check if already at max (like AddToBorrowButton)
       if (totalAfterAdd > availableCount) {
         const maxTitleLength = 30;
         const displayTitle =
@@ -241,7 +228,6 @@ export default function BookList(): React.ReactElement {
           },
         });
 
-        // Success - show confirmation with truncated title
         const maxTitleLength = 35;
         const displayTitle =
           book.title.length > maxTitleLength
@@ -296,7 +282,6 @@ export default function BookList(): React.ReactElement {
             message = err.message || "Không thể thêm vào giỏ";
           }
 
-          // BATCH setState
           setAddingBookId(null);
           setSnackbar({
             open: true,
@@ -304,13 +289,11 @@ export default function BookList(): React.ReactElement {
             severity: "warning",
           });
         } else {
-          // Backend or network error - show error toast
           const err = error as { response?: { data?: { message?: string } } };
           const errorMessage =
             err?.response?.data?.message ||
             "Không thể thêm sách vào giỏ. Vui lòng thử lại.";
 
-          // BATCH setState
           setAddingBookId(null);
           setSnackbar({
             open: true,
@@ -347,7 +330,6 @@ export default function BookList(): React.ReactElement {
       />
 
       <Container maxWidth="xl" sx={{ px: { xs: 1.5, sm: 2, md: 3 } }}>
-        {/* Breadcrumbs */}
         <Breadcrumbs
           sx={{
             mb: { xs: 2, sm: 2.5, md: 3 },
@@ -374,7 +356,6 @@ export default function BookList(): React.ReactElement {
           </Typography>
         </Breadcrumbs>
 
-        {/* Title Section */}
         <Box sx={{ mb: { xs: 2.5, sm: 3, md: 4 } }}>
           <Box
             sx={{
@@ -424,7 +405,6 @@ export default function BookList(): React.ReactElement {
           </Typography>
         </Box>
 
-        {/* Main Content */}
         <Box
           sx={{
             display: "flex",
@@ -432,7 +412,6 @@ export default function BookList(): React.ReactElement {
             alignItems: "flex-start",
           }}
         >
-          {/* Desktop Filters */}
           {!isMobile && (
             <Box sx={{ width: 280, flexShrink: 0 }}>
               <BookCatalogFilters
@@ -446,7 +425,6 @@ export default function BookList(): React.ReactElement {
             </Box>
           )}
 
-          {/* Mobile Filters */}
           {isMobile && (
             <BookCatalogFilters
               filters={filters}
@@ -460,7 +438,6 @@ export default function BookList(): React.ReactElement {
             />
           )}
 
-          {/* Books Grid */}
           <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
             <BookCatalogGrid
               books={allBooks}
@@ -475,7 +452,6 @@ export default function BookList(): React.ReactElement {
         </Box>
       </Container>
 
-      {/* Scroll to Top Button */}
       <Zoom in={showScrollTop}>
         <Fab
           size="medium"
@@ -494,7 +470,6 @@ export default function BookList(): React.ReactElement {
         </Fab>
       </Zoom>
 
-      {/* Snackbar Notification */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={2500}
@@ -504,12 +479,11 @@ export default function BookList(): React.ReactElement {
           horizontal: isMobile ? "center" : "right",
         }}
         TransitionProps={{
-          timeout: 200, // Faster transition (default 300ms)
+          timeout: 200,
         }}
         sx={{
           top: { xs: "60px", sm: "140px" },
           zIndex: 9999,
-          // Optimize rendering
           willChange: "transform, opacity",
         }}
       >
@@ -519,7 +493,6 @@ export default function BookList(): React.ReactElement {
           variant="filled"
           sx={{
             fontWeight: 600,
-            // Optimize rendering
             willChange: "opacity",
           }}
         >

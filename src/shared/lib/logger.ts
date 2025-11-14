@@ -40,15 +40,7 @@ const sanitizeData = (data: unknown, depth = 0): unknown => {
 
     for (const [key, value] of Object.entries(obj)) {
       if (SENSITIVE_KEYS.has(key.toLowerCase())) {
-        if (typeof value === "string" && value.length > 0) {
-          const start = Math.min(3, Math.floor(value.length / 3));
-          const maskedValue =
-            value.substring(0, start) +
-            "*".repeat(Math.max(3, value.length - start));
-          sanitized[key] = maskedValue;
-        } else {
-          sanitized[key] = "[REDACTED]";
-        }
+        sanitized[key] = "[REDACTED]";
       } else if (typeof value === "object" && value !== null) {
         sanitized[key] = sanitizeData(value, depth + 1);
       } else if (typeof value === "string" && value.length > 200) {

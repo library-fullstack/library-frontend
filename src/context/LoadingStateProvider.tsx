@@ -1,21 +1,13 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import LoadingStateContext from "./LoadingStateContext";
 
-interface LoadingStateContextType {
-  isInitialLoaderHidden: boolean;
-}
-
-export const LoadingStateContext = createContext<
-  LoadingStateContextType | undefined
->(undefined);
-
-export const LoadingStateProvider: React.FC<{ children: React.ReactNode }> = ({
+const LoadingStateProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [isInitialLoaderHidden, setIsInitialLoaderHidden] = useState(false);
 
   useEffect(() => {
     const handleInitialLoaderHidden = () => {
-      console.log("[LoadingStateContext] Received initial-loader-hidden event");
       setIsInitialLoaderHidden(true);
     };
 
@@ -34,3 +26,5 @@ export const LoadingStateProvider: React.FC<{ children: React.ReactNode }> = ({
     </LoadingStateContext.Provider>
   );
 };
+
+export default LoadingStateProvider;

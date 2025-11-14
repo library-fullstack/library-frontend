@@ -1,11 +1,3 @@
-/**
- * Debounce function - delays execution until after wait milliseconds have elapsed
- * since the last time it was invoked
- *
- * @param func - Function to debounce
- * @param wait - Milliseconds to wait (default: 300ms)
- * @returns Debounced function
- */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
@@ -25,13 +17,6 @@ export function debounce<T extends (...args: any[]) => any>(
   };
 }
 
-/**
- * Throttle function - ensures function is called at most once per specified time period
- *
- * @param func - Function to throttle
- * @param limit - Milliseconds to limit (default: 300ms)
- * @returns Throttled function
- */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function throttle<T extends (...args: any[]) => any>(
   func: T,

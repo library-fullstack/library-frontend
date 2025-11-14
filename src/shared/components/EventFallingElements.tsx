@@ -27,10 +27,12 @@ const ALLOWED_EVENT_TYPES = [
   "default",
 ] as const;
 
-type AllowedEventType = typeof ALLOWED_EVENT_TYPES[number];
+type AllowedEventType = (typeof ALLOWED_EVENT_TYPES)[number];
 
 const isValidEventType = (eventType: string): eventType is AllowedEventType => {
-  return ALLOWED_EVENT_TYPES.includes(eventType.toLowerCase() as AllowedEventType);
+  return ALLOWED_EVENT_TYPES.includes(
+    eventType.toLowerCase() as AllowedEventType
+  );
 };
 
 const defaultConfigs: Record<string, FallingElementConfig> = {
@@ -147,7 +149,9 @@ export const EventFallingElements: React.FC<Props> = ({
     const container = containerRef.current;
 
     if (!isEffectsEnabled) {
-      container.innerHTML = "";
+      while (container.firstChild) {
+        container.removeChild(container.firstChild);
+      }
       initRef.current = false;
       return;
     }
@@ -157,14 +161,20 @@ export const EventFallingElements: React.FC<Props> = ({
     const normalizedEventType = eventType.toLowerCase();
 
     if (!isValidEventType(normalizedEventType)) {
-      logger.warn(`Invalid event type: ${eventType}. Allowed types are: ${ALLOWED_EVENT_TYPES.join(", ")}`);
+      logger.warn(
+        `Invalid event type: ${eventType}. Allowed types are: ${ALLOWED_EVENT_TYPES.join(
+          ", "
+        )}`
+      );
       return;
     }
 
     const config = defaultConfigs[normalizedEventType];
     if (!config) return;
 
-    container.innerHTML = "";
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
     const style = document.createElement("style");
     style.textContent = generateAnimationCSS(normalizedEventType, config);
     container.appendChild(style);
