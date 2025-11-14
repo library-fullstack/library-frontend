@@ -8,8 +8,6 @@ export default defineConfig(({ mode }) => {
   const isProduction = mode === "production";
 
   return {
-    base: "/",
-
     plugins: [
       react({
         jsxRuntime: "automatic",
