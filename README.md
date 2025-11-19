@@ -1,129 +1,132 @@
-# Library UI – Frontend
+# Library UI - Frontend
 
-Hệ thống Quản Lý Thư Viện Trực Tuyến  
-Frontend xây dựng bằng **React + TypeScript + Vite + Material UI**  
-Kết nối trực tiếp backend `library-api` qua REST API.
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)]()
+[![React](https://img.shields.io/badge/React-19-blue)]()
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)]()
+[![Vite](https://img.shields.io/badge/Vite-5-purple)]()
+[![MUI](https://img.shields.io/badge/MUI-7-blue)]()
+[![Issues](https://img.shields.io/github/issues/library-fullstack/library-frontend)]()
+[![Stars](https://img.shields.io/github/stars/library-fullstack/library-frontend)]()
 
-## Công Nghệ Sử Dụng
+---
 
-| Thành phần       | Công nghệ           | Phiên bản |
-| ---------------- | ------------------- | --------- |
-| Framework        | React + TypeScript  | 19.x      |
-| Bundler          | Vite                | 5.x       |
-| UI Library       | Material UI (MUI)   | 7.x       |
-| HTTP Client      | Axios               | 1.x       |
-| Router           | React Router        | 7.x       |
-| State Management | Context API + Hooks | -         |
-| Icons            | MUI Icons           | 7.x       |
+# Library UI – Frontend  
+**Online Library Management System UI**  
+Built with **React - TypeScript - Vite - Material UI**  
+Connects to backend `library-api` via REST API.
 
-## Mục Lục
+# English Version
 
-- [Giới Thiệu](#giới-thiệu)
-- [Kiến Trúc & Cấu Trúc Thư Mục](#kiến-trúc--cấu-trúc-thư-mục)
-- [Cài Đặt & Chạy Dự Án](#cài-đặt--chạy-dự-án)
-- [Biến Môi Trường](#biến-môi-trường)
-- [Chức Năng Đã Hoàn Thành](#chức-năng-đã-hoàn-thành)
-- [Chức Năng Sắp Phát Triển](#chức-năng-sắp-phát-triển)
-- [Scripts Hữu Ích](#scripts-hữu-ích)
-- [Hướng Dẫn Phát Triển](#hướng-dẫn-phát-triển)
-- [Troubleshooting](#troubleshooting)
-- [Liên Hệ & Giấy Phép](#liên-hệ--giấy-phép)
+## Overview
 
-## Giới Thiệu
+Library UI is the frontend of the **Online Library Management System**, providing:  
+- Book browsing, searching, filtering  
+- User account management  
+- Borrow/return workflows  
+- Admin dashboard (users, books, borrow records)  
+- Community interaction via forum (expanding soon)
 
-Library UI là giao diện web hiện đại phục vụ:
+**Dev URLs**:  
+- Frontend: `http://localhost:5173`  
+- Backend: `http://localhost:4000/api/v1`
 
-- Sinh viên mượn sách, xem chi tiết
-- Quản trị viên quản lý người dùng, sách, mượn trả
-- Việc tương tác cộng đồng thông qua diễn đàn
+---
 
-**Cổng mặc định (dev):**  
-Frontend: http://localhost:5173  
-Backend: http://localhost:4000/api/v1
+## Tech Stack
 
-## Kiến Trúc & Cấu Trúc Thư Mục
+| Component        | Technology           | Version |
+|-----------------|-----------------------|---------|
+| Framework        | React + TypeScript    | 19.x    |
+| Bundler          | Vite                  | 5.x     |
+| UI Library       | Material UI (MUI)     | 7.x     |
+| HTTP Client      | Axios                 | 1.x     |
+| Router           | React Router          | 7.x     |
+| State Mgmt       | Context API + Hooks   | -       |
+| Icons            | MUI Icons             | 7.x     |
 
-```
-src/
-├── api/
-├── app/
-├── components/
-├── context/
-├── features/
-│   ├── books/
-│   ├── borrow/
-│   ├── favourites/
-│   ├── forum/
-│   └── users/
-├── hooks/
-├── lib/
-├── pages/
-├── styles/
-└── main.tsx / App.tsx
-```
+---
 
-## Cài Đặt & Chạy Dự Án
+## Project Structure
 
-### Cài đặt
+src/  
+├── api/  
+├── app/  
+├── components/  
+├── context/  
+├── features/  
+│   ├── books/  
+│   ├── borrow/  
+│   ├── favourites/  
+│   ├── forum/  
+│   └── users/  
+├── hooks/  
+├── lib/  
+├── pages/  
+├── styles/  
+└── main.tsx / App.tsx  
 
+---
+
+## Installation
+
+Install:
 ```
 npm install
 ```
 
-### Chạy development
-
+Run development:
 ```
 npm run dev
 ```
 
-Truy cập: http://localhost:5173
+Open: http://localhost:5173
 
-## Biến Môi Trường
+---
 
-Tạo file `.env.local`:
+## Environment Variables
 
+Create `.env.local`:
 ```
 VITE_API_URL=http://localhost:4000/api/v1
 ```
 
-## Chức Năng Đã Hoàn Thành
+---
 
-### 1. Xác thực & người dùng
+## Completed Features
 
-- Đăng ký / đăng nhập
-- Lưu token JWT
-- Xem & cập nhật profile
-- Đổi mật khẩu
-- Danh sách yêu thích
-- Lịch sử hoạt động
+### 1. Authentication & Users  
+- Register / Login  
+- JWT token handling  
+- Profile view/update  
+- Change password  
+- Favourites  
+- Activity history  
 
-### 2. Quản lý sách
+### 2. Books  
+- List + pagination  
+- Book details  
+- Search, sort, filter  
 
-- Danh sách + phân trang
-- Chi tiết sách
-- Lọc, tìm kiếm, sắp xếp
+### 3. Admin Dashboard  
+- CRUD users  
+- CRUD books  
+- Borrow/return management  
+- Banner + stats  
 
-### 3. Dashboard quản trị
+---
 
-- CRUD người dùng
-- CRUD sách
-- Quản lý mượn trả
-- Banner & thống kê
+## Upcoming Features   
+- Borrow request  
+- Rich forum  
+- E-book reader  
+- Recommendation engine  
+- Reading statistics  
+- Multilanguage UI  
+- AI assistant  
 
-## Chức Năng Sắp Phát Triển
+---
 
-- Giỏ mượn
-- Đặt yêu cầu mượn
-- Lịch sử mượn trả
-- Diễn đàn đầy đủ
-- Recommendation engine
-- E-book viewer
-- Reading statistics
-- Đa ngôn ngữ
-- AI hỗ trợ
-
-## Scripts Hữu Ích
-
+## Useful Scripts
 ```
 npm run dev
 npm run build
@@ -131,29 +134,92 @@ npm run preview
 npm run lint
 ```
 
-## Hướng Dẫn Phát Triển
-
-- Tạo API service trong shared/api
-- Tạo hook nếu cần
-- Tạo UI component
-- Thêm route mới vào AppRoutes.tsx
-- TypeScript strict mode
-- Clean code + hooks
+---
 
 ## Troubleshooting
 
-### Lỗi CORS:
+### CORS error  
+Check backend `corsOptions`.
 
-- Kiểm tra corsOptions backend
+### Token error  
+Check Axios interceptor.
 
-### Lỗi token:
+### API error  
+Validate `VITE_API_URL`.
 
-- Kiểm tra axios interceptor
+---
 
-### Lỗi API:
+## License  
+MIT License
 
-- Kiểm tra VITE_API_URL
+---
 
-## Giấy Phép
+# Phiên Bản Tiếng Việt
 
+## Giới Thiệu
+
+Library UI là giao diện web của **Hệ thống Quản Lý Thư Viện Trực Tuyến**, hỗ trợ:  
+- Xem, tìm kiếm, lọc sách  
+- Quản lý tài khoản người dùng  
+- Quy trình mượn trả sách  
+- Dashboard quản trị (user, sách, mượn trả)  
+- Tương tác cộng đồng thông qua diễn đàn
+
+Cổng phát triển:  
+Frontend: `http://localhost:5173`  
+Backend: `http://localhost:4000/api/v1`
+
+---
+
+## Công Nghệ
+
+(Bảng công nghệ giống bản tiếng Anh)
+
+---
+
+## Cấu Trúc Thư Mục
+
+(Giống phần tiếng Anh)
+
+---
+
+## Cài Đặt
+
+Cài:
+```
+npm install
+```
+
+Chạy:
+```
+npm run dev
+```
+
+---
+
+## Biến Môi Trường  
+Tạo file `.env.local`:
+```
+VITE_API_URL=http://localhost:4000/api/v1
+```
+
+---
+
+## Chức Năng Đã Hoàn Thành
+
+- Đăng ký / đăng nhập  
+- Quản lý token  
+- Hồ sơ cá nhân  
+- Danh sách yêu thích  
+- Tìm kiếm và xem chi tiết sách  
+- Dashboard quản trị  
+
+---
+
+## Chức Năng Sắp Phát Triển  
+(giống bản tiếng Anh)
+
+---
+
+## Giấy Phép  
 MIT License
