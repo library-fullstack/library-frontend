@@ -10,6 +10,10 @@ export const STORAGE_KEYS = {
     items: "library_cart_items",
   },
 
+  favourites: {
+    state: "library_favourites_state",
+  },
+
   banner: {
     cache: "banner_cache",
     active: "banner_active",
@@ -36,4 +40,5 @@ export const STORAGE_TTLs = {
   banner: 5 * 60 * 1000,
   session: 1 * 60 * 1000,
   cart: 24 * 60 * 60 * 1000,
+  favourites: 24 * 60 * 60 * 1000,
 };

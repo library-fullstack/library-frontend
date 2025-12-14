@@ -1,26 +1,34 @@
 import axiosClient from "../../../shared/api/axiosClient";
 
 export interface Favourite {
-  id: string;
-  book_id: string;
+  id: number;
   user_id: string;
+  book_id: number;
+  title: string;
+  author_names?: string | null;
+  thumbnail_url?: string | null;
+  description?: string | null;
+  isbn?: string | null;
+  publisher_name?: string | null;
+  publication_date?: string | null;
+  available_count?: number | null;
   created_at: string;
-  book?: {
-    id: string;
-    title: string;
-    author: string;
-    cover_image?: string;
-  };
+  updated_at: string;
 }
 
-// api cho phần yêu thích - chưa làm gì cả
 export const favouritesApi = {
-  getAll: () => axiosClient.get<Favourite[]>("/favourites"),
+  getAll: () => axiosClient.get("/favourites"),
 
-  add: (book_id: string) => axiosClient.post("/favourites", { book_id }),
+  add: (bookId: number) => axiosClient.post("/favourites/add", { bookId }),
 
-  remove: (id: string) => axiosClient.delete(`/favourites/${id}`),
+  remove: (bookId: number) => {
+    return axiosClient.delete("/favourites/remove", {
+      data: { bookId },
+    });
+  },
 
-  checkFavourite: (book_id: string) =>
-    axiosClient.get<{ is_favourite: boolean }>(`/favourites/check/${book_id}`),
+  checkFavourite: (bookId: number) =>
+    axiosClient.get(`/favourites/check/${bookId}`),
+
+  getCount: () => axiosClient.get("/favourites/count"),
 };

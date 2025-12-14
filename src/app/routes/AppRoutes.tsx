@@ -221,13 +221,13 @@ export default function AppRoutes(): JSX.Element {
         <Route
           path="/forum"
           element={
-            <KeepAlive id="forum" name="forum">
-              <Suspense fallback={<PageLoader />}>
-                <ProtectedRoute>
+            <ProtectedRoute>
+              <KeepAlive id="forum" name="forum">
+                <Suspense fallback={<PageLoader />}>
                   <Forum />
-                </ProtectedRoute>
-              </Suspense>
-            </KeepAlive>
+                </Suspense>
+              </KeepAlive>
+            </ProtectedRoute>
           }
         />
         <Route

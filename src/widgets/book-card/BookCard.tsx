@@ -12,9 +12,10 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { ShoppingBag } from "lucide-react";
-import { InfoOutlined } from "@mui/icons-material";
+import { InfoOutlined, FavoriteBorder, Favorite } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import type { Book } from "../../features/books/types";
+import FavouritesContext from "../../context/FavouritesContext";
 
 interface BookCardProps {
   book: Book;
@@ -31,9 +32,27 @@ export default function BookCard({
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const cardRef = useRef<HTMLDivElement>(null);
+  const favouritesContext = React.useContext(FavouritesContext);
+
+  const { isFavourite, toggleFavourite } = favouritesContext || {};
+  const [isTogglingFav, setIsTogglingFav] = React.useState(false);
+  const isFav = isFavourite?.(book.id) || false;
 
   const handleViewDetail = () => {
     navigate(`/books/${book.id}`);
+  };
+
+  const handleToggleFavourite = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!toggleFavourite) return;
+
+    setIsTogglingFav(true);
+    try {
+      await toggleFavourite(book.id);
+    } catch (error) {
+    } finally {
+      setIsTogglingFav(false);
+    }
   };
 
   const isAvailable = (book.available_count ?? 0) > 0;
@@ -176,6 +195,49 @@ export default function BookCard({
                       filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.1))",
                     }}
                   />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip
+                title={isFav ? "Bỏ yêu thích" : "Yêu thích"}
+                arrow
+                placement="top"
+              >
+                <IconButton
+                  size="small"
+                  disabled={isTogglingFav}
+                  onClick={handleToggleFavourite}
+                  sx={{
+                    bgcolor: "background.paper",
+                    flex: 1,
+                    borderRadius: 2,
+                    height: 36,
+                    backdropFilter: "blur(10px)",
+                    transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                    "&:hover": {
+                      bgcolor: "error.main",
+                      color: "#fff",
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 4px 12px rgba(239, 68, 68, 0.4)",
+                    },
+                  }}
+                >
+                  {isFav ? (
+                    <Favorite
+                      fontSize="small"
+                      sx={{
+                        color: "error.main",
+                        filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.1))",
+                      }}
+                    />
+                  ) : (
+                    <FavoriteBorder
+                      fontSize="small"
+                      sx={{
+                        filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.1))",
+                      }}
+                    />
+                  )}
                 </IconButton>
               </Tooltip>
 

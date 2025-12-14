@@ -22,6 +22,7 @@ export interface AuthContextValue {
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
   refreshUser: () => Promise<void>;
   isInitialized: boolean;
+  isAuthenticated: boolean;
 }
 
 export const AuthContext = createContext<AuthContextValue | undefined>(

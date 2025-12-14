@@ -381,6 +381,7 @@ export function AuthProvider({ children }: Props): ReactNode {
       setUser,
       refreshUser,
       isInitialized: initialized,
+      isAuthenticated: !!user,
     }),
     [user, token, login, logout, refreshUser, initialized]
   );

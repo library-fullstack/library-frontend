@@ -22,8 +22,6 @@ import {
   LocalOffer,
   CheckCircle,
   ErrorOutline,
-  Favorite,
-  FavoriteBorder,
   Share,
 } from "@mui/icons-material";
 import { checkBookAvailable } from "../../features/books/api/books.api";
@@ -35,6 +33,7 @@ import RecentBorrowersSection from "./components/RecentBorrowersSection";
 import BookImageGallery from "./components/BookImageGallery";
 import BookCopiesSection from "./components/BookCopiesSection";
 import AddToBorrowButton from "../../features/borrow/components/AddToBorrowButton";
+import FavouriteButton from "../../features/favourites/components/FavouriteButton";
 import logger from "@/shared/lib/logger";
 import { useBook } from "@/features/books/hooks/useBooks";
 import StorageUtil from "../../shared/lib/storage";
@@ -54,7 +53,6 @@ export default function BookDetail(): React.ReactElement {
 
   const [available, setAvailable] = useState<boolean>(false);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -94,17 +92,6 @@ export default function BookDetail(): React.ReactElement {
 
     checkAvailability();
   }, [book, id]);
-
-  const handleToggleFavorite = () => {
-    setIsFavorite(!isFavorite);
-    setSnackbar({
-      open: true,
-      message: !isFavorite
-        ? "Đã thêm vào danh sách yêu thích"
-        : "Đã xóa khỏi danh sách yêu thích",
-      severity: "success",
-    });
-  };
 
   const handleShare = async () => {
     const shareData = {
@@ -511,28 +498,18 @@ export default function BookDetail(): React.ReactElement {
                 />
 
                 <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
-                  <Button
-                    variant="outlined"
-                    sx={{
-                      flex: 1,
-                      py: 1.5,
-                      fontWeight: 600,
-                      borderRadius: 1,
-                      textTransform: "none",
-                      color: isFavorite ? "error.main" : "text.secondary",
-                      borderColor: isFavorite ? "error.main" : "divider",
-                      "&:hover": {
-                        borderColor: isFavorite ? "error.dark" : "primary.main",
-                        bgcolor: isFavorite
-                          ? "rgba(239, 68, 68, 0.04)"
-                          : "rgba(79, 70, 229, 0.04)",
-                      },
-                    }}
-                    startIcon={isFavorite ? <Favorite /> : <FavoriteBorder />}
-                    onClick={handleToggleFavorite}
-                  >
-                    {isFavorite ? "Đã thích" : "Yêu thích"}
-                  </Button>
+                  <Box sx={{ flex: 1 }}>
+                    <FavouriteButton
+                      bookId={book.id}
+                      bookTitle={book.title}
+                      variant="button"
+                      size="large"
+                      fullWidth
+                      onNotify={(message, severity) =>
+                        setSnackbar({ open: true, message, severity })
+                      }
+                    />
+                  </Box>
 
                   <Button
                     variant="outlined"

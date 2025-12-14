@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { useCart } from "../../features/borrow/components/hooks/useCart";
 import { useCurrentUser } from "../../features/users/hooks/useUser";
+import { useFavourites } from "../../features/favourites/hooks/useFavourites";
 
 export default function Navbar(): React.ReactElement {
   const navigate = useNavigate();
@@ -43,6 +44,7 @@ export default function Navbar(): React.ReactElement {
   const { data: user } = useCurrentUser();
   const { mode, toggleTheme } = useThemeMode();
   const { data: borrowCart } = useCart(!!user);
+  const { favourites } = useFavourites();
   const isMobile = useMediaQuery("(max-width:700px)");
 
   const [drawerOpen, setDrawerOpen] = React.useState(false);
@@ -116,6 +118,14 @@ export default function Navbar(): React.ReactElement {
       ? borrowCart.totalBooks
       : undefined;
   }, [borrowCart, user]);
+
+  const favouriteBadgeValue = React.useMemo(() => {
+    if (!user) return undefined;
+
+    return favourites && favourites.length > 0
+      ? favourites.length
+      : undefined;
+  }, [favourites, user]);
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && query.trim().length >= 2) {
@@ -369,6 +379,7 @@ export default function Navbar(): React.ReactElement {
                     label: "Yêu thích",
                     icon: <Heart size={20} />,
                     onClick: handleFavouriteClick,
+                    badge: favouriteBadgeValue,
                   },
                   {
                     label: user ? user.full_name : "Tài khoản",
@@ -588,6 +599,27 @@ export default function Navbar(): React.ReactElement {
                     },
                   }}
                 />
+                {(favouriteBadgeValue ?? 0) > 0 && (
+                  <Box
+                    sx={{
+                      bgcolor: "error.main",
+                      color: "white",
+                      borderRadius: "12px",
+                      px: 0.75,
+                      py: 0.25,
+                      fontSize: "0.75rem",
+                      fontWeight: 700,
+                      minWidth: 20,
+                      height: 20,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      mr: 1,
+                    }}
+                  >
+                    {favouriteBadgeValue}
+                  </Box>
+                )}
               </ListItemButton>
             </ListItem>
 

@@ -12,6 +12,7 @@ import {
   Alert,
 } from "@mui/material";
 import { Trash2, Plus, Minus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import type { CartItem } from "../types/borrow.types";
 
 interface BorrowCartItemProps {
@@ -28,6 +29,7 @@ const BorrowCartItem = memo(function BorrowCartItem({
   isUpdating = false,
 }: BorrowCartItemProps) {
   const theme = useTheme();
+  const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const maxAvailable = item.available_count || 0;
   const [localIsUpdating, setLocalIsUpdating] = useState(false);
@@ -37,7 +39,8 @@ const BorrowCartItem = memo(function BorrowCartItem({
   }>({ open: false, message: "" });
 
   const handleButtonClick = useCallback(
-    (newQuantity: number) => {
+    (newQuantity: number, e?: React.MouseEvent) => {
+      e?.stopPropagation();
       const isIncreasing = newQuantity > item.quantity;
 
       if (isIncreasing && newQuantity > maxAvailable) {
@@ -65,11 +68,13 @@ const BorrowCartItem = memo(function BorrowCartItem({
   return (
     <>
       <Card
+        onClick={() => navigate(`/books/${item.bookId}`)}
         sx={{
           mb: 2,
           border: `1px solid`,
           borderColor: "divider",
           transition: "all 0.3s ease",
+          cursor: "pointer",
           "&:hover": {
             boxShadow:
               theme.palette.mode === "dark"
@@ -85,6 +90,10 @@ const BorrowCartItem = memo(function BorrowCartItem({
                 component="img"
                 src={item.thumbnail_url}
                 alt={item.title}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/books/${item.bookId}`);
+                }}
                 sx={{
                   width: { xs: 70, sm: 80 },
                   height: { xs: 100, sm: 120 },
@@ -92,6 +101,10 @@ const BorrowCartItem = memo(function BorrowCartItem({
                   borderRadius: 1,
                   bgcolor: "background.paper",
                   flexShrink: 0,
+                  cursor: "pointer",
+                  "&:hover": {
+                    opacity: 0.8,
+                  },
                 }}
               />
             )}
@@ -99,6 +112,10 @@ const BorrowCartItem = memo(function BorrowCartItem({
             <Stack spacing={1} sx={{ flex: 1, minWidth: 0 }}>
               <Typography
                 variant="h6"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/books/${item.bookId}`);
+                }}
                 sx={{
                   fontWeight: 600,
                   color: "text.primary",
@@ -109,6 +126,10 @@ const BorrowCartItem = memo(function BorrowCartItem({
                   display: "-webkit-box",
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: "vertical",
+                  cursor: "pointer",
+                  "&:hover": {
+                    color: "primary.main",
+                  },
                 }}
               >
                 {item.title}
@@ -155,7 +176,7 @@ const BorrowCartItem = memo(function BorrowCartItem({
                   <Stack direction="row" alignItems="center" spacing={0.5}>
                     <IconButton
                       size="small"
-                      onClick={() => handleButtonClick(item.quantity - 1)}
+                      onClick={(e) => handleButtonClick(item.quantity - 1, e)}
                       disabled={isUpdating || localIsUpdating}
                       sx={{
                         color: "text.secondary",
@@ -177,7 +198,7 @@ const BorrowCartItem = memo(function BorrowCartItem({
                     </Typography>
                     <IconButton
                       size="small"
-                      onClick={() => handleButtonClick(item.quantity + 1)}
+                      onClick={(e) => handleButtonClick(item.quantity + 1, e)}
                       disabled={isUpdating || localIsUpdating}
                       sx={{
                         color: "text.secondary",
@@ -190,7 +211,10 @@ const BorrowCartItem = memo(function BorrowCartItem({
 
                   <IconButton
                     size="small"
-                    onClick={() => onRemove(item.bookId)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemove(item.bookId);
+                    }}
                     disabled={isUpdating || localIsUpdating}
                     sx={{
                       color: "error.main",
@@ -208,7 +232,7 @@ const BorrowCartItem = memo(function BorrowCartItem({
                 <Stack direction="row" alignItems="center" spacing={0.5}>
                   <IconButton
                     size="small"
-                    onClick={() => handleButtonClick(item.quantity - 1)}
+                    onClick={(e) => handleButtonClick(item.quantity - 1, e)}
                     disabled={isUpdating || localIsUpdating}
                     sx={{
                       color: "text.secondary",
@@ -230,7 +254,7 @@ const BorrowCartItem = memo(function BorrowCartItem({
                   </Typography>
                   <IconButton
                     size="small"
-                    onClick={() => handleButtonClick(item.quantity + 1)}
+                    onClick={(e) => handleButtonClick(item.quantity + 1, e)}
                     disabled={isUpdating || localIsUpdating}
                     sx={{
                       color: "text.secondary",
@@ -243,7 +267,10 @@ const BorrowCartItem = memo(function BorrowCartItem({
 
                 <IconButton
                   size="small"
-                  onClick={() => onRemove(item.bookId)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemove(item.bookId);
+                  }}
                   disabled={isUpdating || localIsUpdating}
                   sx={{
                     color: "error.main",
