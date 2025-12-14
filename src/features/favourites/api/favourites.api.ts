@@ -22,7 +22,9 @@ export const favouritesApi = {
   add: (bookId: number) => axiosClient.post("/favourites/add", { bookId }),
 
   remove: (bookId: number) => {
-    return axiosClient.delete("/favourites/remove", {
+    return axiosClient.request({
+      method: "delete",
+      url: "/favourites/remove",
       data: { bookId },
     });
   },
