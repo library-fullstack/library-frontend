@@ -6,6 +6,7 @@ import { QueryProvider } from "./shared/lib/react-query";
 import AuthProvider from "./context/AuthContext";
 import { ThemeContextProvider } from "./context/ThemeContext";
 import { BannerProvider } from "./context/BannerContext";
+import { FavouritesProvider } from "./context/FavouritesContext";
 import LoadingStateProvider from "./context/LoadingStateProvider";
 import ErrorBoundary from "./shared/components/ErrorBoundary";
 import App from "./App";
@@ -20,11 +21,13 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <ThemeContextProvider>
             <BannerProvider>
               <AuthProvider>
-                <BrowserRouter>
-                  <AliveScope>
-                    <App />
-                  </AliveScope>
-                </BrowserRouter>
+                <FavouritesProvider>
+                  <BrowserRouter>
+                    <AliveScope>
+                      <App />
+                    </AliveScope>
+                  </BrowserRouter>
+                </FavouritesProvider>
               </AuthProvider>
             </BannerProvider>
           </ThemeContextProvider>
