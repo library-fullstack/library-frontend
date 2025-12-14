@@ -61,7 +61,10 @@ const getStoredFavourites = (): FavouriteItem[] => {
       return parsed;
     }
   } catch (error) {
-    logger.error("[FavouritesContext] Failed to parse stored favourites:", error);
+    logger.error(
+      "[FavouritesContext] Failed to parse stored favourites:",
+      error
+    );
   }
   logger.debug("[FavouritesContext] No stored favourites, returning empty");
   return [...EMPTY_FAVOURITES];
@@ -72,7 +75,10 @@ const saveFavouritesToStorage = (favourites: FavouriteItem[]): void => {
     logger.debug("[FavouritesContext] Saving to localStorage");
     localStorage.setItem(FAVOURITES_STORAGE_KEY, JSON.stringify(favourites));
   } catch (error) {
-    logger.error("[FavouritesContext] Failed to save favourites to localStorage:", error);
+    logger.error(
+      "[FavouritesContext] Failed to save favourites to localStorage:",
+      error
+    );
   }
 };
 
@@ -120,10 +126,12 @@ export const FavouritesProvider: React.FC<FavouritesProviderProps> = ({
     logger.info("[FavouritesContext] Refetching favourites from API");
 
     try {
-      const response = await favouritesApi.getAll() as FavouritesResponse;
+      const response = (await favouritesApi.getAll()) as FavouritesResponse;
       if (response.data?.success) {
         logger.info(
-          `[FavouritesContext] Fetched ${response.data.data?.length || 0} favourites`
+          `[FavouritesContext] Fetched ${
+            response.data.data?.length || 0
+          } favourites`
         );
         const newFavourites = response.data.data || [];
         setFavourites(newFavourites);
@@ -159,7 +167,9 @@ export const FavouritesProvider: React.FC<FavouritesProviderProps> = ({
     }
 
     if (hasFetchedRef.current) {
-      logger.debug("[FavouritesContext] Already fetched, skipping initial fetch");
+      logger.debug(
+        "[FavouritesContext] Already fetched, skipping initial fetch"
+      );
       return;
     }
 
@@ -188,21 +198,30 @@ export const FavouritesProvider: React.FC<FavouritesProviderProps> = ({
   const addFavourite = useCallback(
     async (bookId: number) => {
       if (!user?.id) {
-        logger.warn("[FavouritesContext] Cannot add favourite: User not logged in");
+        logger.warn(
+          "[FavouritesContext] Cannot add favourite: User not logged in"
+        );
         throw new Error("User not logged in");
       }
 
       logger.info(`[FavouritesContext] Adding favourite for book ${bookId}`);
 
       try {
-        const response = await favouritesApi.add(bookId) as FavouritesResponse;
+        const response = (await favouritesApi.add(
+          bookId
+        )) as FavouritesResponse;
         if (response.data?.success) {
-          logger.info(`[FavouritesContext] Successfully added favourite for book ${bookId}`);
+          logger.info(
+            `[FavouritesContext] Successfully added favourite for book ${bookId}`
+          );
           const newFavourites = response.data.data || [];
           setFavourites(newFavourites);
           saveFavouritesToStorage(newFavourites);
         } else {
-          logger.error("[FavouritesContext] Failed to add favourite:", response);
+          logger.error(
+            "[FavouritesContext] Failed to add favourite:",
+            response
+          );
           throw new Error("Failed to add favourite");
         }
       } catch (error: unknown) {
@@ -216,21 +235,28 @@ export const FavouritesProvider: React.FC<FavouritesProviderProps> = ({
   const removeFavourite = useCallback(
     async (bookId: number) => {
       if (!user?.id) {
-        logger.warn("[FavouritesContext] Cannot remove favourite: User not logged in");
+        logger.warn(
+          "[FavouritesContext] Cannot remove favourite: User not logged in"
+        );
         throw new Error("User not logged in");
       }
 
       logger.info(`[FavouritesContext] Removing favourite for book ${bookId}`);
 
       try {
-        const response = await favouritesApi.remove(bookId) as FavouritesResponse;
-        if (response.data?.success) {
-          logger.info(`[FavouritesContext] Successfully removed favourite for book ${bookId}`);
-          const newFavourites = response.data.data || [];
+        const response = await favouritesApi.remove(bookId);
+        if ((response.data as any)?.success) {
+          logger.info(
+            `[FavouritesContext] Successfully removed favourite for book ${bookId}`
+          );
+          const newFavourites = (response.data as any)?.data || [];
           setFavourites(newFavourites);
           saveFavouritesToStorage(newFavourites);
         } else {
-          logger.error("[FavouritesContext] Failed to remove favourite:", response);
+          logger.error(
+            "[FavouritesContext] Failed to remove favourite:",
+            response
+          );
           throw new Error("Failed to remove favourite");
         }
       } catch (error: unknown) {
