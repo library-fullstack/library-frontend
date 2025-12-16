@@ -10,8 +10,9 @@ import {
 import { ForumCategory } from "../../features/forum/types/forum.types";
 
 export default function Forum(): React.ReactElement {
-  const [selectedCategory, setSelectedCategory] =
-    React.useState<ForumCategory>("Tất cả");
+  const [selectedCategory, setSelectedCategory] = React.useState<ForumCategory>(
+    forumCategories[0]
+  );
 
   const handleCreatePost = React.useCallback(() => {
     // chưa làm phần tạo bài viết khi bấm vào tạo bài viết
@@ -27,8 +28,8 @@ export default function Forum(): React.ReactElement {
 
   // filter các bài viết với danh mục
   const filteredPosts = React.useMemo(() => {
-    if (selectedCategory === "Tất cả") return mockPosts;
-    return mockPosts.filter((post) => post.category === selectedCategory);
+    if (selectedCategory.id === 0) return mockPosts;
+    return mockPosts.filter((post) => post.category_id === selectedCategory.id);
   }, [selectedCategory]);
 
   return (

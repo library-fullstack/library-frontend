@@ -11,6 +11,7 @@ import {
   useTheme,
   Divider,
   Tooltip,
+  Collapse,
 } from "@mui/material";
 import {
   LayoutDashboard,
@@ -24,6 +25,9 @@ import {
   ArrowLeft,
   Image,
   Activity,
+  MessageSquare,
+  AlertCircle,
+  ChevronDown,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Logo from "../../shared/ui/icons/Logo";
@@ -40,8 +44,9 @@ interface AdminSidebarProps {
 interface MenuItem {
   title: string;
   icon: React.ReactElement;
-  path: string;
+  path?: string;
   roles: string[];
+  subItems?: MenuItem[];
 }
 
 export default function AdminSidebar({
@@ -51,11 +56,18 @@ export default function AdminSidebar({
   sidebarOpen,
   handleDrawerToggle,
 }: AdminSidebarProps) {
+  const [expandedItems, setExpandedItems] = React.useState<string[]>([]);
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const { data: user } = useCurrentUser();
   const isCollapsed = !sidebarOpen;
+
+  const toggleExpand = (title: string) => {
+    setExpandedItems((prev) =>
+      prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title]
+    );
+  };
 
   const menuItems: MenuItem[] = [
     {
@@ -111,6 +123,43 @@ export default function AdminSidebar({
       icon: <Activity size={20} />,
       path: "/admin/performance",
       roles: ["ADMIN"],
+    },
+    {
+      title: "Diễn đàn",
+      icon: <MessageSquare size={20} />,
+      roles: ["ADMIN", "MODERATOR"],
+      subItems: [
+        {
+          title: "Bài viết chờ duyệt",
+          icon: <MessageSquare size={16} />,
+          path: "/admin/forum/pending-posts",
+          roles: ["ADMIN", "MODERATOR"],
+        },
+        {
+          title: "Báo cáo vi phạm",
+          icon: <AlertCircle size={16} />,
+          path: "/admin/forum/reports",
+          roles: ["ADMIN", "MODERATOR"],
+        },
+        {
+          title: "Nhật ký hoạt động",
+          icon: <Activity size={16} />,
+          path: "/admin/forum/activity-logs",
+          roles: ["ADMIN", "MODERATOR"],
+        },
+        {
+          title: "Quản lý chủ đề",
+          icon: <Tag size={16} />,
+          path: "/admin/forum/categories",
+          roles: ["ADMIN"],
+        },
+        {
+          title: "Cài đặt diễn đàn",
+          icon: <Settings size={16} />,
+          path: "/admin/forum/settings",
+          roles: ["ADMIN"],
+        },
+      ],
     },
     {
       title: "Cài đặt hệ thống",
@@ -197,10 +246,19 @@ export default function AdminSidebar({
           }}
         >
           {filteredMenuItems.map((item) => {
+            const isExpanded = expandedItems.includes(item.title);
             const isActive = location.pathname === item.path;
+            const hasSubItems = item.subItems && item.subItems.length > 0;
+
             const button = (
               <ListItemButton
-                onClick={() => handleNavigation(item.path)}
+                onClick={() => {
+                  if (hasSubItems) {
+                    toggleExpand(item.title);
+                  } else {
+                    handleNavigation(item.path!);
+                  }
+                }}
                 disableRipple
                 sx={{
                   borderRadius: 2,
@@ -262,35 +320,124 @@ export default function AdminSidebar({
                 </ListItemIcon>
 
                 {!isCollapsed && (
-                  <ListItemText
-                    primary={item.title}
-                    primaryTypographyProps={{
-                      fontSize: "0.875rem",
-                      fontWeight: isActive ? 600 : 500,
-                      noWrap: true,
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flex: 1,
+                      alignItems: "center",
+                      gap: 1,
                     }}
-                  />
+                  >
+                    <ListItemText
+                      primary={item.title}
+                      primaryTypographyProps={{
+                        fontSize: "0.875rem",
+                        fontWeight: isActive ? 600 : 500,
+                        noWrap: true,
+                      }}
+                    />
+                    {hasSubItems && (
+                      <ChevronDown
+                        size={16}
+                        style={{
+                          transform: isExpanded
+                            ? "rotate(180deg)"
+                            : "rotate(0deg)",
+                          transition: "transform 0.2s ease",
+                          flexShrink: 0,
+                        }}
+                      />
+                    )}
+                  </Box>
                 )}
               </ListItemButton>
             );
 
             return (
-              <ListItem
-                key={item.path}
-                disablePadding
-                sx={{
-                  mb: 0.5,
-                  transition: "all 300ms cubic-bezier(0.4, 0, 0.2, 1)",
-                }}
-              >
-                {isCollapsed ? (
-                  <Tooltip title={item.title} placement="right" arrow>
-                    {button}
-                  </Tooltip>
-                ) : (
-                  button
+              <Box key={item.title} sx={{ mb: 0.5 }}>
+                <ListItem
+                  disablePadding
+                  sx={{
+                    mb: 0.5,
+                    transition: "all 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+                  }}
+                >
+                  {isCollapsed && hasSubItems ? (
+                    <Tooltip title={item.title} placement="right" arrow>
+                      {button}
+                    </Tooltip>
+                  ) : isCollapsed ? (
+                    <Tooltip title={item.title} placement="right" arrow>
+                      {button}
+                    </Tooltip>
+                  ) : (
+                    button
+                  )}
+                </ListItem>
+
+                {hasSubItems && !isCollapsed && (
+                  <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                    <List sx={{ pl: 2, pt: 0.5, pb: 0.5 }}>
+                      {item.subItems?.map((subItem) => {
+                        const isSubActive = location.pathname === subItem.path;
+                        return (
+                          <ListItem
+                            key={subItem.path}
+                            disablePadding
+                            sx={{ mb: 0.25 }}
+                          >
+                            <ListItemButton
+                              onClick={() => handleNavigation(subItem.path!)}
+                              disableRipple
+                              sx={{
+                                borderRadius: 1.5,
+                                pl: 2,
+                                pr: 2,
+                                py: 0.75,
+                                minHeight: 36,
+                                bgcolor: isSubActive
+                                  ? theme.palette.mode === "dark"
+                                    ? "rgba(129, 140, 248, 0.1)"
+                                    : "rgba(79, 70, 229, 0.05)"
+                                  : "transparent",
+                                color: isSubActive
+                                  ? "primary.main"
+                                  : "text.secondary",
+                                fontWeight: isSubActive ? 500 : 400,
+                                "&:hover": {
+                                  bgcolor:
+                                    theme.palette.mode === "dark"
+                                      ? "rgba(129, 140, 248, 0.08)"
+                                      : "rgba(79, 70, 229, 0.04)",
+                                },
+                              }}
+                            >
+                              <ListItemIcon
+                                sx={{
+                                  minWidth: 28,
+                                  color: isSubActive
+                                    ? "primary.main"
+                                    : "text.secondary",
+                                }}
+                              >
+                                {subItem.icon}
+                              </ListItemIcon>
+                              <ListItemText
+                                primary={subItem.title}
+                                primaryTypographyProps={{
+                                  fontSize: "0.8125rem",
+                                  fontWeight: isSubActive ? 500 : 400,
+                                  noWrap: true,
+                                }}
+                              />
+                            </ListItemButton>
+                          </ListItem>
+                        );
+                      })}
+                    </List>
+                  </Collapse>
                 )}
-              </ListItem>
+              </Box>
             );
           })}
         </List>

@@ -16,12 +16,12 @@ import {
   VisibilityOutlined,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
-import { ForumPost } from "../../features/forum/types/forum.types";
+import { ForumPostDetail } from "../../features/forum/types/forum.types";
 
 const MotionCard = motion.create(Card);
 
 interface ForumPostCardProps {
-  post: ForumPost;
+  post: ForumPostDetail;
   index?: number;
   onClick?: (postId: number) => void;
 }
@@ -66,8 +66,8 @@ export default function ForumPostCard({
             sx={{ width: { xs: "100%", sm: "auto" } }}
           >
             <Avatar
-              src={post.avatar}
-              alt={post.author}
+              src={post.author?.avatar_url}
+              alt={post.author?.full_name}
               sx={{
                 width: { xs: 40, md: 48 },
                 height: { xs: 40, md: 48 },
@@ -76,11 +76,11 @@ export default function ForumPostCard({
             {/* hiện author và category ngay bên avatar - mobile */}
             <Box sx={{ display: { xs: "block", sm: "none" }, flex: 1 }}>
               <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                {post.author}
+                {post.author?.full_name}
               </Typography>
               <Stack direction="row" spacing={1} alignItems="center">
                 <Chip
-                  label={post.category}
+                  label={post.category?.name}
                   size="small"
                   sx={{
                     height: 20,
@@ -92,7 +92,7 @@ export default function ForumPostCard({
                   }}
                 />
                 <Typography variant="caption" color="text.secondary">
-                  {post.timestamp}
+                  {post.created_at}
                 </Typography>
               </Stack>
             </Box>
@@ -109,11 +109,11 @@ export default function ForumPostCard({
             >
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                  {post.author}
+                  {post.author?.full_name}
                 </Typography>
                 <Stack direction="row" spacing={1} alignItems="center">
                   <Chip
-                    label={post.category}
+                    label={post.category?.name}
                     size="small"
                     sx={{
                       height: 20,
@@ -125,7 +125,7 @@ export default function ForumPostCard({
                     }}
                   />
                   <Typography variant="caption" color="text.secondary">
-                    {post.timestamp}
+                    {post.created_at}
                   </Typography>
                 </Stack>
               </Box>
@@ -162,7 +162,8 @@ export default function ForumPostCard({
               {post.content}
             </Typography>
 
-            {/* tags */}
+            {/* tags - commented out as tags not in ForumPost interface */}
+            {/* 
             <Stack
               direction="row"
               spacing={1}
@@ -172,7 +173,7 @@ export default function ForumPostCard({
                 gap: 0.5,
               }}
             >
-              {post.tags.map((tag) => (
+              {post.tags && post.tags.map((tag: string) => (
                 <Chip
                   key={tag}
                   label={`#${tag}`}
@@ -187,6 +188,7 @@ export default function ForumPostCard({
                 />
               ))}
             </Stack>
+            */}
 
             <Divider sx={{ mb: 2 }} />
 
@@ -208,7 +210,7 @@ export default function ForumPostCard({
                   color="text.secondary"
                   sx={{ fontSize: { xs: "0.75rem", md: "0.875rem" } }}
                 >
-                  {post.views.toLocaleString()}
+                  {post.views_count?.toLocaleString() || 0}
                 </Typography>
               </Stack>
               <Stack direction="row" spacing={0.5} alignItems="center">
@@ -223,7 +225,7 @@ export default function ForumPostCard({
                   color="text.secondary"
                   sx={{ fontSize: { xs: "0.75rem", md: "0.875rem" } }}
                 >
-                  {post.replies}
+                  {post.comments_count || 0}
                 </Typography>
               </Stack>
               <Stack direction="row" spacing={0.5} alignItems="center">
@@ -238,7 +240,7 @@ export default function ForumPostCard({
                   color="text.secondary"
                   sx={{ fontSize: { xs: "0.75rem", md: "0.875rem" } }}
                 >
-                  {post.likes}
+                  {post.likes_count || 0}
                 </Typography>
               </Stack>
             </Stack>

@@ -17,20 +17,20 @@ export interface Favourite {
 }
 
 export const favouritesApi = {
-  getAll: () => axiosClient.get("/favourites"),
+  getAll: () => axiosClient.get("/bookFavourite"),
 
-  add: (bookId: number) => axiosClient.post("/favourites/add", { bookId }),
+  add: (bookId: number) => axiosClient.post("/bookFavourite/add", { bookId }),
 
   remove: (bookId: number) => {
     return axiosClient.request({
       method: "delete",
-      url: "/favourites/remove",
+      url: "/bookFavourite/remove",
       data: { bookId },
     });
   },
 
   checkFavourite: (bookId: number) =>
-    axiosClient.get(`/favourites/check/${bookId}`),
+    axiosClient.get(`/bookFavourite/check/${bookId}`),
 
-  getCount: () => axiosClient.get("/favourites/count"),
+  getCount: () => axiosClient.get("/bookFavourite/count"),
 };

@@ -44,8 +44,11 @@ export default function ForumCategoryTabs({
         }}
       >
         <Tabs
-          value={selectedCategory}
-          onChange={(e, newValue) => onCategoryChange(newValue)}
+          value={selectedCategory.id}
+          onChange={(e, newValue) => {
+            const category = categories.find((c) => c.id === newValue);
+            if (category) onCategoryChange(category);
+          }}
           variant={isMobile ? "scrollable" : "standard"}
           scrollButtons="auto"
           allowScrollButtonsMobile
@@ -74,7 +77,7 @@ export default function ForumCategoryTabs({
           }}
         >
           {categories.map((category) => (
-            <Tab key={category} label={category} value={category} />
+            <Tab key={category.id} label={category.name} value={category.id} />
           ))}
         </Tabs>
       </Box>
