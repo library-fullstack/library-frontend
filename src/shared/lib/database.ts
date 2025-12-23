@@ -7,7 +7,6 @@ class DatabaseService {
   async saveBook(id: number, bookData: unknown): Promise<void> {
     try {
       await set(this.prefix + `book-${id}`, bookData);
-      logger.debug("[DB] Book saved:", id);
     } catch (err) {
       logger.error("[DB] Failed to save book:", err);
     }
@@ -16,7 +15,6 @@ class DatabaseService {
   async getBook(id: number): Promise<unknown> {
     try {
       const data = await get(this.prefix + `book-${id}`);
-      logger.debug("[DB] Book retrieved:", id);
       return data;
     } catch (err) {
       logger.error("[DB] Failed to get book:", err);
@@ -38,7 +36,6 @@ class DatabaseService {
         retries: 0,
       };
       await set(this.prefix + `pending-${id}`, queueItem);
-      logger.debug("[DB] Mutation queued:", id);
       return id;
     } catch (err) {
       logger.error("[DB] Failed to queue mutation:", err);
@@ -52,7 +49,6 @@ class DatabaseService {
         | string
         | null;
       const mutations = mutationsJson ? JSON.parse(mutationsJson) : [];
-      logger.debug("[DB] Pending mutations retrieved:", mutations.length);
       return mutations;
     } catch (err) {
       logger.error("[DB] Failed to get pending mutations:", err);
@@ -65,7 +61,6 @@ class DatabaseService {
       const mutations = await this.getPendingMutations();
       mutations.push(mutation);
       await set(this.prefix + "pending-mutations", JSON.stringify(mutations));
-      logger.debug("[DB] Added to pending mutations");
     } catch (err) {
       logger.error("[DB] Failed to add pending mutation:", err);
     }
@@ -78,7 +73,6 @@ class DatabaseService {
         return (m as Record<string, unknown>).id !== id;
       });
       await set(this.prefix + "pending-mutations", JSON.stringify(mutations));
-      logger.debug("[DB] Mutation removed:", id);
     } catch (err) {
       logger.error("[DB] Failed to remove mutation:", err);
     }
@@ -87,7 +81,6 @@ class DatabaseService {
   async saveForumPosts(posts: unknown): Promise<void> {
     try {
       await set(this.prefix + "forum-posts", posts);
-      logger.debug("[DB] Forum posts saved");
     } catch (err) {
       logger.error("[DB] Failed to save forum posts:", err);
     }
@@ -96,7 +89,6 @@ class DatabaseService {
   async getForumPosts(): Promise<unknown> {
     try {
       const posts = await get(this.prefix + "forum-posts");
-      logger.debug("[DB] Forum posts retrieved");
       return posts;
     } catch (err) {
       logger.error("[DB] Failed to get forum posts:", err);
@@ -123,7 +115,6 @@ class DatabaseService {
           : "pending-mutations");
 
       await del(keyToDelete);
-      logger.debug("[DB] Category cleared:", category);
     } catch (err) {
       logger.error("[DB] Failed to clear category:", err);
     }
@@ -148,7 +139,6 @@ class DatabaseService {
     try {
       if (navigator.storage && navigator.storage.persist) {
         const persistent = await navigator.storage.persist();
-        logger.debug("[DB] Persistent storage:", persistent);
         return persistent;
       }
     } catch (err) {

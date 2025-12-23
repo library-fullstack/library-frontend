@@ -464,7 +464,7 @@ const FeaturedBooks: React.FC = () => {
             }}
             style={{ paddingBottom: 50 }}
           >
-            {books.map((book) => (
+            {books.map((book: Book) => (
               <SwiperSlide key={book.id}>{CardItem(book)}</SwiperSlide>
             ))}
           </Swiper>

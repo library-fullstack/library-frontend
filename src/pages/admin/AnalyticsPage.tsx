@@ -60,6 +60,16 @@ export default function AnalyticsPage() {
     booksAddedThisMonth: 45,
     usersJoinedThisMonth: 67,
     borrowsThisMonth: 189,
+    booksAddedLastMonth: 40,
+    usersJoinedLastMonth: 62,
+    borrowsLastMonth: 195,
+    overdueLastMonth: 14,
+    growthRates: {
+      books: 12.5,
+      users: 8.1,
+      borrows: -3.1,
+      overdue: -14.3,
+    },
     popularCategories: [
       {
         category_id: 1,
@@ -93,6 +103,7 @@ export default function AnalyticsPage() {
   const displayStats = stats || createMockStats();
 
   const calculatePercentage = (value: number, total: number) => {
+    if (total === 0) return "0.0";
     return ((value / total) * 100).toFixed(1);
   };
 
@@ -102,32 +113,32 @@ export default function AnalyticsPage() {
       value: displayStats.booksAddedThisMonth,
       total: displayStats.totalBooks,
       color: "#4F46E5",
-      trend: 12.5,
-      isPositive: true,
+      trend: stats?.growthRates?.books || 0,
+      isPositive: (stats?.growthRates?.books || 0) >= 0,
     },
     {
       label: "Người dùng mới",
       value: displayStats.usersJoinedThisMonth,
       total: displayStats.totalUsers,
       color: "#10B981",
-      trend: 8.3,
-      isPositive: true,
+      trend: stats?.growthRates?.users || 0,
+      isPositive: (stats?.growthRates?.users || 0) >= 0,
     },
     {
       label: "Lượt mượn tháng này",
       value: displayStats.borrowsThisMonth,
       total: displayStats.totalBorrows,
       color: "#F59E0B",
-      trend: -3.2,
-      isPositive: false,
+      trend: stats?.growthRates?.borrows || 0,
+      isPositive: (stats?.growthRates?.borrows || 0) >= 0,
     },
     {
       label: "Sách quá hạn",
       value: displayStats.overdueBorrows,
       total: displayStats.activeBorrows,
       color: "#EF4444",
-      trend: -15.7,
-      isPositive: true,
+      trend: stats?.growthRates?.overdue || 0,
+      isPositive: (stats?.growthRates?.overdue || 0) < 0,
     },
   ];
 
@@ -482,9 +493,11 @@ export default function AnalyticsPage() {
                     <LinearProgress
                       variant="determinate"
                       value={
-                        (displayStats.activeBorrows /
-                          displayStats.totalBorrows) *
-                        100
+                        displayStats.totalBorrows > 0
+                          ? (displayStats.activeBorrows /
+                              displayStats.totalBorrows) *
+                            100
+                          : 0
                       }
                       sx={{ height: 6, borderRadius: 1 }}
                     />

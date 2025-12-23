@@ -19,7 +19,6 @@ import {
 import { statisticsApi } from "../../features/admin/api/statistics.api";
 import type { DashboardStatistics } from "../../features/admin/api/statistics.api";
 import { parseApiError } from "../../shared/lib/errorHandler";
-import logger from "@/shared/lib/logger";
 
 const RecentActivity = lazy(
   () => import("../../features/admin/components/RecentActivity")
@@ -139,13 +138,10 @@ export default function AdminDashboard() {
       setLoading(true);
       setError("");
       try {
-        logger.log("[AdminDashboard] Đang lấy thống kê bảng điều khiển...");
-        const response = await statisticsApi.getDashboardStats();
-        logger.log("[AdminDashboard] Phản hồi từ API:", response);
-        setStats(response.data);
+        const statsResponse = await statisticsApi.getDashboardStats();
+        setStats(statsResponse.data);
       } catch (err) {
         const errorMsg = parseApiError(err);
-        logger.error("[AdminDashboard] Lỗi:", err, "Đã parse:", errorMsg);
         setError(errorMsg);
         setStats(createMockStats());
       } finally {
@@ -168,6 +164,16 @@ export default function AdminDashboard() {
     booksAddedThisMonth: 45,
     usersJoinedThisMonth: 67,
     borrowsThisMonth: 189,
+    booksAddedLastMonth: 38,
+    usersJoinedLastMonth: 52,
+    borrowsLastMonth: 178,
+    overdueLastMonth: 15,
+    growthRates: {
+      books: 3.6,
+      users: 7.8,
+      borrows: -2.4,
+      overdue: -15.7,
+    },
     popularCategories: [
       { category_id: 1, category_name: "Khoa học", book_count: 287 },
       { category_id: 2, category_name: "Văn học", book_count: 245 },
@@ -295,7 +301,7 @@ export default function AdminDashboard() {
           <StatCard
             title="Tổng số sách"
             value={displayStats.totalBooks}
-            change={3.6}
+            change={displayStats.growthRates?.books || 0}
             icon={<BookOpen />}
             color="#3B82F6"
             loading={loading}
@@ -305,7 +311,7 @@ export default function AdminDashboard() {
           <StatCard
             title="Tổng người dùng"
             value={displayStats.totalUsers}
-            change={7.8}
+            change={displayStats.growthRates?.users || 0}
             icon={<Users />}
             color="#10B981"
             loading={loading}
@@ -315,7 +321,7 @@ export default function AdminDashboard() {
           <StatCard
             title="Đang mượn"
             value={displayStats.activeBorrows}
-            change={-2.4}
+            change={displayStats.growthRates?.borrows || 0}
             icon={<BookMarked />}
             color="#F59E0B"
             loading={loading}
@@ -325,7 +331,7 @@ export default function AdminDashboard() {
           <StatCard
             title="Sách quá hạn"
             value={displayStats.overdueBorrows}
-            change={-15.7}
+            change={displayStats.growthRates?.overdue || 0}
             icon={<AlertTriangle />}
             color="#EF4444"
             loading={loading}

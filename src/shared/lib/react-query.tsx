@@ -32,21 +32,11 @@ export function QueryProvider({ children }: QueryProviderProps) {
             const queryKey = query.queryKey[0];
 
             if (queryKey === "user" || queryKey === "cart") {
-              logger.debug(
-                `[QueryProvider] Skipping ${String(
-                  queryKey
-                )} cache persistence (user-specific)`
-              );
               return false;
             }
 
             if (typeof queryKey === "string") {
               const shouldPersist = PERSISTABLE_QUERY_KEYS.includes(queryKey);
-              if (!shouldPersist) {
-                logger.debug(
-                  `[QueryProvider] Skipping ${queryKey} cache persistence (not whitelisted)`
-                );
-              }
               return shouldPersist;
             }
 

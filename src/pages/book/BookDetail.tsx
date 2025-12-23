@@ -147,10 +147,8 @@ export default function BookDetail(): React.ReactElement {
           return;
         } catch (shareErr) {
           if ((shareErr as Error).name === "AbortError") {
-            logger.log("Share cancelled by user");
             return;
           }
-          logger.warn("Share failed, falling back to clipboard:", shareErr);
         }
       }
 
@@ -759,7 +757,7 @@ export default function BookDetail(): React.ReactElement {
           <BookCopiesSection copies={book.copies} />
         )}
 
-        <RecentBorrowersSection bookTitle={book.title} />
+        <RecentBorrowersSection bookId={book.id} />
 
         <RelatedBooksSection
           currentBookId={book.id}

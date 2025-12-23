@@ -25,6 +25,25 @@ export interface BorrowRecord {
   };
 }
 
+export interface BorrowPreviewData {
+  id: number;
+  user_id: string;
+  borrow_date: string;
+  due_date: string;
+  status: string;
+  fullname: string;
+  email: string;
+  student_id?: string;
+  items?: Array<{
+    copy_id: number;
+    book_id: number;
+    book_title: string;
+    thumbnail_url?: string;
+    isbn?: string;
+    barcode?: string;
+  }>;
+}
+
 export const borrowApi = {
   createBorrow: async (data: CreateBorrowRequest) => {
     const res = await axiosClient.post<CreateBorrowResponse>("/borrows", {
@@ -36,6 +55,22 @@ export const borrowApi = {
     return res.data;
   },
 
+  getBorrowPreview: async (borrowId: number) => {
+    const res = await axiosClient.get<{
+      success: boolean;
+      data: BorrowPreviewData;
+    }>(`/borrows/${borrowId}/preview`);
+    return res.data;
+  },
+
+  confirmBorrow: async (borrowId: number, signature: string) => {
+    const res = await axiosClient.post<{ success: boolean; message: string }>(
+      `/borrows/${borrowId}/confirm`,
+      { signature }
+    );
+    return res.data;
+  },
+
   create: (data: BorrowRequest) => axiosClient.post("/borrows", data),
 
   getMyBorrows: () => axiosClient.get<BorrowRecord[]>("/borrows/my"),
@@ -43,6 +78,18 @@ export const borrowApi = {
   returnBook: (id: string) => axiosClient.patch(`/borrows/${id}/return`),
 
   renewBook: (id: string) => axiosClient.patch(`/borrows/${id}/renew`),
+
+  renewBorrow: async (borrowId: number) => {
+    const res = await axiosClient.post(`/borrows/${borrowId}/renew`);
+    return res.data;
+  },
+
+  cancelBorrow: async (borrowId: number) => {
+    const res = await axiosClient.patch(`/borrows/admin/${borrowId}/status`, {
+      status: "CANCELLED",
+    });
+    return res.data;
+  },
 
   getCart: () => axiosClient.get("/cart"),
 

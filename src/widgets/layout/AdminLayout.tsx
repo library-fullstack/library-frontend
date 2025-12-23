@@ -174,7 +174,11 @@ function AdminLayout() {
                 {user?.full_name || "Admin"}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {user?.role === "ADMIN" ? "Quản trị viên" : "Thủ thư"}
+                {user?.role === "ADMIN"
+                  ? "Quản trị viên"
+                  : user?.role === "MODERATOR"
+                  ? "Kiểm duyệt viên"
+                  : "Thủ thư"}
               </Typography>
             </Box>
             <Avatar

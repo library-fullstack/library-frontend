@@ -10,6 +10,7 @@ import {
   useMediaQuery,
   useTheme,
   Button,
+  Skeleton,
 } from "@mui/material";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -18,38 +19,19 @@ import { motion } from "framer-motion";
 import { Link as RouterLink, useNavigationType } from "react-router-dom";
 import { Pagination, Autoplay } from "swiper/modules";
 import { useEventTheme } from "../hooks/useEventTheme";
+import { useQuery } from "@tanstack/react-query";
+import axiosClient from "../api/axiosClient";
 import "../../styles/eventTheme.css";
 
-// cần gọi api lấy post ra
-// TODO
-// TODO
-// TODO
-const mockPosts = [
-  {
-    id: 1,
-    title: "Chia sẻ cảm nhận sau khi đọc 'Tôi thấy hoa vàng trên cỏ xanh'",
-    author: "Tạ Hữu Anh Bình",
-    tag: "Cảm nhận sách",
-    excerpt:
-      "Một cuốn sách nhẹ nhàng nhưng đầy cảm xúc. Mình nghĩ ai từng trải qua tuổi thơ giản dị đều sẽ tìm thấy bản thân trong đó...",
-  },
-  {
-    id: 2,
-    title: "Thảo luận: Nên đọc ebook hay sách giấy?",
-    author: "Lê Văn Huy",
-    tag: "Thảo luận học tập",
-    excerpt:
-      "Mỗi hình thức đều có ưu và nhược điểm riêng. Theo bạn, giữa sự tiện lợi và trải nghiệm thật, nên chọn bên nào?",
-  },
-  {
-    id: 3,
-    title: "Góc học tập: Cách ghi chú hiệu quả khi đọc sách chuyên ngành",
-    author: "Trần Kính Hoàng",
-    tag: "Kinh nghiệm học tập",
-    excerpt:
-      "Thay vì highlight tràn lan, mình chuyển sang hệ thống hoá bằng sơ đồ tư duy. Kết quả ghi nhớ tăng rõ rệt!",
-  },
-];
+interface ForumPost {
+  id: number;
+  title: string;
+  slug: string;
+  author_name: string;
+  category_name: string;
+  content: string;
+  created_at: string;
+}
 
 export default function CommunitySection(): React.ReactElement {
   const theme = useTheme();
@@ -57,6 +39,24 @@ export default function CommunitySection(): React.ReactElement {
   const navigationType = useNavigationType();
   const shouldAnimate = !isMobile && navigationType !== "POP";
   const eventClass = useEventTheme();
+
+  const { data: postsData, isLoading } = useQuery<ForumPost[]>({
+    queryKey: ["forum-posts-random"],
+    queryFn: async () => {
+      const response = await axiosClient.get("/forum/posts", {
+        params: {
+          limit: 3,
+          sort: "random",
+          status: "APPROVED",
+        },
+      });
+      const data = response.data as { success?: boolean; data?: ForumPost[] };
+      return data.data || [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const posts = postsData || [];
 
   const MobileContent = (
     <Container maxWidth="md" sx={{ px: { xs: 2, sm: 3 } }}>
@@ -111,90 +111,118 @@ export default function CommunitySection(): React.ReactElement {
         observeParents
         speed={500}
       >
-        {mockPosts.map((post) => (
-          <SwiperSlide key={post.id} style={{ display: "flex" }}>
-            <Card
-              sx={{
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                p: { xs: 2.5, sm: 3 },
-                borderRadius: 2,
-                bgcolor: theme.palette.background.paper,
-                border: `1px solid ${theme.palette.divider}`,
-                boxShadow: theme.shadows[1],
-                transition: isMobile ? "none" : "all 0.25s ease",
-                "&:hover": !isMobile
-                  ? {
-                      transform: "translateY(-4px)",
-                      boxShadow: (t) => t.shadows[4],
-                      transition: "0.3s ease",
-                    }
-                  : {},
-              }}
-            >
-              <Box>
-                <Chip
-                  label={post.tag}
-                  size="small"
-                  color="primary"
-                  sx={{ mb: 1.2, fontWeight: 500, borderRadius: 2 }}
-                />
-                <Typography
-                  variant="subtitle1"
-                  fontWeight={700}
+        {isLoading
+          ? [1, 2, 3].map((i) => (
+              <SwiperSlide key={i} style={{ display: "flex" }}>
+                <Card
                   sx={{
-                    mb: 0.5,
-                    color: theme.palette.text.primary,
-                    lineHeight: 1.5,
-                    minHeight: "3em",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
+                    height: "100%",
+                    p: { xs: 2.5, sm: 3 },
+                    borderRadius: 2,
                   }}
                 >
-                  {post.title}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
+                  <Skeleton width="60%" height={24} sx={{ mb: 1 }} />
+                  <Skeleton width="80%" height={20} sx={{ mb: 1 }} />
+                  <Skeleton height={16} />
+                  <Skeleton height={16} />
+                  <Skeleton width="70%" height={16} />
+                </Card>
+              </SwiperSlide>
+            ))
+          : posts.map((post) => (
+              <SwiperSlide key={post.id} style={{ display: "flex" }}>
+                <Card
+                  component={RouterLink}
+                  to={`/forum/posts/${post.slug}`}
                   sx={{
-                    pt: 0.5,
-                    display: "-webkit-box",
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                    minHeight: 56,
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    p: { xs: 2.5, sm: 3 },
+                    borderRadius: 2,
+                    bgcolor: theme.palette.background.paper,
+                    border: `1px solid ${theme.palette.divider}`,
+                    boxShadow: theme.shadows[1],
+                    textDecoration: "none",
+                    transition: isMobile ? "none" : "all 0.25s ease",
+                    "&:hover": !isMobile
+                      ? {
+                          transform: "translateY(-4px)",
+                          boxShadow: (t) => t.shadows[4],
+                          transition: "0.3s ease",
+                        }
+                      : {},
                   }}
                 >
-                  {post.excerpt}
-                </Typography>
-              </Box>
+                  <Box>
+                    <Chip
+                      label={post.category_name || "Thảo luận"}
+                      size="small"
+                      color="primary"
+                      sx={{ mb: 1.2, fontWeight: 500, borderRadius: 2 }}
+                    />
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight={700}
+                      sx={{
+                        mb: 0.5,
+                        color: theme.palette.text.primary,
+                        lineHeight: 1.5,
+                        minHeight: "3em",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {post.title}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        pt: 0.5,
+                        display: "-webkit-box",
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        minHeight: 56,
+                      }}
+                    >
+                      {post.content
+                        ? post.content.replace(/<[^>]*>/g, "").substring(0, 150)
+                        : "Nhấn để xem chi tiết..."}
+                    </Typography>
+                  </Box>
 
-              <Box
-                sx={{ display: "flex", alignItems: "center", gap: 1, mt: 2 }}
-              >
-                <Avatar
-                  sx={{
-                    width: 28,
-                    height: 28,
-                    bgcolor: (t) => t.palette.primary.main,
-                    fontSize: 13,
-                    color: (t) => t.palette.primary.contrastText,
-                    flexShrink: 0,
-                  }}
-                >
-                  {post.author.charAt(0)}
-                </Avatar>
-                <Typography variant="caption" color="text.secondary" noWrap>
-                  {post.author}
-                </Typography>
-              </Box>
-            </Card>
-          </SwiperSlide>
-        ))}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      mt: 2,
+                    }}
+                  >
+                    <Avatar
+                      sx={{
+                        width: 28,
+                        height: 28,
+                        bgcolor: (t) => t.palette.primary.main,
+                        fontSize: 13,
+                        color: (t) => t.palette.primary.contrastText,
+                        flexShrink: 0,
+                      }}
+                    >
+                      {post.author_name?.charAt(0) || "A"}
+                    </Avatar>
+                    <Typography variant="caption" color="text.secondary" noWrap>
+                      {post.author_name || "Ẩn danh"}
+                    </Typography>
+                  </Box>
+                </Card>
+              </SwiperSlide>
+            ))}
       </Swiper>
 
       <Box sx={{ display: "flex", justifyContent: "center" }}>
@@ -278,82 +306,124 @@ export default function CommunitySection(): React.ReactElement {
       </Typography>
 
       <Stack direction="row" spacing={4}>
-        {mockPosts.map((post, index) => (
-          <Card
-            key={post.id}
-            component={motion.div}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 * index, duration: 0.5 }}
-            sx={{
-              flex: 1,
-              p: 3,
-              borderRadius: 2,
-              bgcolor: (t) => t.palette.background.paper,
-              border: (t) => `1px solid ${t.palette.divider}`,
-              boxShadow: (t) => t.shadows[1],
-              overflow: "hidden",
-              "&:hover": !isMobile
-                ? {
-                    transform: "translateY(-4px)",
-                    boxShadow: (t) => t.shadows[4],
-                    transition: "0.3s ease",
-                  }
-                : {},
-            }}
-          >
-            <Chip
-              label={post.tag}
-              size="small"
-              color="primary"
-              sx={{ mb: 1.2, fontWeight: 500, borderRadius: 2 }}
-            />
-            <Typography
-              variant="h6"
-              fontWeight={600}
-              sx={{
-                mb: 1,
-                color: (t) => t.palette.text.primary,
-                lineHeight: 1.4,
-              }}
-            >
-              {post.title}
-            </Typography>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{
-                mb: 1.5,
-                display: "-webkit-box",
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-              }}
-            >
-              {post.excerpt}
-            </Typography>
-
-            <Box
-              sx={{ display: "flex", alignItems: "center", gap: 1, mt: "auto" }}
-            >
-              <Avatar
+        {isLoading
+          ? [1, 2, 3].map((i) => (
+              <Card key={i} sx={{ flex: 1, p: 3, borderRadius: 2 }}>
+                <Skeleton width="40%" height={24} sx={{ mb: 1 }} />
+                <Skeleton width="90%" height={20} sx={{ mb: 1 }} />
+                <Skeleton height={16} />
+                <Skeleton height={16} />
+                <Skeleton width="60%" height={16} />
+              </Card>
+            ))
+          : posts.map((post, index) => (
+              <Card
+                key={post.id}
+                component={motion.div}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 * index, duration: 0.5 }}
+                onClick={() =>
+                  (window.location.href = `/forum/posts/${post.slug}`)
+                }
                 sx={{
-                  width: 28,
-                  height: 28,
-                  bgcolor: (t) => t.palette.primary.main,
-                  fontSize: 13,
-                  color: (t) => t.palette.primary.contrastText,
+                  flex: 1,
+                  p: 3,
+                  height: 320,
+                  borderRadius: 2,
+                  bgcolor: (t) => t.palette.background.paper,
+                  border: (t) => `1px solid ${t.palette.divider}`,
+                  boxShadow: (t) => t.shadows[1],
+                  overflow: "hidden",
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  "&:hover": !isMobile
+                    ? {
+                        transform: "translateY(-4px)",
+                        boxShadow: (t) => t.shadows[4],
+                        transition: "0.3s ease",
+                      }
+                    : {},
                 }}
               >
-                {post.author.charAt(0)}
-              </Avatar>
-              <Typography variant="caption" color="text.secondary">
-                {post.author}
-              </Typography>
-            </Box>
-          </Card>
-        ))}
+                <Box
+                  sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
+                >
+                  <Chip
+                    label={post.category_name || "Thảo luận"}
+                    size="small"
+                    color="primary"
+                    sx={{
+                      mb: 1.2,
+                      fontWeight: 500,
+                      borderRadius: 2,
+                      alignSelf: "flex-start",
+                    }}
+                  />
+                  <Typography
+                    variant="h6"
+                    fontWeight={600}
+                    sx={{
+                      mb: 1,
+                      color: (t) => t.palette.text.primary,
+                      lineHeight: 1.4,
+                      height: "2.8em",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {post.title}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      display: "-webkit-box",
+                      WebkitLineClamp: 4,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      flexGrow: 1,
+                    }}
+                  >
+                    {post.content
+                      ? post.content.replace(/<[^>]*>/g, "").substring(0, 150)
+                      : "Nhấn để xem chi tiết..."}
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    pt: 2,
+                    mt: 2,
+                    borderTop: 1,
+                    borderColor: "divider",
+                  }}
+                >
+                  <Avatar
+                    sx={{
+                      width: 28,
+                      height: 28,
+                      bgcolor: (t) => t.palette.primary.main,
+                      fontSize: 13,
+                      color: (t) => t.palette.primary.contrastText,
+                    }}
+                  >
+                    {post.author_name?.charAt(0) || "A"}
+                  </Avatar>
+                  <Typography variant="caption" color="text.secondary">
+                    {post.author_name || "Ẩn danh"}
+                  </Typography>
+                </Box>
+              </Card>
+            ))}
       </Stack>
 
       <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>

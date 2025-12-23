@@ -23,6 +23,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useThemeMode } from "../../shared/hooks/useThemeMode";
 import { useBookSearch } from "../../shared/hooks/useBookSearch";
 import SearchResultsPanel from "./SearchResultsPanel";
+import NotificationBell from "./NotificationBell";
 import Logo from "../../shared/ui/icons/Logo";
 import CartBadge from "../../shared/components/CartBadge";
 import {
@@ -104,12 +105,19 @@ export default function Navbar(): React.ReactElement {
   };
 
   const handleAdminClick = () => {
-    navigate("/admin/dashboard");
+    if (user?.role === "MODERATOR") {
+      navigate("/admin/forum/pending-posts");
+    } else {
+      navigate("/admin/dashboard");
+    }
     setDrawerOpen(false);
   };
 
   const isAdminOrLibrarian =
-    user && (user.role === "ADMIN" || user.role === "LIBRARIAN");
+    user &&
+    (user.role === "ADMIN" ||
+      user.role === "LIBRARIAN" ||
+      user.role === "MODERATOR");
 
   const cartBadgeValue = React.useMemo(() => {
     if (!user) return undefined;
@@ -122,9 +130,7 @@ export default function Navbar(): React.ReactElement {
   const favouriteBadgeValue = React.useMemo(() => {
     if (!user) return undefined;
 
-    return favourites && favourites.length > 0
-      ? favourites.length
-      : undefined;
+    return favourites && favourites.length > 0 ? favourites.length : undefined;
   }, [favourites, user]);
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -381,26 +387,6 @@ export default function Navbar(): React.ReactElement {
                     onClick: handleFavouriteClick,
                     badge: favouriteBadgeValue,
                   },
-                  {
-                    label: user ? user.full_name : "Tài khoản",
-                    icon: user ? (
-                      <Avatar
-                        src={user.avatar_url || ""}
-                        alt={user.full_name}
-                        sx={{
-                          width: 28,
-                          height: 28,
-                          fontSize: 13,
-                          fontWeight: 600,
-                          bgColor: "primary.main",
-                        }}
-                      ></Avatar>
-                    ) : (
-                      <UserRound size={20} />
-                    ),
-                    onClick: handleAccountClick,
-                    truncate: !!user,
-                  },
                 ].map((item, i) => (
                   <React.Fragment key={i}>
                     <Box
@@ -436,24 +422,81 @@ export default function Navbar(): React.ReactElement {
                           fontWeight: 500,
                           letterSpacing: "-0.01em",
                           lineHeight: 1.4,
-                          ...(item.truncate && {
-                            maxWidth: { xs: 100, sm: 130, md: 160 },
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }),
                         }}
                       >
                         {item.label}
                       </Typography>
                     </Box>
-                    {i < (isAdminOrLibrarian ? 3 : 2) && (
+                    {i < (isAdminOrLibrarian ? 2 : 1) && (
                       <Box
                         sx={{ width: "1px", height: 18, bgcolor: "divider" }}
                       />
                     )}
                   </React.Fragment>
                 ))}
+
+                {user && (
+                  <>
+                    <Box
+                      sx={{ width: "1px", height: 18, bgcolor: "divider" }}
+                    />
+                    <NotificationBell />
+                  </>
+                )}
+
+                <Box sx={{ width: "1px", height: 18, bgcolor: "divider" }} />
+
+                <Box
+                  onClick={handleAccountClick}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.75,
+                    px: 1,
+                    py: 0.6,
+                    borderRadius: 1.25,
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    flexShrink: 0,
+                    position: "relative",
+                    "&:hover": {
+                      bgcolor:
+                        mode === "light"
+                          ? "rgba(99,102,241,0.08)"
+                          : "rgba(129,140,248,0.12)",
+                    },
+                  }}
+                >
+                  {user ? (
+                    <Avatar
+                      src={user.avatar_url || ""}
+                      alt={user.full_name}
+                      sx={{
+                        width: 28,
+                        height: 28,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        bgColor: "primary.main",
+                      }}
+                    />
+                  ) : (
+                    <UserRound size={20} />
+                  )}
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontSize: { xs: "0.8rem", sm: "0.85rem" },
+                      fontWeight: 500,
+                      color: "text.primary",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      maxWidth: user ? 140 : "auto",
+                    }}
+                  >
+                    {user ? user.full_name : "Tài khoản"}
+                  </Typography>
+                </Box>
               </Box>
             )}
           </Toolbar>
@@ -511,6 +554,34 @@ export default function Navbar(): React.ReactElement {
               pl: "0.5rem",
             }}
           >
+            {/* Notification */}
+            {user && (
+              <ListItem disablePadding>
+                <ListItemButton
+                  onClick={() => {
+                    setDrawerOpen(false);
+                  }}
+                  sx={{
+                    borderRadius: 1.5,
+                    mx: 1,
+                    mb: 0.5,
+                    "&:hover": { bgcolor: "action.hover" },
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 36, color: "text.primary" }}>
+                    <NotificationBell />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Thông báo"
+                    primaryTypographyProps={{
+                      fontSize: "0.95rem",
+                      fontWeight: 500,
+                    }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            )}
+
             <ListItem disablePadding>
               <ListItemButton onClick={toggleTheme}>
                 <ListItemIcon sx={{ color: "text.primary", minWidth: 40 }}>

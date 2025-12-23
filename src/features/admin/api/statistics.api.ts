@@ -12,6 +12,16 @@ export interface DashboardStatistics {
   booksAddedThisMonth: number;
   usersJoinedThisMonth: number;
   borrowsThisMonth: number;
+  booksAddedLastMonth: number;
+  usersJoinedLastMonth: number;
+  borrowsLastMonth: number;
+  overdueLastMonth: number;
+  growthRates: {
+    books: number;
+    users: number;
+    borrows: number;
+    overdue: number;
+  };
   popularCategories: Array<{
     category_id: number;
     category_name: string;

@@ -319,7 +319,6 @@ export default function SearchResultsPanel({
                 </Typography>
               </Box>
             ) : (
-              // empty
               <Box
                 sx={{
                   display: "flex",

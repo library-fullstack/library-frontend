@@ -15,7 +15,6 @@ export default function PublicRoute({
   const location = useLocation();
 
   if (!isInitialized) {
-    logger.log("[PublicRoute] Waiting for auth initialization...");
     return <div />;
   }
 
@@ -25,7 +24,5 @@ export default function PublicRoute({
     logger.log("[PublicRoute] Already logged in, redirecting to:", from || "/");
     return <Navigate to={from || "/"} replace />;
   }
-
-  logger.log("[PublicRoute] Truy cập được chấp nhận (chưa đăng nhập)");
   return children;
 }

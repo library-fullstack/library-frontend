@@ -125,16 +125,17 @@ export default function Cart(): React.ReactElement {
         })),
       });
 
-      if (response.success) {
-        clearCart();
+      if (response.success && response.data?.borrowId) {
         setSnackbar({
           open: true,
-          message: "Tạo yêu cầu mượn thành công!",
+          message: "Đang chuyển đến trang xác nhận...",
           severity: "success",
         });
         setTimeout(() => {
-          navigate("/borrow");
-        }, 1500);
+          if (response.data?.borrowId) {
+            navigate(`/borrow/confirm/${response.data.borrowId}`);
+          }
+        }, 500);
       } else {
         setSnackbar({
           open: true,

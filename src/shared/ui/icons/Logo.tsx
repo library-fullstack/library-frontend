@@ -14,7 +14,7 @@ export default function Logo({
     <Box
       component="img"
       src="/assets/img/logo.webp"
-      alt="Logo thư viện trực tuyến HBH"
+      alt="Logo"
       width="180"
       height="60"
       sx={{

@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 import { LogoutOutlined, BadgeOutlined } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import type { ApiError } from "../../shared/types/api-error";
 import type { LocationState } from "../../shared/types/router";
 import useAuth from "../../features/auth/hooks/useAuth";
@@ -33,6 +34,8 @@ import ChangePasswordSection from "../../features/auth/components/ChangePassword
 import { LoadingButton } from "@mui/lab";
 import { CircularProgress } from "@mui/material";
 import logger from "@/shared/lib/logger";
+import axiosClient from "../../shared/api/axiosClient";
+import MyBorrows from "./MyBorrows";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -72,8 +75,27 @@ export default function Profile(): React.ReactElement {
   const [cropOpen, setCropOpen] = React.useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = React.useState<string>("");
 
+  const { data: borrowStats } = useQuery({
+    queryKey: ["borrowStats"],
+    queryFn: async () => {
+      const response = await axiosClient.get("/users/stats/borrows");
+      return (response.data as { data: { active: number; returned: number } })
+        .data;
+    },
+    enabled: !!user,
+  });
+
   React.useEffect(() => {
-    const state = location.state as LocationState | null;
+    const state = location.state as (LocationState & { tab?: number }) | null;
+
+    if (location.pathname === "/user/borrows") {
+      setTab(1);
+    }
+
+    if (state && typeof state.tab === "number") {
+      setTab(state.tab);
+    }
+
     if (state?.loginSuccess) {
       setSnackbar({
         open: true,
@@ -92,7 +114,6 @@ export default function Profile(): React.ReactElement {
     if (!file) return;
 
     if (updateAvatarMutation.isPending) {
-      logger.log("[Upload Avatar] Upload already in progress, skipping...");
       return;
     }
 
@@ -122,7 +143,6 @@ export default function Profile(): React.ReactElement {
 
     try {
       await updateAvatarMutation.mutateAsync(formData);
-      logger.debug("[Avatar Upload] Success");
     } catch (err) {
       logger.error("[Upload Avatar Error]", err);
       const msg =
@@ -310,9 +330,8 @@ export default function Profile(): React.ReactElement {
             }}
           >
             <Tab label="Thông tin tài khoản" />
-            <Tab label="Hoạt động" />
+            <Tab label="Theo dõi mượn" />
             <Tab label="Cài đặt tài khoản" />
-            <Tab label="Cài đặt hệ thống" />
           </Tabs>
 
           {/* tab thông tin tài khoản */}
@@ -485,16 +504,23 @@ export default function Profile(): React.ReactElement {
                 display: "grid",
                 gridTemplateColumns: {
                   xs: "1fr",
-                  sm: "repeat(3, 1fr)",
+                  sm: "repeat(2, 1fr)",
                 },
                 gap: 3,
                 mt: 3,
               }}
             >
               {[
-                { label: "Sách đang mượn", value: 0 },
-                { label: "Đã trả", value: 0 },
-                { label: "Yêu thích", value: 0 },
+                {
+                  label: "Sách đang mượn",
+                  value: borrowStats?.active || 0,
+                  color: "primary",
+                },
+                {
+                  label: "Đã trả",
+                  value: borrowStats?.returned || 0,
+                  color: "success",
+                },
               ].map((s) => (
                 <Card
                   key={s.label}
@@ -515,7 +541,7 @@ export default function Profile(): React.ReactElement {
                     <Typography
                       variant="h3"
                       fontWeight={800}
-                      color="primary.main"
+                      color={`${s.color}.main`}
                     >
                       {s.value}
                     </Typography>
@@ -533,24 +559,9 @@ export default function Profile(): React.ReactElement {
             </Box>
           </TabPanel>
 
-          {/* tab hoạt động */}
+          {/* tab theo dõi mượn */}
           <TabPanel value={tab} index={1}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 3,
-                borderRadius: 2,
-                border: "1px solid",
-                borderColor: "divider",
-              }}
-            >
-              <Typography variant="h6" fontWeight={800} mb={2}>
-                Hoạt động gần đây
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Chưa có hoạt động nào gần đây.
-              </Typography>
-            </Paper>
+            <MyBorrows />
           </TabPanel>
 
           {/* tab cài đặt tài khoản */}
@@ -558,7 +569,7 @@ export default function Profile(): React.ReactElement {
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: "1fr 1.5fr" },
+                gridTemplateColumns: { xs: "1fr", lg: "1fr 1.5fr" },
                 gap: 3,
               }}
             >
@@ -676,7 +687,7 @@ export default function Profile(): React.ReactElement {
               <Paper
                 elevation={0}
                 sx={{
-                  p: 3,
+                  p: { xs: 2, sm: 3 },
                   borderRadius: 2,
                   border: "1px solid",
                   borderColor: "divider",
@@ -690,25 +701,40 @@ export default function Profile(): React.ReactElement {
                     control={<Switch defaultChecked />}
                     label={
                       <Typography variant="body2" fontWeight={500}>
-                        Nhận email khi sắp đến hạn trả sách ( BETA )
+                        Nhận email khi sắp đến hạn trả sách
                       </Typography>
                     }
+                    sx={{
+                      "& .MuiFormControlLabel-label": {
+                        fontSize: { xs: "0.875rem", sm: "0.875rem" },
+                      },
+                    }}
                   />
                   <FormControlLabel
                     control={<Switch defaultChecked />}
                     label={
                       <Typography variant="body2" fontWeight={500}>
-                        Nhận email khi có sách mới ( BETA )
+                        Nhận email khi có sách mới
                       </Typography>
                     }
+                    sx={{
+                      "& .MuiFormControlLabel-label": {
+                        fontSize: { xs: "0.875rem", sm: "0.875rem" },
+                      },
+                    }}
                   />
                   <FormControlLabel
                     control={<Switch />}
                     label={
                       <Typography variant="body2" fontWeight={500}>
-                        Nhận thông báo về sự kiện thư viện ( BETA )
+                        Nhận thông báo về sự kiện thư viện
                       </Typography>
                     }
+                    sx={{
+                      "& .MuiFormControlLabel-label": {
+                        fontSize: { xs: "0.875rem", sm: "0.875rem" },
+                      },
+                    }}
                   />
                 </Stack>
               </Paper>
@@ -716,7 +742,7 @@ export default function Profile(): React.ReactElement {
               <Paper
                 elevation={0}
                 sx={{
-                  p: 3,
+                  p: { xs: 2, sm: 3 },
                   borderRadius: 2,
                   border: "1px solid",
                   borderColor: "divider",
@@ -725,24 +751,6 @@ export default function Profile(): React.ReactElement {
                 <Typography variant="h6" fontWeight={800} mb={2}>
                   Giao diện
                 </Typography>
-                <Stack spacing={1.5}>
-                  <FormControlLabel
-                    control={<Switch />}
-                    label={
-                      <Typography variant="body2" fontWeight={500}>
-                        Chế độ thu gọn ( BETA )
-                      </Typography>
-                    }
-                  />
-                  <FormControlLabel
-                    control={<Switch />}
-                    label={
-                      <Typography variant="body2" fontWeight={500}>
-                        Hiển thị số lượng sách trong menu ( BETA )
-                      </Typography>
-                    }
-                  />
-                </Stack>
               </Paper>
             </Box>
           </TabPanel>

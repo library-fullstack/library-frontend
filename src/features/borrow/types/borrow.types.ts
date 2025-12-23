@@ -25,15 +25,14 @@ export interface CreateBorrowResponse {
   success: boolean;
   message: string;
   data?: {
-    id: string;
-    user_id: string;
-    items: Array<{
-      id: string;
-      book_id: number;
-      quantity: number;
-      status: string;
-    }>;
+    borrowId: number;
+    ticketNumber: string;
     status: string;
-    created_at: string;
+    dueDate: string;
+    reservedCopies: Array<{
+      copy_id: number;
+      book_title: string;
+    }>;
+    note: string;
   };
 }

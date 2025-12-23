@@ -96,18 +96,16 @@ const Cart = lazyWithErrorBoundary(
   () => import("../../pages/borrow/Cart"),
   "Giỏ sách"
 );
-const Checkout = lazyWithErrorBoundary(
-  () => import("../../pages/borrow/Checkout"),
-  "Thanh toán"
+const BorrowConfirm = lazyWithErrorBoundary(
+  () => import("../../pages/borrow/BorrowConfirm"),
+  "Xác nhận mượn sách"
 );
-const BorrowList = lazyWithErrorBoundary(
-  () => import("../../pages/borrow/BorrowList"),
-  "Danh sách mượn"
-);
-const OrderList = lazyWithErrorBoundary(
-  () => import("../../pages/borrow/OrderList"),
-  "Danh sách đơn hàng"
-);
+// MyBorrows integrated into Profile component
+// const MyBorrows = lazyWithErrorBoundary(
+//   () => import("../../pages/user/MyBorrows"),
+//   "Lịch sử mượn sách"
+// );
+
 const AdminDashboard = lazyWithErrorBoundary(
   () => import("../../pages/admin/AdminDashboard"),
   "Dashboard Admin"
@@ -121,7 +119,7 @@ const UsersManagement = lazyWithErrorBoundary(
   "Quản lý người dùng"
 );
 const BorrowManagement = lazyWithErrorBoundary(
-  () => import("../../pages/admin/BorrowManagement"),
+  () => import("../../pages/admin/BorrowManagementNew"),
   "Quản lý mượn"
 );
 const AnalyticsPage = lazyWithErrorBoundary(
@@ -136,13 +134,47 @@ const PerformanceMonitoring = lazyWithErrorBoundary(
   () => import("../../pages/admin/PerformanceMonitoring"),
   "Giám sát hiệu suất"
 );
+const ForumPendingPostsPage = lazyWithErrorBoundary(
+  () => import("../../pages/admin/ForumPendingPostsPage"),
+  "Bài viết chờ duyệt"
+);
+const ForumReportsPage = lazyWithErrorBoundary(
+  () => import("../../pages/admin/ForumReportsPage"),
+  "Báo cáo vi phạm"
+);
+const ForumActivityLogsPage = lazyWithErrorBoundary(
+  () => import("../../pages/admin/ForumActivityLogsPage"),
+  "Nhật ký hoạt động"
+);
+const ForumCategoriesPage = lazyWithErrorBoundary(
+  () => import("../../pages/admin/ForumCategoriesPage"),
+  "Quản lý chủ đề"
+);
+const ForumSettingsPage = lazyWithErrorBoundary(
+  () => import("../../pages/admin/ForumSettingsPage"),
+  "Cài đặt diễn đàn"
+);
 const Services = lazyWithErrorBoundary(
   () => import("../../pages/common/Services"),
   "Dịch vụ"
 );
-const News = lazyWithErrorBoundary(
-  () => import("../../pages/common/News"),
-  "Tin tức"
+
+const NewsAndEventsPage = lazyWithErrorBoundary(
+  () => import("../../pages/common/NewsAndEventsPage"),
+  "Tin tức & Sự kiện"
+);
+const NewsDetailPage = lazyWithErrorBoundary(
+  () => import("../../pages/common/NewsDetailPage"),
+  "Chi tiết tin tức"
+);
+const EventDetailPage = lazyWithErrorBoundary(
+  () => import("../../pages/common/EventDetailPage"),
+  "Chi tiết sự kiện"
+);
+
+const AdminContentManagementPage = lazyWithErrorBoundary(
+  () => import("../../pages/admin/AdminContentManagementPage"),
+  "Quản lý nội dung"
 );
 const About = lazyWithErrorBoundary(
   () => import("../../pages/common/About"),
@@ -152,9 +184,23 @@ const Contact = lazyWithErrorBoundary(
   () => import("../../pages/common/Contact"),
   "Liên hệ"
 );
-const Forum = lazyWithErrorBoundary(
-  () => import("../../pages/common/Forum"),
-  "Diễn đàn"
+import ForumPageDirect from "../../pages/forum/ForumPage";
+const Forum = ForumPageDirect;
+const ForumPostDetail = lazyWithErrorBoundary(
+  () => import("../../pages/forum/PostDetailPage"),
+  "Chi tiết bài viết"
+);
+const ForumCreatePost = lazyWithErrorBoundary(
+  () => import("../../pages/forum/CreatePostPage"),
+  "Tạo bài viết"
+);
+const ModerationDashboard = lazyWithErrorBoundary(
+  () => import("../../pages/forum/ModerationDashboard"),
+  "Bảng điều khiển kiểm duyệt"
+);
+const UserProfile = lazyWithErrorBoundary(
+  () => import("../../pages/forum/UserProfile"),
+  "Hồ sơ người dùng"
 );
 const Favorites = lazyWithErrorBoundary(
   () => import("../../pages/common/Favorites"),
@@ -213,9 +259,33 @@ export default function AppRoutes(): JSX.Element {
           element={
             <KeepAlive id="news" name="news">
               <Suspense fallback={<PageLoader />}>
-                <News />
+                <NewsAndEventsPage />
               </Suspense>
             </KeepAlive>
+          }
+        />
+        <Route
+          path="/news/:slug"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <NewsDetailPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/events"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <NewsAndEventsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/events/:slug"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <EventDetailPage />
+            </Suspense>
           }
         />
         <Route
@@ -227,6 +297,66 @@ export default function AppRoutes(): JSX.Element {
                   <Forum />
                 </Suspense>
               </KeepAlive>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/forum/:categorySlug"
+          element={
+            <ProtectedRoute>
+              <Suspense fallback={<PageLoader />}>
+                <Forum />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/forum/create"
+          element={
+            <ProtectedRoute>
+              <Suspense fallback={<PageLoader />}>
+                <ForumCreatePost />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/forum/edit/:postId"
+          element={
+            <ProtectedRoute>
+              <Suspense fallback={<PageLoader />}>
+                <ForumCreatePost />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/forum/:categorySlug/:postId"
+          element={
+            <ProtectedRoute>
+              <Suspense fallback={<PageLoader />}>
+                <ForumPostDetail />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/forum/moderation"
+          element={
+            <ProtectedRoute roles={["MODERATOR", "ADMIN"]}>
+              <Suspense fallback={<PageLoader />}>
+                <ModerationDashboard />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/forum/users/:userId"
+          element={
+            <ProtectedRoute>
+              <Suspense fallback={<PageLoader />}>
+                <UserProfile />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -301,31 +431,11 @@ export default function AppRoutes(): JSX.Element {
           }
         />
         <Route
-          path="/checkout"
+          path="/borrow/confirm/:id"
           element={
             <Suspense fallback={<PageLoader />}>
               <ProtectedRoute>
-                <Checkout />
-              </ProtectedRoute>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/borrow"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <ProtectedRoute>
-                <BorrowList />
-              </ProtectedRoute>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/orders"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <ProtectedRoute>
-                <OrderList />
+                <BorrowConfirm />
               </ProtectedRoute>
             </Suspense>
           }
@@ -338,12 +448,20 @@ export default function AppRoutes(): JSX.Element {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/user/borrows"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
       </Route>
 
       <Route
         path="/admin"
         element={
-          <ProtectedRoute roles={["ADMIN", "LIBRARIAN"]}>
+          <ProtectedRoute roles={["ADMIN", "LIBRARIAN", "MODERATOR"]}>
             <AdminLayout />
           </ProtectedRoute>
         }
@@ -394,7 +512,7 @@ export default function AppRoutes(): JSX.Element {
         <Route
           path="banners"
           element={
-            <ProtectedRoute roles={["ADMIN"]}>
+            <ProtectedRoute roles={["ADMIN", "LIBRARIAN"]}>
               <Suspense fallback={<PageLoader />}>
                 <BannerManagement />
               </Suspense>
@@ -402,11 +520,71 @@ export default function AppRoutes(): JSX.Element {
           }
         />
         <Route
+          path="content"
+          element={
+            <ProtectedRoute roles={["ADMIN", "LIBRARIAN"]}>
+              <Suspense fallback={<PageLoader />}>
+                <AdminContentManagementPage />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="performance"
+          element={
+            <ProtectedRoute roles={["ADMIN", "LIBRARIAN"]}>
+              <Suspense fallback={<PageLoader />}>
+                <PerformanceMonitoring />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="forum/pending-posts"
+          element={
+            <ProtectedRoute roles={["ADMIN", "MODERATOR"]}>
+              <Suspense fallback={<PageLoader />}>
+                <ForumPendingPostsPage />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="forum/reports"
+          element={
+            <ProtectedRoute roles={["ADMIN", "MODERATOR"]}>
+              <Suspense fallback={<PageLoader />}>
+                <ForumReportsPage />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="forum/activity-logs"
+          element={
+            <ProtectedRoute roles={["ADMIN", "MODERATOR"]}>
+              <Suspense fallback={<PageLoader />}>
+                <ForumActivityLogsPage />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="forum/categories"
           element={
             <ProtectedRoute roles={["ADMIN"]}>
               <Suspense fallback={<PageLoader />}>
-                <PerformanceMonitoring />
+                <ForumCategoriesPage />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="forum/settings"
+          element={
+            <ProtectedRoute roles={["ADMIN"]}>
+              <Suspense fallback={<PageLoader />}>
+                <ForumSettingsPage />
               </Suspense>
             </ProtectedRoute>
           }

@@ -29,11 +29,13 @@ export default function DiscoverSection(): React.ReactElement {
     let mounted = true;
     const fetch = async () => {
       try {
-        const data = await booksApi.getAllBooks({
+        const response = await booksApi.getAllBooks({
           limit: 40,
           sort_by: "popular",
         });
         if (!mounted) return;
+        const data =
+          (response as { data?: Book[] })?.data || (response as Book[]);
         const list = (Array.isArray(data) ? data : []) as Book[];
         const thumbnails = list
           .map((b) => b.thumbnail_url)
