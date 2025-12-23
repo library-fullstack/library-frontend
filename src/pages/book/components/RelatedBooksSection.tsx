@@ -23,7 +23,7 @@ interface RelatedBooksSectionProps {
 export default function RelatedBooksSection({
   currentBookId,
   categoryId,
-  categoryName: _categoryName, // Không dùng nhưng giữ lại interface
+  categoryName: _categoryName,
 }: RelatedBooksSectionProps): React.ReactElement | null {
   const theme = useTheme();
   const navigate = useNavigate();

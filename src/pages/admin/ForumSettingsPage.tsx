@@ -1,10 +1,10 @@
 import React, { Suspense } from "react";
-import { Container, CircularProgress, Box } from "@mui/material";
+import { CircularProgress, Box } from "@mui/material";
 import ForumSettingsPanel from "./ForumSettingsPanel";
 
 export default function ForumSettingsPage() {
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Box>
       <Suspense
         fallback={
           <Box
@@ -19,6 +19,6 @@ export default function ForumSettingsPage() {
       >
         <ForumSettingsPanel />
       </Suspense>
-    </Container>
+    </Box>
   );
 }

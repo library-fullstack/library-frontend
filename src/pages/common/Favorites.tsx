@@ -21,6 +21,7 @@ import { Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import FavouritesContext from "../../context/FavouritesContext";
 import { useAddToCart } from "../../features/borrow/components/hooks/useCart";
+import { borrowApi } from "../../features/borrow/api/borrow.api";
 import logger from "../../shared/lib/logger";
 
 export default function Favorites(): React.ReactElement {
@@ -37,6 +38,7 @@ export default function Favorites(): React.ReactElement {
     severity: "success" | "error" | "info" | "warning";
   }>({ open: false, message: "", severity: "info" });
   const [removingIds, setRemovingIds] = useState<Set<number>>(new Set());
+  const [clearingAll, setClearingAll] = useState(false);
 
   const handleRemove = async (
     e: React.MouseEvent,
@@ -69,6 +71,40 @@ export default function Favorites(): React.ReactElement {
         next.delete(bookId);
         return next;
       });
+    }
+  };
+
+  const handleClearAll = async () => {
+    if (!favourites || favourites.length === 0 || !removeFavourite) return;
+
+    const confirmed = window.confirm(
+      `Bạn có chắc muốn xóa tất cả ${
+        favourites?.length || 0
+      } cuốn sách khỏi danh sách yêu thích?`
+    );
+
+    if (!confirmed) return;
+
+    setClearingAll(true);
+    try {
+      for (const item of favourites) {
+        await removeFavourite(item.book_id);
+      }
+
+      setSnackbar({
+        open: true,
+        message: "Đã xóa tất cả sách khỏi danh sách yêu thích",
+        severity: "success",
+      });
+    } catch (error) {
+      logger.error("Error clearing all favorites:", error);
+      setSnackbar({
+        open: true,
+        message: "Không thể xóa tất cả. Vui lòng thử lại.",
+        severity: "error",
+      });
+    } finally {
+      setClearingAll(false);
     }
   };
 
@@ -124,9 +160,64 @@ export default function Favorites(): React.ReactElement {
     }
   };
 
-  const handleBorrowNow = (e: React.MouseEvent, bookId: number) => {
+  const handleBorrowNow = async (
+    e: React.MouseEvent,
+    bookId: number,
+    bookTitle: string,
+    availableCount: number
+  ) => {
     e.stopPropagation();
-    navigate(`/books/${bookId}`);
+    if (availableCount <= 0) {
+      setSnackbar({
+        open: true,
+        message: "Sách hiện hết bản",
+        severity: "error",
+      });
+      return;
+    }
+
+    try {
+      await addToCart({
+        bookId,
+        quantity: 1,
+        bookAvailableCount: availableCount,
+        bookData: {
+          title: bookTitle,
+          author_names: null,
+          thumbnail_url: "",
+          bookAvailableCount: availableCount,
+        },
+      });
+
+      const borrowResponse = await borrowApi.createBorrow({
+        items: [{ book_id: bookId, quantity: 1 }],
+      });
+
+      if (borrowResponse.success && borrowResponse.data?.borrowId) {
+        try {
+          await borrowApi.clearCart();
+        } catch (clearError) {
+          logger.warn("Failed to clear cart:", clearError);
+        }
+
+        navigate(`/borrow/confirm/${borrowResponse.data.borrowId}`);
+      } else {
+        throw new Error("Không thể tạo phiếu mượn");
+      }
+    } catch (error) {
+      logger.error("Error borrowing book:", error);
+      const backendError = error as {
+        response?: { data?: { message?: string } };
+      };
+      const errorMessage =
+        backendError?.response?.data?.message ||
+        "Không thể mượn sách. Vui lòng thử lại.";
+      setSnackbar({
+        open: true,
+        message: errorMessage,
+        severity: "error",
+      });
+    }
   };
 
   if (loading) {
@@ -175,10 +266,6 @@ export default function Favorites(): React.ReactElement {
           Sách yêu thích
         </Typography>
 
-        <Typography variant="h6" sx={{ mb: 1, color: "text.secondary" }}>
-          Chưa có sách yêu thích
-        </Typography>
-
         <Typography variant="body2" sx={{ mb: 3, color: "text.secondary" }}>
           Hãy thêm những cuốn sách bạn yêu thích vào đây
         </Typography>
@@ -206,17 +293,34 @@ export default function Favorites(): React.ReactElement {
           gap: 2,
         }}
       >
-        <Typography
-          variant="h4"
-          sx={{ fontWeight: 700, color: "text.primary" }}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Typography
+            variant="h4"
+            sx={{ fontWeight: 700, color: "text.primary" }}
+          >
+            Sách yêu thích
+          </Typography>
+          <Chip
+            label={`${favourites.length} cuốn`}
+            color="primary"
+            sx={{ fontWeight: 600 }}
+          />
+        </Box>
+        <Button
+          variant="outlined"
+          color="error"
+          size={isMobile ? "small" : "medium"}
+          startIcon={<Trash2 size={18} />}
+          onClick={handleClearAll}
+          disabled={clearingAll || favourites.length === 0}
+          sx={{
+            textTransform: "none",
+            fontWeight: 600,
+            borderRadius: 2,
+          }}
         >
-          Sách yêu thích
-        </Typography>
-        <Chip
-          label={`${favourites.length} cuốn sách`}
-          color="primary"
-          sx={{ fontWeight: 600 }}
-        />
+          {clearingAll ? "Đang xóa..." : "Xóa tất cả"}
+        </Button>
       </Box>
 
       <Grid container spacing={3}>
@@ -408,7 +512,14 @@ export default function Favorites(): React.ReactElement {
                         <Button
                           variant="contained"
                           size="medium"
-                          onClick={(e) => handleBorrowNow(e, item.book_id)}
+                          onClick={(e) =>
+                            handleBorrowNow(
+                              e,
+                              item.book_id,
+                              item.title,
+                              item.available_count ?? 0
+                            )
+                          }
                           disabled={(item.available_count ?? 0) === 0}
                           sx={{
                             minWidth: 0,
@@ -502,7 +613,14 @@ export default function Favorites(): React.ReactElement {
                     <Button
                       variant="contained"
                       size="small"
-                      onClick={(e) => handleBorrowNow(e, item.book_id)}
+                      onClick={(e) =>
+                        handleBorrowNow(
+                          e,
+                          item.book_id,
+                          item.title,
+                          item.available_count ?? 0
+                        )
+                      }
                       disabled={(item.available_count ?? 0) === 0}
                       sx={{
                         textTransform: "none",

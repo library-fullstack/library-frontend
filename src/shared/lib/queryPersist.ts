@@ -5,7 +5,6 @@ const PERSIST_CACHE_KEY = "REACT_QUERY_OFFLINE_CACHE";
 export function clearPersistCache(): void {
   try {
     localStorage.removeItem(PERSIST_CACHE_KEY);
-    logger.debug("[QueryPersist] Cleared persist cache from localStorage");
   } catch (err) {
     logger.error("[QueryPersist] Failed to clear persist cache:", err);
   }

@@ -1,12 +1,5 @@
 import React, { useState, Suspense, useEffect } from "react";
-import {
-  Container,
-  Tabs,
-  Tab,
-  Box,
-  Paper,
-  CircularProgress,
-} from "@mui/material";
+import { Tabs, Tab, Box, Paper, CircularProgress } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -40,7 +33,7 @@ function TabPanel(props: TabPanelProps) {
       id={`forum-tabpanel-${index}`}
       aria-labelledby={`forum-tab-${index}`}
     >
-      {value === index && <Box sx={{ p: 2 }}>{children}</Box>}
+      {value === index && <Box>{children}</Box>}
     </div>
   );
 }
@@ -97,7 +90,7 @@ export default function ForumAdminPage() {
   ];
 
   return (
-    <Container maxWidth="lg" sx={{ py: 2 }}>
+    <Box>
       <Paper
         sx={{
           borderRadius: 2,
@@ -158,6 +151,6 @@ export default function ForumAdminPage() {
           </TabPanel>
         ))}
       </Paper>
-    </Container>
+    </Box>
   );
 }

@@ -11,6 +11,7 @@ export interface BannerConfig {
   subtitleColor: string;
   buttonColor: string;
   buttonText: string;
+  buttonLink?: string;
   eventType?: string;
   startDate?: string;
   endDate?: string;

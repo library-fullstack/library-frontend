@@ -26,7 +26,6 @@ export function useServiceWorker({
     const registerServiceWorker = async () => {
       try {
         if (!("serviceWorker" in navigator)) {
-          logger.warn("[SW] Service Worker not supported");
           return;
         }
 
@@ -35,25 +34,18 @@ export function useServiceWorker({
         })) as SyncRegistration;
 
         registrationRef.current = registration;
-        logger.info("[SW] Service Worker registered");
         setIsRegistered(true);
 
         registration.addEventListener("updatefound", () => {
           const newWorker = registration.installing;
           if (newWorker) {
-            logger.info("[SW] New version found");
-            newWorker.addEventListener("statechange", () => {
-              if (newWorker.state === "activated") {
-                logger.info("[SW] Service Worker updated");
-              }
-            });
+            newWorker.addEventListener("statechange", () => {});
           }
         });
 
         navigator.serviceWorker.addEventListener("message", (event: Event) => {
           const messageEvent = event as MessageEvent;
           if (messageEvent.data.type === "SYNC_COMPLETE") {
-            logger.info("[SW] Sync completed", messageEvent.data);
             onSyncComplete?.(messageEvent.data);
           }
         });
@@ -69,15 +61,12 @@ export function useServiceWorker({
     registerServiceWorker();
 
     const handleOnline = () => {
-      logger.info("[SW] App is online");
       setIsOnline(true);
 
       if (registrationRef.current && registrationRef.current.sync) {
         registrationRef.current.sync
           .register("sync-mutations")
-          .then(() => {
-            logger.info("[SW] Sync requested");
-          })
+          .then(() => {})
           .catch((err: unknown) => {
             logger.error("[SW] Failed to request sync:", err);
           });
@@ -85,7 +74,6 @@ export function useServiceWorker({
     };
 
     const handleOffline = () => {
-      logger.warn("[SW] App is offline");
       setIsOnline(false);
     };
 
@@ -100,13 +88,11 @@ export function useServiceWorker({
 
   const triggerSync = async () => {
     if (!registrationRef.current || !registrationRef.current.sync) {
-      logger.warn("[SW] Service Worker not registered");
       return;
     }
 
     try {
       await registrationRef.current.sync.register("sync-mutations");
-      logger.info("[SW] Manual sync triggered");
     } catch (err: unknown) {
       logger.error("[SW] Failed to trigger sync:", err);
     }

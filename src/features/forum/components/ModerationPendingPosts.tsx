@@ -9,13 +9,9 @@ import {
   Stack,
   CircularProgress,
   Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
 } from "@mui/material";
 import { forumModerationApi } from "../api/forum.api";
+import RejectPostDialog from "../../admin/components/RejectPostDialog";
 import type {
   ForumPost,
   ApiResponse,
@@ -33,7 +29,7 @@ const PendingPostsList: React.FC<PendingPostsProps> = ({ onPostUpdated }) => {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [rejectingPost, setRejectingPost] = useState<number | null>(null);
-  const [rejectReason, setRejectReason] = useState("");
+  const [_rejectReason, setRejectReason] = useState("");
 
   const limit = 20;
 
@@ -74,11 +70,11 @@ const PendingPostsList: React.FC<PendingPostsProps> = ({ onPostUpdated }) => {
     }
   };
 
-  const handleReject = async () => {
-    if (!rejectingPost || !rejectReason.trim()) return;
+  const handleReject = async (reason: string) => {
+    if (!rejectingPost) return;
 
     try {
-      await forumModerationApi.rejectPost(rejectingPost, rejectReason);
+      await forumModerationApi.rejectPost(rejectingPost, reason);
       setPosts(posts.filter((p) => p.id !== rejectingPost));
       setRejectingPost(null);
       setRejectReason("");
@@ -186,31 +182,15 @@ const PendingPostsList: React.FC<PendingPostsProps> = ({ onPostUpdated }) => {
         </>
       )}
 
-      <Dialog
+      <RejectPostDialog
         open={rejectingPost !== null}
-        onClose={() => setRejectingPost(null)}
-      >
-        <DialogTitle>Từ chối bài viết</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Lý do từ chối"
-            fullWidth
-            multiline
-            rows={3}
-            value={rejectReason}
-            onChange={(e) => setRejectReason(e.target.value)}
-            placeholder="Nhập lý do từ chối bài viết..."
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setRejectingPost(null)}>Hủy</Button>
-          <Button onClick={handleReject} color="error" variant="contained">
-            Từ chối
-          </Button>
-        </DialogActions>
-      </Dialog>
+        postTitle={posts.find((p) => p.id === rejectingPost)?.title || ""}
+        onClose={() => {
+          setRejectingPost(null);
+          setRejectReason("");
+        }}
+        onConfirm={handleReject}
+      />
     </Box>
   );
 };

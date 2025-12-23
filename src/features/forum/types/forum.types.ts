@@ -123,7 +123,7 @@ export interface UserNotification {
     byUserId?: string;
     byUserName?: string;
     action?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   read_at?: string | null;
   created_at?: string;
@@ -186,3 +186,43 @@ export type ForumCategoryType =
   | "Khoa học"
   | "Nghệ thuật"
   | "Trao đổi";
+
+export interface ActivityLog {
+  id: number;
+  type: string;
+  action: string;
+  user_id?: string;
+  user_name?: string;
+  details?: string;
+  created_at: string;
+}
+
+export interface CreateCategoryData {
+  name: string;
+  slug?: string;
+  description?: string;
+  parent_id?: number | null;
+  sort_order?: number;
+  allowed_roles?: string;
+  is_locked?: boolean;
+}
+
+export interface UpdateCategoryData {
+  name?: string;
+  slug?: string;
+  description?: string;
+  parent_id?: number | null;
+  sort_order?: number;
+  allowed_roles?: string;
+  is_locked?: boolean;
+}
+
+export interface ForumSettings {
+  require_approval: boolean;
+  min_post_length?: number;
+  max_post_length?: number;
+  allow_anonymous?: boolean;
+  allowed_file_types?: string[];
+  max_file_size?: number;
+  [key: string]: unknown;
+}

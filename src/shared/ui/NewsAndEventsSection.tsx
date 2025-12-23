@@ -20,6 +20,10 @@ import "swiper/css/pagination";
 import { Link as RouterLink } from "react-router-dom";
 import { useEventTheme } from "../hooks/useEventTheme";
 import "../../styles/eventTheme.css";
+import { useLatestNews } from "../../features/news/hooks/useNewsQuery";
+import { useLatestEvents } from "../../features/events/hooks/useEventsQuery";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
 
 const MotionBox = motion.create(Box);
 
@@ -32,50 +36,6 @@ const cardVariants: Variants = {
   }),
 };
 
-// cần gọi api lấy tin tức
-// TODO
-// TODO
-// TODO
-const mockNews = [
-  {
-    title: "Thư viện HBH mở rộng khu đọc mới",
-    date: "20/10/2025",
-    desc: "Khu đọc mới tại tầng 2 nhà B chính thức hoạt động, mang đến không gian học tập yên tĩnh và tiện nghi hơn cho sinh viên.",
-  },
-  {
-    title: "Cập nhật quy định mượn sách học kỳ I năm 2025-2026",
-    date: "10/10/2025",
-    desc: "Thư viện điều chỉnh thời gian mượn và trả sách nhằm tối ưu luân chuyển tài liệu phục vụ sinh viên toàn trường.",
-  },
-  {
-    title: "Cập nhật tính năng tra cứu nhanh trên hệ thống thư viện",
-    date: "01/10/2025",
-    desc: "Từ nay sinh viên có thể tìm kiếm tài liệu nhanh hơn 50% nhờ công cụ tra cứu mới được tích hợp trên website.",
-  },
-];
-
-// cần gọi api lấy sự kiện
-// TODO
-// TODO
-// TODO
-const mockEvents = [
-  {
-    title: "Ngày hội đọc sách HBH 2025",
-    date: "15/11/2025",
-    desc: "Sự kiện thường niên lan tỏa tinh thần đọc sách trong cộng đồng sinh viên HBH.",
-  },
-  {
-    title: "Talkshow: Văn hóa đọc thời công nghệ số",
-    date: "02/12/2025",
-    desc: "Buổi trò chuyện cùng các diễn giả về việc giữ gìn và phát triển văn hóa đọc trong kỷ nguyên số.",
-  },
-  {
-    title: "Workshop: Viết review sách cùng AI",
-    date: "20/12/2025",
-    desc: "Hướng dẫn sinh viên viết nhận xét, cảm nhận sách hiệu quả với sự hỗ trợ của công nghệ AI.",
-  },
-];
-
 function NewsAndEventsSection() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -83,18 +43,26 @@ function NewsAndEventsSection() {
   const [ref, inView] = useInView({ threshold: 0.25, triggerOnce: true });
   const eventClass = useEventTheme();
 
+  const { data: newsData } = useLatestNews(3);
+  const { data: eventsData } = useLatestEvents(3);
+
+  const news = newsData || [];
+  const events = eventsData || [];
+
   React.useEffect(() => {
     if (!isMobile && inView) controls.start("visible");
   }, [inView, isMobile, controls]);
 
   const renderCard = (
-    item: { title: string; date: string; desc: string },
+    item: { title: string; date: string; desc: string; slug?: string },
     color: "primary" | "secondary",
     index?: number
   ) => {
     const CardContentBox = (
       <Card
         key={item.title}
+        component={RouterLink}
+        to={color === "primary" ? `/news/${item.slug}` : `/events/${item.slug}`}
         sx={{
           height: "100%",
           display: "flex",
@@ -105,6 +73,7 @@ function NewsAndEventsSection() {
           bgcolor: theme.palette.background.paper,
           border: `1px solid ${theme.palette.divider}`,
           boxShadow: theme.shadows[1],
+          textDecoration: "none",
           transition: isMobile ? "none" : "all 0.25s ease",
           "&:hover": !isMobile
             ? {
@@ -226,9 +195,23 @@ function NewsAndEventsSection() {
                     : false
                 }
               >
-                {mockNews.map((news) => (
-                  <SwiperSlide key={news.title} style={{ display: "flex" }}>
-                    {renderCard(news, "primary")}
+                {news.map((newsItem) => (
+                  <SwiperSlide key={newsItem.id} style={{ display: "flex" }}>
+                    {renderCard(
+                      {
+                        title: newsItem.title,
+                        date: format(
+                          new Date(newsItem.published_at),
+                          "dd/MM/yyyy",
+                          { locale: vi }
+                        ),
+                        desc: newsItem.content
+                          .replace(/<[^>]*>/g, "")
+                          .substring(0, 150),
+                        slug: newsItem.slug,
+                      },
+                      "primary"
+                    )}
                   </SwiperSlide>
                 ))}
               </Swiper>
@@ -274,9 +257,19 @@ function NewsAndEventsSection() {
                     : false
                 }
               >
-                {mockEvents.map((event) => (
-                  <SwiperSlide key={event.title} style={{ display: "flex" }}>
-                    {renderCard(event, "secondary")}
+                {events.map((event) => (
+                  <SwiperSlide key={event.id} style={{ display: "flex" }}>
+                    {renderCard(
+                      {
+                        title: event.title,
+                        date: format(new Date(event.start_time), "dd/MM/yyyy", {
+                          locale: vi,
+                        }),
+                        desc: event.description || "",
+                        slug: event.slug,
+                      },
+                      "secondary"
+                    )}
                   </SwiperSlide>
                 ))}
               </Swiper>
@@ -316,7 +309,24 @@ function NewsAndEventsSection() {
                 <Typography fontWeight={600}>Tin tức mới</Typography>
               </Stack>
               <Stack spacing={3}>
-                {mockNews.map((news, i) => renderCard(news, "primary", i))}
+                {news.map((newsItem, i) =>
+                  renderCard(
+                    {
+                      title: newsItem.title,
+                      date: format(
+                        new Date(newsItem.published_at),
+                        "dd/MM/yyyy",
+                        { locale: vi }
+                      ),
+                      desc: newsItem.content
+                        .replace(/<[^>]*>/g, "")
+                        .substring(0, 150),
+                      slug: newsItem.slug,
+                    },
+                    "primary",
+                    i
+                  )
+                )}
               </Stack>
               <Button
                 component={RouterLink}
@@ -343,8 +353,19 @@ function NewsAndEventsSection() {
                 <Typography fontWeight={600}>Sự kiện sắp tới</Typography>
               </Stack>
               <Stack spacing={3}>
-                {mockEvents.map((event, i) =>
-                  renderCard(event, "secondary", i + mockNews.length)
+                {events.map((event, i) =>
+                  renderCard(
+                    {
+                      title: event.title,
+                      date: format(new Date(event.start_time), "dd/MM/yyyy", {
+                        locale: vi,
+                      }),
+                      desc: event.description || "",
+                      slug: event.slug,
+                    },
+                    "secondary",
+                    i + news.length
+                  )
                 )}
               </Stack>
               <Button

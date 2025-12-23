@@ -78,7 +78,7 @@ export function useBooksInfinite(params?: {
     ],
     queryFn: async ({ pageParam }: { pageParam: number | string | null }) => {
       const offset = pageParam ? Number(pageParam) : 0;
-      return await booksApi.getAllBooks({
+      const response = await booksApi.getAllBooks({
         keyword: params?.keyword,
         category_id: params?.categoryId,
         status: params?.status,
@@ -87,6 +87,7 @@ export function useBooksInfinite(params?: {
         offset,
         limit,
       });
+      return response || [];
     },
     getNextPageParam: (lastPage, allPages) => {
       const books = lastPage || [];

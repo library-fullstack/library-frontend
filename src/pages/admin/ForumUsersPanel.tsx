@@ -61,8 +61,6 @@ export default function ForumUsersPanel() {
   };
 
   const handleSubmitBan = () => {
-    // Call API to ban user
-    console.log("Ban user:", selectedUser?.id, "Reason:", banReason);
     setOpenDialog(false);
     queryClient.invalidateQueries({ queryKey: ["forumUsers"] });
   };

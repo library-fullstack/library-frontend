@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { forumApi } from "../../features/forum/api/forum.api";
+import { ForumCategory } from "../../features/forum/types/forum.types";
 
 interface Category {
   id: number;
@@ -62,9 +63,9 @@ export default function ForumCategoriesPanel() {
     queryFn: async () => {
       const response = await forumApi.getCategories();
       const data = response.data?.data || [];
-      // Convert is_locked from number (0/1) to boolean
-      return data.map((cat: Category) => ({
+      return data.map((cat: ForumCategory) => ({
         ...cat,
+        description: cat.description ?? undefined,
         is_locked: Boolean(cat.is_locked),
       }));
     },

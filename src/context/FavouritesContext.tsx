@@ -245,11 +245,15 @@ export const FavouritesProvider: React.FC<FavouritesProviderProps> = ({
 
       try {
         const response = await favouritesApi.remove(bookId);
-        if ((response.data as any)?.success) {
+        const responseData = response.data as {
+          success?: boolean;
+          data?: unknown;
+        };
+        if (responseData?.success) {
           logger.info(
             `[FavouritesContext] Successfully removed favourite for book ${bookId}`
           );
-          const newFavourites = (response.data as any)?.data || [];
+          const newFavourites = (responseData.data as FavouriteItem[]) || [];
           setFavourites(newFavourites);
           saveFavouritesToStorage(newFavourites);
         } else {

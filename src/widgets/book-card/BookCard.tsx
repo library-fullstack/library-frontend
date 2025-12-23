@@ -16,6 +16,7 @@ import { InfoOutlined, FavoriteBorder, Favorite } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import type { Book } from "../../features/books/types";
 import FavouritesContext from "../../context/FavouritesContext";
+import logger from "@/shared/lib/logger";
 
 interface BookCardProps {
   book: Book;
@@ -49,7 +50,8 @@ export default function BookCard({
     setIsTogglingFav(true);
     try {
       await toggleFavourite(book.id);
-    } catch (error) {
+    } catch (_error) {
+      logger.error("Error toggling favourite for book", _error);
     } finally {
       setIsTogglingFav(false);
     }

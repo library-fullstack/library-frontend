@@ -43,7 +43,7 @@ const ForumCommentComponent = ({
   comment,
   postId,
   isReply = false,
-  onReplyClick,
+  onReplyClick: _onReplyClick,
 }: Props) => {
   const theme = useTheme();
   const { user } = useAuthContext();

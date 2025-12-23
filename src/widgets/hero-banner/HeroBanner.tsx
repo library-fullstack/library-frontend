@@ -162,6 +162,13 @@ export default function HeroBanner(): React.ReactElement | null {
               <Button
                 variant="contained"
                 endIcon={<ArrowForward />}
+                component={bannerConfig.buttonLink ? "a" : "button"}
+                href={bannerConfig.buttonLink || undefined}
+                onClick={
+                  !bannerConfig.buttonLink
+                    ? () => (window.location.href = "/catalog")
+                    : undefined
+                }
                 sx={{
                   backgroundColor: bannerConfig.buttonColor,
                   color: "#fff",
@@ -171,6 +178,7 @@ export default function HeroBanner(): React.ReactElement | null {
                   fontSize: { xs: "0.875rem", md: "0.95rem" },
                   borderRadius: 2,
                   boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+                  textDecoration: "none",
                   "&:hover": {
                     backgroundColor: `${bannerConfig.buttonColor}cc`,
                     boxShadow: "0 6px 16px rgba(0,0,0,0.25)",

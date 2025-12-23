@@ -1,435 +1,321 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  TextField,
   Button,
-  Chip,
-  IconButton,
-  Menu,
-  MenuItem,
+  TextField,
   InputAdornment,
-  Select,
-  FormControl,
-  InputLabel,
-  Skeleton,
+  Stack,
   Alert,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Paper,
+  Snackbar,
 } from "@mui/material";
-import {
-  Search,
-  Plus,
-  MoreVertical,
-  Edit,
-  Trash2,
-  Eye,
-  BookOpen,
-} from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { statisticsApi } from "../../features/admin/api/statistics.api";
+import { Search, Plus } from "lucide-react";
+import BooksList from "../../features/admin/components/BooksList";
+import BookForm from "../../features/admin/components/BookForm";
+import axiosClient from "../../shared/api/axiosClient";
 import { parseApiError } from "../../shared/lib/errorHandler";
-import logger from "@/shared/lib/logger";
 
 interface Book {
-  id: string | number;
+  id: number;
   title: string;
-  author_names: string;
-  category_name: string;
-  publisher_name: string;
-  status: string;
-  copies_count: number;
-  available_count: number;
-  created_at: string;
+  author: string;
+  publisher: string;
+  publication_year: number;
+  isbn?: string;
+  call_number?: string;
+  language_code?: string;
+  format?: string;
+  category: string;
+  description?: string;
+  thumbnail_url?: string;
+  total_copies: number;
+  available_copies: number;
 }
 
-export default function BooksManagement() {
-  const navigate = useNavigate();
+interface BookFormData {
+  id?: number;
+  title: string;
+  author: string;
+  publisher: string;
+  publication_year: number;
+  isbn?: string;
+  call_number?: string;
+  language_code?: string;
+  format?: string;
+  category: string;
+  description?: string;
+  thumbnail_url?: string;
+  total_copies: number;
+}
+
+export default function BooksManagement(): React.ReactElement {
   const [books, setBooks] = useState<Book[]>([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-
-  const createMockBooks = useCallback((): Book[] => {
-    const mockData: Book[] = [];
-    for (let i = 1; i <= rowsPerPage; i++) {
-      mockData.push({
-        id: i + page * rowsPerPage,
-        title: `Sách mẫu ${i + page * rowsPerPage}`,
-        author_names: `Tác giả ${i}`,
-        category_name: ["Khoa học", "Văn học", "Công nghệ"][i % 3],
-        publisher_name: `NXB ${i}`,
-        status: ["ACTIVE", "INACTIVE", "DRAFT"][i % 3],
-        copies_count: Math.floor(Math.random() * 20) + 5,
-        available_count: Math.floor(Math.random() * 10) + 1,
-        created_at: new Date(
-          Date.now() - i * 24 * 60 * 60 * 1000
-        ).toISOString(),
-      });
-    }
-    return mockData;
-  }, [page, rowsPerPage]);
-
-  const fetchBooks = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const response = await statisticsApi.getBookManagement({
-        page: page + 1,
-        limit: rowsPerPage,
-        search: search || undefined,
-        status: statusFilter || undefined,
-      });
-      logger.log("[BooksManagement] Phản hồi từ API: ", response);
-      setBooks(response.data.books || []);
-      setTotal(response.data.total || 0);
-    } catch (err) {
-      logger.error("[BooksManagement] Lỗi API:", err);
-      setError(parseApiError(err));
-      setBooks(createMockBooks());
-      setTotal(50);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, rowsPerPage, search, statusFilter, createMockBooks]);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingBook, setEditingBook] = useState<Book | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [bookToDelete, setBookToDelete] = useState<number | null>(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error",
+  });
+  const [pagination, setPagination] = useState({
+    page: 0,
+    limit: 10,
+    total: 0,
+  });
 
   useEffect(() => {
+    const fetchBooks = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const params: Record<string, string | number> = {
+          page: pagination.page + 1,
+          limit: pagination.limit,
+        };
+        if (search) params.search = search;
+
+        const response = await axiosClient.get("/books", { params });
+        const data = response.data as {
+          success: boolean;
+          data: Book[];
+          pagination?: { total: number };
+        };
+
+        if (data.success) {
+          setBooks(data.data || []);
+          setPagination((prev) => ({
+            ...prev,
+            total: Number(data.pagination?.total) || 0,
+          }));
+        }
+      } catch (err) {
+        setError(parseApiError(err));
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchBooks();
-  }, [fetchBooks]);
+  }, [pagination.page, pagination.limit, search]);
 
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, book: Book) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedBook(book);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedBook(null);
-  };
-
-  const handleView = () => {
-    if (selectedBook) {
-      navigate(`/books/${selectedBook.id}`);
-    }
-    handleMenuClose();
-  };
-
-  const handleEdit = () => {
-    if (selectedBook) {
-      navigate(`/admin/books/${selectedBook.id}/edit`);
-    }
-    handleMenuClose();
-  };
-
-  const handleDelete = () => {
-    if (selectedBook) {
-      logger.log("Xoá sách:", selectedBook.id);
-    }
-    handleMenuClose();
-  };
-
-  const getStatusColor = (
-    status: string
-  ): "success" | "error" | "warning" | "default" => {
-    switch (status) {
-      case "ACTIVE":
-        return "success";
-      case "INACTIVE":
-        return "error";
-      case "DRAFT":
-        return "warning";
-      default:
-        return "default";
+  const handleSubmit = async (formData: BookFormData) => {
+    try {
+      if (editingBook) {
+        await axiosClient.put(`/books/${editingBook.id}`, formData);
+        setSnackbar({
+          open: true,
+          message: "Cập nhật sách thành công!",
+          severity: "success",
+        });
+      } else {
+        await axiosClient.post("/books", formData);
+        setSnackbar({
+          open: true,
+          message: "Thêm sách mới thành công!",
+          severity: "success",
+        });
+      }
+      setFormOpen(false);
+      setEditingBook(null);
+      setPagination((prev) => ({ ...prev, page: 0 }));
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: parseApiError(err),
+        severity: "error",
+      });
+      throw new Error(parseApiError(err));
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "ACTIVE":
-        return "Hoạt động";
-      case "INACTIVE":
-        return "Ngừng";
-      case "DRAFT":
-        return "Nháp";
-      default:
-        return status;
+  const handleDeleteClick = (bookId: number) => {
+    setBookToDelete(bookId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!bookToDelete) return;
+    try {
+      await axiosClient.delete(`/books/${bookToDelete}`);
+      setSnackbar({
+        open: true,
+        message: "Xóa sách thành công!",
+        severity: "success",
+      });
+      setDeleteDialogOpen(false);
+      setBookToDelete(null);
+      setPagination((prev) => ({ ...prev, page: 0 }));
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: parseApiError(err),
+        severity: "error",
+      });
+      setDeleteDialogOpen(false);
+      setBookToDelete(null);
     }
+  };
+
+  const handleEdit = (book: Book) => {
+    setEditingBook(book);
+    setFormOpen(true);
+  };
+
+  const handleView = (book: Book) => {
+    window.open(`/books/${book.id}`, "_blank");
   };
 
   return (
     <Box sx={{ maxWidth: "100%", px: { xs: 0, sm: 0 } }}>
-      <Box>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: { xs: "flex-start", sm: "center" },
-            mb: { xs: 2, sm: 3, md: 4 },
-            flexDirection: { xs: "column", sm: "row" },
-            gap: { xs: 2, sm: 3 },
-          }}
+      <Box sx={{ mb: { xs: 2, sm: 3, md: 4 } }}>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
         >
           <Box>
-            <Typography
-              variant="h4"
-              fontWeight={800}
-              gutterBottom
-              sx={{ fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" } }}
-            >
+            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
               Quản lý sách
             </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Quản lý toàn bộ sách trong thư viện
+            <Typography variant="body2" color="text.secondary">
+              Quản lý thông tin sách trong thư viện
             </Typography>
           </Box>
           <Button
             variant="contained"
-            startIcon={<Plus size={20} />}
-            onClick={() => navigate("/admin/books/new")}
-            sx={{ fontWeight: 600, alignSelf: { xs: "stretch", sm: "auto" } }}
+            startIcon={<Plus />}
+            onClick={() => {
+              setEditingBook(null);
+              setFormOpen(true);
+            }}
           >
             Thêm sách mới
           </Button>
-        </Box>
+        </Stack>
+      </Box>
+
+      <Paper sx={{ width: "100%", p: 2 }}>
+        <TextField
+          placeholder="Tìm kiếm theo tên sách, tác giả, ISBN..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          size="small"
+          sx={{ mb: 2, maxWidth: 400 }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search size={20} />
+              </InputAdornment>
+            ),
+          }}
+        />
 
         {error && (
-          <Alert severity="info" sx={{ mb: 3 }}>
-            Đang sử dụng dữ liệu mẫu. {error}
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
           </Alert>
         )}
 
-        <Paper elevation={0} sx={{ mb: 3 }}>
-          <Box
-            sx={{
-              p: { xs: 2, sm: 3 },
-              display: "flex",
-              gap: { xs: 1.5, sm: 2 },
-              flexWrap: "wrap",
-            }}
-          >
-            <TextField
-              placeholder="Tìm kiếm sách..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              sx={{
-                flex: { xs: "1 1 100%", sm: "1 1 auto" },
-                minWidth: { xs: "100%", sm: 250 },
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search size={20} />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <FormControl sx={{ minWidth: { xs: "100%", sm: 150 } }}>
-              <InputLabel>Trạng thái</InputLabel>
-              <Select
-                value={statusFilter}
-                label="Trạng thái"
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <MenuItem value="">Tất cả</MenuItem>
-                <MenuItem value="ACTIVE">Hoạt động</MenuItem>
-                <MenuItem value="INACTIVE">Ngừng</MenuItem>
-                <MenuItem value="DRAFT">Nháp</MenuItem>
-              </Select>
-            </FormControl>
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+            <CircularProgress />
           </Box>
-        </Paper>
-
-        <TableContainer component={Paper} elevation={0}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: "action.hover" }}>
-                <TableCell sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
-                  ID
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
-                  Tên sách
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
-                  Tác giả
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
-                  Danh mục
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
-                  NXB
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
-                  Trạng thái
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
-                  Số bản
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
-                  Còn lại
-                </TableCell>
-                <TableCell
-                  sx={{ fontWeight: 700, whiteSpace: "nowrap" }}
-                  align="right"
-                >
-                  Thao tác
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {loading ? (
-                Array.from({ length: rowsPerPage }).map((_, index) => (
-                  <TableRow key={index}>
-                    {Array.from({ length: 9 }).map((_, cellIndex) => (
-                      <TableCell key={cellIndex}>
-                        <Skeleton />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : !books || books.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={9} align="center" sx={{ py: 8 }}>
-                    <BookOpen
-                      size={48}
-                      style={{ opacity: 0.3, marginBottom: 16 }}
-                    />
-                    <Typography variant="body2" color="text.secondary">
-                      Không tìm thấy sách nào
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                books.map((book) => (
-                  <TableRow
-                    key={book.id}
-                    hover
-                    sx={{
-                      "&:hover": {
-                        bgcolor: "action.hover",
-                      },
-                    }}
-                  >
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      {book.id}
-                    </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      <Typography
-                        variant="body2"
-                        fontWeight={600}
-                        sx={{
-                          maxWidth: 250,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {book.title}
-                      </Typography>
-                    </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      {book.author_names}
-                    </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      {book.category_name}
-                    </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      {book.publisher_name}
-                    </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      <Chip
-                        label={getStatusLabel(book.status)}
-                        size="small"
-                        color={getStatusColor(book.status)}
-                        sx={{ fontWeight: 600 }}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      {book.copies_count}
-                    </TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      <Typography
-                        variant="body2"
-                        fontWeight={600}
-                        color={
-                          book.available_count === 0
-                            ? "error.main"
-                            : "success.main"
-                        }
-                      >
-                        {book.available_count}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
-                      <IconButton
-                        size="small"
-                        onClick={(e) => handleMenuOpen(e, book)}
-                      >
-                        <MoreVertical size={18} />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-          <TablePagination
-            component="div"
-            count={total}
-            page={page}
-            onPageChange={handleChangePage}
-            rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            rowsPerPageOptions={[5, 10, 25, 50]}
-            labelRowsPerPage="Số dòng mỗi trang:"
-            labelDisplayedRows={({ from, to, count }) =>
-              `${from}-${to} trong tổng số ${count}`
+        ) : (
+          <BooksList
+            books={books}
+            pagination={pagination}
+            onPageChange={(_, newPage) =>
+              setPagination((prev) => ({ ...prev, page: newPage }))
             }
+            onRowsPerPageChange={(e) =>
+              setPagination((prev) => ({
+                ...prev,
+                limit: parseInt(e.target.value, 10),
+                page: 0,
+              }))
+            }
+            onEdit={handleEdit}
+            onDelete={handleDeleteClick}
+            onView={handleView}
           />
-        </TableContainer>
+        )}
+      </Paper>
 
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleMenuClose}
-          disableScrollLock={true}
-        >
-          <MenuItem onClick={handleView}>
-            <Eye size={18} style={{ marginRight: 8 }} />
-            Xem chi tiết
-          </MenuItem>
-          <MenuItem onClick={handleEdit}>
-            <Edit size={18} style={{ marginRight: 8 }} />
-            Chỉnh sửa
-          </MenuItem>
-          <MenuItem onClick={handleDelete} sx={{ color: "error.main" }}>
-            <Trash2 size={18} style={{ marginRight: 8 }} />
+      <Dialog
+        open={formOpen}
+        onClose={() => {
+          setFormOpen(false);
+          setEditingBook(null);
+        }}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          {editingBook ? "Chỉnh sửa sách" : "Thêm sách mới"}
+        </DialogTitle>
+        <DialogContent>
+          <BookForm
+            initialData={editingBook || undefined}
+            onSubmit={handleSubmit}
+            onCancel={() => {
+              setFormOpen(false);
+              setEditingBook(null);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      >
+        <DialogTitle>Xác nhận xóa sách</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Bạn có chắc chắn muốn xóa sách này? Hành động này không thể hoàn
+            tác.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Hủy</Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            color="error"
+            variant="contained"
+          >
             Xóa
-          </MenuItem>
-        </Menu>
-      </Box>
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

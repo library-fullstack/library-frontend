@@ -33,13 +33,11 @@ export class PushNotificationService {
 
   async init(): Promise<void> {
     if (!this.isSupported) {
-      console.warn("[Push] Browser does not support Push Notifications");
       return;
     }
 
     try {
       this.registration = await navigator.serviceWorker.ready;
-      console.log("[Push] Service Worker ready for push notifications");
     } catch (err) {
       console.error("[Push] Failed to initialize:", err);
     }
@@ -60,7 +58,6 @@ export class PushNotificationService {
 
   async subscribe(): Promise<PushSubscription | null> {
     if (!this.isSupported || !this.registration) {
-      console.warn("[Push] Push notifications not supported");
       return null;
     }
 
@@ -82,11 +79,6 @@ export class PushNotificationService {
             SERVER_PUBLIC_KEY
           ) as BufferSource,
         });
-
-        console.log("[Push] Subscribed to push notifications");
-        console.log("[Push] Subscription:", subscription);
-      } else {
-        console.log("[Push] Already subscribed");
       }
 
       return subscription;
@@ -104,7 +96,6 @@ export class PushNotificationService {
         await this.registration.pushManager.getSubscription();
       if (subscription) {
         await subscription.unsubscribe();
-        console.log("[Push] Unsubscribed from push notifications");
         return true;
       }
       return false;
@@ -116,7 +107,6 @@ export class PushNotificationService {
 
   async showNotification(options: NotificationOptions): Promise<void> {
     if (!this.isSupported || !this.registration) {
-      console.warn("[Push] Cannot show notification - not supported");
       return;
     }
 

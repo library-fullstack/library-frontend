@@ -26,14 +26,14 @@ interface UploadedFile {
 interface FileUploadProps {
   onFilesUpload: (files: UploadedFile[]) => void;
   maxFiles?: number;
-  maxFileSize?: number; // in MB
+  maxFileSize?: number;
   accept?: string;
 }
 
 const FileUpload = ({
   onFilesUpload,
   maxFiles = 3,
-  maxFileSize = 10, // 10MB
+  maxFileSize = 10,
   accept = "image/*,.pdf,.doc,.docx,.xls,.xlsx",
 }: FileUploadProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -72,26 +72,22 @@ const FileUpload = ({
   const handleFiles = async (files: FileList) => {
     setError(null);
 
-    // Validate file count
     const totalFiles = uploadedFiles.length + files.length;
     if (totalFiles > maxFiles) {
       setError(`Tối đa ${maxFiles} tệp được cho phép`);
       return;
     }
 
-    // Upload files
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
 
-      // Determine max file size based on file type
       let allowedSize = maxFileSize;
       if (file.type.startsWith("image/")) {
-        allowedSize = 2; // 2MB for images
+        allowedSize = 2;
       } else {
-        allowedSize = 5; // 5MB for other files
+        allowedSize = 5;
       }
 
-      // Validate file size
       const fileSizeMB = file.size / (1024 * 1024);
       if (fileSizeMB > allowedSize) {
         setError(

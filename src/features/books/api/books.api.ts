@@ -33,19 +33,28 @@ const getAllBooks = async (params?: {
     });
   }
 
-  const res = await axiosClient.get<Book[]>("/books", {
+  const res = await axiosClient.get<{
+    success: boolean;
+    data: Book[];
+    pagination?: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  }>("/books", {
     params: cleanParams,
     headers: { "Cache-Control": "no-cache" },
   });
 
   if (typeof window !== "undefined") {
     logger.debug("Books API: Received books", {
-      count: res.data?.length || 0,
+      count: res.data?.data?.length || 0,
       limit: cleanParams.limit,
     });
   }
 
-  return res.data;
+  return res.data.data || [];
 };
 
 // gọi api lấy chi tiết 1 quyển sách
@@ -122,7 +131,6 @@ const getBookStats = async () => {
     return res.data;
   } catch (error) {
     // thay vì trả về lỗi ngay thì trả về tất cả đều 0
-    // bây giờ thì không cần. lười xoá thôi cứ để tạm
     const err = error as unknown as { response?: { status?: number } };
     if (err?.response?.status === 401) {
       return { total: 0, active: 0, inactive: 0, draft: 0 };

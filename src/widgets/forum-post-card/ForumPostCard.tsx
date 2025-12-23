@@ -161,35 +161,6 @@ export default function ForumPostCard({
             >
               {post.content}
             </Typography>
-
-            {/* tags - commented out as tags not in ForumPost interface */}
-            {/* 
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{
-                mb: 2,
-                flexWrap: "wrap",
-                gap: 0.5,
-              }}
-            >
-              {post.tags && post.tags.map((tag: string) => (
-                <Chip
-                  key={tag}
-                  label={`#${tag}`}
-                  size="small"
-                  variant="outlined"
-                  sx={{
-                    height: { xs: 22, md: 24 },
-                    fontSize: { xs: "0.7rem", md: "0.75rem" },
-                    borderRadius: 1,
-                    borderColor: "divider",
-                  }}
-                />
-              ))}
-            </Stack>
-            */}
-
             <Divider sx={{ mb: 2 }} />
 
             {/* thống kê */}

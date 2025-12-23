@@ -138,20 +138,22 @@ const ReportsList: React.FC<ReportsListProps> = ({ onReportUpdated }) => {
                   color="textSecondary"
                   sx={{ mb: 2 }}
                 >
-                  Từ: {(report as Record<string, unknown>).reporter_name}
+                  Từ: {String(report.reporter_name || "Không rõ")}
                 </Typography>
 
                 {report.target_type === "POST" && (
                   <Typography variant="body2" sx={{ mb: 2 }}>
                     <strong>Bài viết:</strong>{" "}
-                    {(report as Record<string, unknown>).post_title}
+                    {String(report.post_title || "Không rõ")}
                   </Typography>
                 )}
 
                 <Typography variant="body2" sx={{ mb: 2 }}>
                   <strong>Chi tiết:</strong>{" "}
-                  {(report as Record<string, unknown>).description ||
-                    "Không có"}
+                  {String(
+                    (report as { description?: string }).description ||
+                      "Không có"
+                  )}
                 </Typography>
 
                 <Stack direction="row" spacing={1}>

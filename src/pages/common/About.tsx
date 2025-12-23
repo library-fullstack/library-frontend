@@ -84,7 +84,7 @@ export default function About(): React.ReactElement {
               Về chúng tôi
             </Typography>
             <Typography variant="h6" sx={{ opacity: 0.95, maxWidth: 700 }}>
-              Trung tâm Thư viện Trường Đại học Kinh tế - Kỹ thuật Công nghiệp
+              Trung tâm Thư viện Trường Đại Học HBH
             </Typography>
           </Container>
         </Box>

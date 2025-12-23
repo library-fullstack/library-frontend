@@ -14,6 +14,10 @@ import type {
   CreateReportInput,
   ApiResponse,
   PaginationMeta,
+  ActivityLog,
+  CreateCategoryData,
+  UpdateCategoryData,
+  ForumSettings,
 } from "../types/forum.types";
 
 export const forumCategoryApi = {
@@ -234,10 +238,11 @@ export const forumModerationApi = {
     page: number = 1,
     limit: number = 50
   ) =>
-    axiosClient.get<ApiResponse<any[]> & { pagination: PaginationMeta }>(
-      "/forum/moderation/dashboard/activity-logs",
-      { params: { type, page, limit } }
-    ),
+    axiosClient.get<
+      ApiResponse<ActivityLog[]> & { pagination: PaginationMeta }
+    >("/forum/moderation/dashboard/activity-logs", {
+      params: { type, page, limit },
+    }),
 
   getNotifications: (page: number = 1, limit: number = 20) =>
     axiosClient.get<
@@ -270,13 +275,13 @@ export const forumAdminApi = {
   getCategories: () =>
     axiosClient.get<ApiResponse<ForumCategory[]>>("/forum/categories"),
 
-  createCategory: (data: any) =>
+  createCategory: (data: CreateCategoryData) =>
     axiosClient.post<ApiResponse<ForumCategory>>(
       "/forum/categories/admin/create",
       data
     ),
 
-  updateCategory: (categoryId: number, data: any) =>
+  updateCategory: (categoryId: number, data: UpdateCategoryData) =>
     axiosClient.put<ApiResponse<void>>(
       `/forum/categories/admin/${categoryId}`,
       data
@@ -288,9 +293,9 @@ export const forumAdminApi = {
     ),
 
   getForumSettings: () =>
-    axiosClient.get<ApiResponse<any>>("/forum/moderation/settings"),
+    axiosClient.get<ApiResponse<ForumSettings>>("/forum/moderation/settings"),
 
-  updateForumSettings: (data: any) =>
+  updateForumSettings: (data: Partial<ForumSettings>) =>
     axiosClient.put<ApiResponse<void>>("/forum/moderation/settings", data),
 };
 

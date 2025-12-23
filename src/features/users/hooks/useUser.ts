@@ -18,17 +18,7 @@ export function useCurrentUser() {
   return useQuery({
     queryKey: userKeys.me(),
     queryFn: async () => {
-      const currentToken = StorageUtil.getItem(STORAGE_KEYS.auth.token);
-      logger.debug(
-        "[useCurrentUser] Calling API with token:",
-        currentToken?.substring(0, 20) + "..."
-      );
       const response = await usersApi.getMe();
-      logger.debug(
-        "[useCurrentUser] Fetched user from API:",
-        response.data.email,
-        response.data.id
-      );
       return response.data;
     },
     enabled: !!token,
@@ -44,13 +34,10 @@ export function useUpdateAvatar() {
 
   return useMutation({
     mutationFn: async (formData: FormData) => {
-      logger.debug("[useUpdateAvatar] Uploading avatar");
       const response = await usersApi.updateAvatar(formData);
       return response.data;
     },
     onSuccess: (data) => {
-      logger.debug("[useUpdateAvatar] Avatar updated successfully");
-
       queryClient.setQueryData<User>(userKeys.me(), (old) => {
         if (!old) return old;
         return { ...old, avatar_url: data.avatar_url };
@@ -88,7 +75,6 @@ export function useChangePassword() {
 export function clearUserQueryCache(
   queryClient?: ReturnType<typeof useQueryClient>
 ) {
-  logger.debug("[clearUserQueryCache] Clearing user-related queries");
   if (queryClient) {
     queryClient.removeQueries({ queryKey: userKeys.all });
   }

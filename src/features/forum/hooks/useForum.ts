@@ -177,14 +177,11 @@ export function useCreateForumPost() {
 
   return useMutation({
     mutationFn: async (data: CreatePostInput) => {
-      logger.debug("[useCreateForumPost] Creating post with data:", data);
       const response = await forumPostApi.create(data);
-      console.log("[useCreateForumPost] API Response:", response);
-      console.log("[useCreateForumPost] response.data:", response.data);
+
       return response.data;
     },
-    onSuccess: async (data) => {
-      logger.debug("[useCreateForumPost] Post created successfully", data);
+    onSuccess: async () => {
       await queryClient.refetchQueries({
         queryKey: ["forum"],
       });
@@ -200,12 +197,10 @@ export function useUpdateForumPost() {
 
   return useMutation({
     mutationFn: async (params: { postId: number; data: UpdatePostInput }) => {
-      logger.debug("[useUpdateForumPost] Updating post");
       const response = await forumPostApi.update(params.postId, params.data);
       return response.data;
     },
     onSuccess: async () => {
-      logger.debug("[useUpdateForumPost] Post updated successfully");
       await queryClient.refetchQueries({
         queryKey: ["forum"],
       });
@@ -221,12 +216,10 @@ export function useDeleteForumPost() {
 
   return useMutation({
     mutationFn: async (postId: number) => {
-      logger.debug("[useDeleteForumPost] Deleting post");
       const response = await forumPostApi.delete(postId);
       return response.data;
     },
     onSuccess: async () => {
-      logger.debug("[useDeleteForumPost] Post deleted successfully");
       await queryClient.refetchQueries({
         queryKey: ["forum"],
       });
@@ -363,14 +356,7 @@ export function useTogglePostLike() {
             is_liked: is_liked,
             likes_count: likes_count,
           };
-          console.log(
-            "[useTogglePostLike] onSuccess: Updated post detail",
-            postId,
-            "new likes_count:",
-            likes_count,
-            "is_liked:",
-            is_liked
-          );
+
           return newState;
         }
       );
@@ -393,12 +379,7 @@ export function useForumComments(
   return useQuery({
     queryKey: forumKeys.commentsByPost(postId),
     queryFn: async () => {
-      logger.debug("[useForumComments] Fetching comments for postId:", postId);
       const response = await forumCommentApi.getByPostId(postId, page, limit);
-      logger.debug("[useForumComments] Response received:", {
-        success: response.data?.success,
-        dataLength: response.data?.data?.length,
-      });
       return response.data;
     },
     staleTime: 0,
@@ -412,28 +393,13 @@ export function useCreateComment() {
 
   return useMutation({
     mutationFn: async (data: CreateCommentInput & { post_id: number }) => {
-      logger.debug("[useCreateComment] Creating comment with data:", {
-        postId: data.post_id,
-        contentLength: data.content.length,
-      });
       const response = await forumCommentApi.create(data.post_id, data);
       return response.data;
     },
     retry: 0,
-    onSuccess: (responseData, variables) => {
-      const postId = variables.post_id;
-      logger.debug(
-        "[useCreateComment] Comment created successfully, invalidating and refetching for postId:",
-        postId
-      );
-      logger.debug("[useCreateComment] Response data:", responseData);
-
-      queryClient.invalidateQueries({
-        queryKey: ["forum"],
-      });
-      queryClient.refetchQueries({
-        queryKey: ["forum"],
-      });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: forumKeys.comments() });
+      queryClient.invalidateQueries({ queryKey: ["forum", "posts"] });
     },
     onError: (error) => {
       logger.error("[useCreateComment] Error creating comment:", error);
@@ -450,7 +416,6 @@ export function useUpdateComment() {
       data: UpdateCommentInput;
       postId?: number;
     }) => {
-      logger.debug("[useUpdateComment] Updating comment");
       const response = await forumCommentApi.update(
         params.commentId,
         params.data
@@ -458,7 +423,6 @@ export function useUpdateComment() {
       return response.data;
     },
     onSuccess: (_, params) => {
-      logger.debug("[useUpdateComment] Comment updated successfully");
       if (params.postId) {
         queryClient.invalidateQueries({
           queryKey: forumKeys.commentsByPost(params.postId),
@@ -476,13 +440,12 @@ export function useDeleteComment() {
 
   return useMutation({
     mutationFn: async (commentId: number) => {
-      logger.debug("[useDeleteComment] Deleting comment");
       const response = await forumCommentApi.delete(commentId);
       return response.data;
     },
     onSuccess: () => {
-      logger.debug("[useDeleteComment] Comment deleted successfully");
       queryClient.invalidateQueries({ queryKey: forumKeys.comments() });
+      queryClient.invalidateQueries({ queryKey: ["forum", "posts"] });
     },
     onError: (error) => {
       logger.error("[useDeleteComment] Error deleting comment:", error);
@@ -495,16 +458,10 @@ export function useToggleCommentLike() {
 
   return useMutation({
     mutationFn: async (commentId: number) => {
-      logger.debug("[useToggleCommentLike] Toggling like");
       const response = await forumCommentApi.toggleLike(commentId);
       return { commentId, ...response.data };
     },
     onMutate: async (commentId) => {
-      logger.debug(
-        "[useToggleCommentLike] Optimistic update for commentId:",
-        commentId
-      );
-
       await queryClient.cancelQueries({ queryKey: forumKeys.comments() });
 
       const commentsData = queryClient.getQueryData(forumKeys.comments());
@@ -536,15 +493,11 @@ export function useToggleCommentLike() {
       return { commentsData };
     },
     onError: (error, commentId, context) => {
-      logger.error("[useToggleCommentLike] Error toggling like:", error);
-
       if (context?.commentsData) {
         queryClient.setQueryData(forumKeys.comments(), context.commentsData);
       }
     },
     onSuccess: async (data) => {
-      logger.debug("[useToggleCommentLike] Like toggled successfully", data);
-
       const { commentId, data: responseData } = data;
       const is_liked = responseData?.is_liked ?? false;
       const likes_count = responseData?.likes_count ?? 0;
@@ -579,7 +532,6 @@ export function useToggleCommentLike() {
 export function useCreateReport() {
   return useMutation({
     mutationFn: async (data: CreateReportInput) => {
-      logger.debug("[useCreateReport] Creating report");
       const response = await forumReportApi.create(data);
       return response.data;
     },
@@ -633,12 +585,10 @@ export function useMarkNotificationAsRead() {
 
   return useMutation({
     mutationFn: async (notificationId: number) => {
-      logger.debug("[useMarkNotificationAsRead] Marking notification as read");
       const response = await forumNotificationApi.markAsRead(notificationId);
       return response.data;
     },
     onSuccess: () => {
-      logger.debug("[useMarkNotificationAsRead] Notification marked as read");
       queryClient.invalidateQueries({ queryKey: forumKeys.notifications() });
       queryClient.invalidateQueries({
         queryKey: forumKeys.unreadNotifications(),
@@ -655,12 +605,10 @@ export function useMarkAllNotificationsAsRead() {
 
   return useMutation({
     mutationFn: async () => {
-      logger.debug("[useMarkAllNotificationsAsRead] Marking all as read");
       const response = await forumNotificationApi.markAllAsRead();
       return response.data;
     },
     onSuccess: () => {
-      logger.debug("[useMarkAllNotificationsAsRead] All marked as read");
       queryClient.invalidateQueries({ queryKey: forumKeys.notifications() });
       queryClient.invalidateQueries({
         queryKey: forumKeys.unreadNotifications(),

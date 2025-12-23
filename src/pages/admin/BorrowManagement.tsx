@@ -62,7 +62,7 @@ export default function BorrowManagement() {
   const [newStatus, setNewStatus] = useState("");
 
   const createMockBorrows = useCallback((): Borrow[] => {
-    const statuses = ["BORROWED", "RETURNED", "OVERDUE"];
+    const statuses = ["ACTIVE", "RETURNED", "APPROVED"];
     const mockData: Borrow[] = [];
     for (let i = 1; i <= rowsPerPage; i++) {
       const status = statuses[i % statuses.length];
@@ -161,10 +161,14 @@ export default function BorrowManagement() {
 
   const getStatusColor = (
     status: string
-  ): "primary" | "success" | "error" | "default" => {
+  ): "primary" | "success" | "error" | "warning" | "default" => {
     switch (status.toUpperCase()) {
-      case "BORROWED":
+      case "ACTIVE":
         return "primary";
+      case "APPROVED":
+        return "warning";
+      case "CONFIRMED":
+        return "warning";
       case "RETURNED":
         return "success";
       case "OVERDUE":
@@ -176,8 +180,12 @@ export default function BorrowManagement() {
 
   const getStatusLabel = (status: string) => {
     switch (status.toUpperCase()) {
-      case "BORROWED":
+      case "ACTIVE":
         return "Đang mượn";
+      case "APPROVED":
+        return "Duyệt xong";
+      case "CONFIRMED":
+        return "Xác nhận";
       case "RETURNED":
         return "Đã trả";
       case "OVERDUE":
@@ -248,9 +256,10 @@ export default function BorrowManagement() {
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
                 <MenuItem value="">Tất cả</MenuItem>
-                <MenuItem value="BORROWED">Đang mượn</MenuItem>
+                <MenuItem value="ACTIVE">Đang mượn</MenuItem>
+                <MenuItem value="APPROVED">Duyệt xong</MenuItem>
+                <MenuItem value="CONFIRMED">Xác nhận</MenuItem>
                 <MenuItem value="RETURNED">Đã trả</MenuItem>
-                <MenuItem value="OVERDUE">Quá hạn</MenuItem>
               </Select>
             </FormControl>
           </Box>

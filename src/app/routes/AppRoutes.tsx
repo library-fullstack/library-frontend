@@ -96,18 +96,16 @@ const Cart = lazyWithErrorBoundary(
   () => import("../../pages/borrow/Cart"),
   "Giỏ sách"
 );
-const Checkout = lazyWithErrorBoundary(
-  () => import("../../pages/borrow/Checkout"),
-  "Thanh toán"
+const BorrowConfirm = lazyWithErrorBoundary(
+  () => import("../../pages/borrow/BorrowConfirm"),
+  "Xác nhận mượn sách"
 );
-const BorrowList = lazyWithErrorBoundary(
-  () => import("../../pages/borrow/BorrowList"),
-  "Danh sách mượn"
-);
-const OrderList = lazyWithErrorBoundary(
-  () => import("../../pages/borrow/OrderList"),
-  "Danh sách đơn hàng"
-);
+// MyBorrows integrated into Profile component
+// const MyBorrows = lazyWithErrorBoundary(
+//   () => import("../../pages/user/MyBorrows"),
+//   "Lịch sử mượn sách"
+// );
+
 const AdminDashboard = lazyWithErrorBoundary(
   () => import("../../pages/admin/AdminDashboard"),
   "Dashboard Admin"
@@ -121,7 +119,7 @@ const UsersManagement = lazyWithErrorBoundary(
   "Quản lý người dùng"
 );
 const BorrowManagement = lazyWithErrorBoundary(
-  () => import("../../pages/admin/BorrowManagement"),
+  () => import("../../pages/admin/BorrowManagementNew"),
   "Quản lý mượn"
 );
 const AnalyticsPage = lazyWithErrorBoundary(
@@ -160,9 +158,23 @@ const Services = lazyWithErrorBoundary(
   () => import("../../pages/common/Services"),
   "Dịch vụ"
 );
-const News = lazyWithErrorBoundary(
-  () => import("../../pages/common/News"),
-  "Tin tức"
+
+const NewsAndEventsPage = lazyWithErrorBoundary(
+  () => import("../../pages/common/NewsAndEventsPage"),
+  "Tin tức & Sự kiện"
+);
+const NewsDetailPage = lazyWithErrorBoundary(
+  () => import("../../pages/common/NewsDetailPage"),
+  "Chi tiết tin tức"
+);
+const EventDetailPage = lazyWithErrorBoundary(
+  () => import("../../pages/common/EventDetailPage"),
+  "Chi tiết sự kiện"
+);
+
+const AdminContentManagementPage = lazyWithErrorBoundary(
+  () => import("../../pages/admin/AdminContentManagementPage"),
+  "Quản lý nội dung"
 );
 const About = lazyWithErrorBoundary(
   () => import("../../pages/common/About"),
@@ -247,9 +259,33 @@ export default function AppRoutes(): JSX.Element {
           element={
             <KeepAlive id="news" name="news">
               <Suspense fallback={<PageLoader />}>
-                <News />
+                <NewsAndEventsPage />
               </Suspense>
             </KeepAlive>
+          }
+        />
+        <Route
+          path="/news/:slug"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <NewsDetailPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/events"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <NewsAndEventsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/events/:slug"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <EventDetailPage />
+            </Suspense>
           }
         />
         <Route
@@ -395,31 +431,11 @@ export default function AppRoutes(): JSX.Element {
           }
         />
         <Route
-          path="/checkout"
+          path="/borrow/confirm/:id"
           element={
             <Suspense fallback={<PageLoader />}>
               <ProtectedRoute>
-                <Checkout />
-              </ProtectedRoute>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/borrow"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <ProtectedRoute>
-                <BorrowList />
-              </ProtectedRoute>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/orders"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <ProtectedRoute>
-                <OrderList />
+                <BorrowConfirm />
               </ProtectedRoute>
             </Suspense>
           }
@@ -432,12 +448,20 @@ export default function AppRoutes(): JSX.Element {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/user/borrows"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
       </Route>
 
       <Route
         path="/admin"
         element={
-          <ProtectedRoute roles={["ADMIN", "LIBRARIAN"]}>
+          <ProtectedRoute roles={["ADMIN", "LIBRARIAN", "MODERATOR"]}>
             <AdminLayout />
           </ProtectedRoute>
         }
@@ -488,7 +512,7 @@ export default function AppRoutes(): JSX.Element {
         <Route
           path="banners"
           element={
-            <ProtectedRoute roles={["ADMIN"]}>
+            <ProtectedRoute roles={["ADMIN", "LIBRARIAN"]}>
               <Suspense fallback={<PageLoader />}>
                 <BannerManagement />
               </Suspense>
@@ -496,9 +520,19 @@ export default function AppRoutes(): JSX.Element {
           }
         />
         <Route
+          path="content"
+          element={
+            <ProtectedRoute roles={["ADMIN", "LIBRARIAN"]}>
+              <Suspense fallback={<PageLoader />}>
+                <AdminContentManagementPage />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="performance"
           element={
-            <ProtectedRoute roles={["ADMIN"]}>
+            <ProtectedRoute roles={["ADMIN", "LIBRARIAN"]}>
               <Suspense fallback={<PageLoader />}>
                 <PerformanceMonitoring />
               </Suspense>

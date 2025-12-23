@@ -2,18 +2,14 @@ const CACHE_NAME = "library-ui-v1";
 const API_BASE_URL = self.location.origin;
 
 self.addEventListener("install", (event) => {
-  console.log("[SW] Installing service worker");
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
-  console.log("[SW] Activating service worker");
   event.waitUntil(clients.claim());
 });
 
 self.addEventListener("sync", (event) => {
-  console.log("[SW] Background sync triggered:", event.tag);
-
   if (event.tag === "sync-mutations") {
     event.waitUntil(syncPendingMutations());
   }
@@ -48,8 +44,6 @@ async function syncPendingMutations() {
               }
             }
 
-            console.log("[SW] Found pending mutations:", mutations.length);
-
             const results = await Promise.allSettled(
               mutations.map((mut) => syncMutation(mut))
             );
@@ -60,10 +54,6 @@ async function syncPendingMutations() {
             const failed = results.filter(
               (r) => r.status === "rejected"
             ).length;
-
-            console.log(
-              `[SW] Sync results - Succeeded: ${succeeded}, Failed: ${failed}`
-            );
 
             const clients = await self.clients.matchAll();
             clients.forEach((client) => {
@@ -110,8 +100,6 @@ async function syncMutation(mutation) {
 
   const url = API_BASE_URL + endpoint.path;
 
-  console.log(`[SW] Syncing mutation ${id}: ${action} to ${url}`);
-
   const response = await fetch(url, {
     method: endpoint.method,
     headers: {
@@ -125,13 +113,10 @@ async function syncMutation(mutation) {
     throw new Error(`API error: ${response.status}`);
   }
 
-  console.log(`[SW] Successfully synced mutation ${id}`);
   return { id, success: true };
 }
 
 self.addEventListener("message", (event) => {
-  console.log("[SW] Message received:", event.data);
-
   if (event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }

@@ -5,155 +5,241 @@ import {
   Typography,
   Stack,
   Divider,
-  Link,
-  Grid,
+  Link as MuiLink,
+  IconButton,
 } from "@mui/material";
+import Grid from "@mui/material/Grid";
 import { motion } from "framer-motion";
 import Logo from "./icons/Logo";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
-import { Link as RouterLink, useNavigationType } from "react-router-dom";
+import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
+import { Facebook } from "lucide-react";
+import { Link, useNavigationType } from "react-router-dom";
 
 export default function Footer(): React.ReactElement {
   const navigationType = useNavigationType();
+  const shouldAnimate = navigationType !== "POP";
 
-  const shouldAnimate = navigationType !== 'POP';
+  const quickLinks = [
+    { label: "Trang chủ", path: "/" },
+    { label: "Giới thiệu", path: "/about" },
+    { label: "Tin tức & Sự kiện", path: "/news" },
+    { label: "Tra cứu sách", path: "/catalog" },
+    { label: "Diễn đàn", path: "/forum" },
+  ];
+
+  const contactInfo = [
+    {
+      icon: <EmailOutlinedIcon sx={{ fontSize: 18 }} />,
+      text: "library@hbh.libsys.me",
+    },
+    {
+      icon: <PhoneOutlinedIcon sx={{ fontSize: 18 }} />,
+      text: "(086) 999 5472",
+    },
+    {
+      icon: <LocationOnOutlinedIcon sx={{ fontSize: 18 }} />,
+      text: "419 Đ. Lĩnh Nam, Vĩnh Hưng, Hoàng Mai, Hà Nội",
+    },
+  ];
 
   return (
     <Box
       component="footer"
       sx={{
-        bgcolor: (theme) => theme.palette.background.paper,
-        borderTop: (theme) => `1px solid ${theme.palette.divider}`,
+        bgcolor: "background.paper",
+        borderTop: 1,
+        borderColor: "divider",
         pt: { xs: 6, md: 8 },
         pb: { xs: 4, md: 6 },
-        color: (theme) => theme.palette.text.secondary,
       }}
     >
-      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
-        <Grid
-          container
-          spacing={{ xs: 6, md: 12 }}
-          justifyContent={{ xs: "flex-start", md: "center" }}
-          alignItems="flex-start"
-          sx={{
-            maxWidth: 1100,
-            mx: "auto",
-          }}
-        >
-          {/* cột 1 */}
-          <Grid size={{ xs: 12, md: 4 }} sx={{ maxWidth: 350 }}>
-            <Stack spacing={1.5}>
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <Logo sx={{ width: 36, height: "auto" }} />
-                <Typography
-                  variant="h6"
-                  fontWeight={700}
-                  color="text.primary"
-                  sx={{ letterSpacing: 0.3 }}
-                >
-                  HBH Library
-                </Typography>
-              </Stack>
-              <Typography
-                variant="body2"
+      <Container maxWidth="lg">
+        <Grid container spacing={4}>
+          {/* Column 1: Logo */}
+          <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: { xs: "center", md: "center" },
+                height: "100%",
+              }}
+            >
+              <Logo width={90} />
+            </Box>
+          </Grid>
+
+          {/* Column 2: Info */}
+          <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                mb: 2,
+                fontSize: "1rem",
+                color: "text.primary",
+              }}
+            >
+              Thư viện HBH
+            </Typography>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mb: 2, lineHeight: 1.7 }}
+            >
+              Nơi hội tụ tri thức, kết nối cộng đồng yêu sách và học tập Trường
+              Đại học HBH.
+            </Typography>
+            <Stack direction="row" spacing={1}>
+              <IconButton
+                size="small"
                 sx={{
-                  lineHeight: 1.7,
-                  color: (theme) => theme.palette.text.secondary,
+                  color: "primary.main",
+                  "&:hover": { bgcolor: "action.hover" },
                 }}
+                aria-label="Facebook"
+                component="a"
+                href="https://www.facebook.com/hoaugtr"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                Hệ thống thư viện điện tử của Trường Đại học HBH. Nơi lưu trữ,
-                chia sẻ và kết nối tri thức dành cho sinh viên HBH.
-              </Typography>
+                <Facebook size={20} />
+              </IconButton>
+              <IconButton
+                size="small"
+                sx={{
+                  color: "primary.main",
+                  "&:hover": { bgcolor: "action.hover" },
+                }}
+                aria-label="YouTube"
+                component="a"
+                href="https://www.facebook.com/huy.levan.355138"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Facebook size={20} />
+              </IconButton>
+              <IconButton
+                size="small"
+                sx={{
+                  color: "primary.main",
+                  "&:hover": { bgcolor: "action.hover" },
+                }}
+                aria-label="Facebook"
+                component="a"
+                href="https://www.facebook.com/anhbnh2425"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Facebook size={20} />
+              </IconButton>
             </Stack>
           </Grid>
 
-          {/* cột thứ 2 */}
-          <Grid
-            size={{ xs: 12, md: 4 }}
-            sx={{
-              maxWidth: 250,
-              textAlign: { xs: "left", md: "left" },
-              display: "flex",
-              justifyContent: { xs: "flex-start", md: "flex-start" },
-            }}
-          >
-            <Stack spacing={1.5} alignItems="flex-start">
-              <Typography
-                variant="subtitle1"
-                fontWeight={700}
-                color="text.primary"
-                sx={{ mb: 0.5 }}
-              >
-                Liên kết nhanh
-              </Typography>
-              {[
-                { label: "Trang chủ", href: "/" },
-                { label: "Giới thiệu", href: "/about" },
-                { label: "Tin tức & Sự kiện", href: "/news" },
-                { label: "Tra cứu sách", href: "/catalog" },
-                { label: "Diễn đàn sinh viên", href: "/forum" },
-              ].map((item, i) => (
-                <Link
-                  key={i}
-                  component={RouterLink}
-                  to={item.href}
-                  underline="none"
+          {/* Column 3: Quick Links */}
+          <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                mb: 2,
+                fontSize: "1rem",
+                color: "text.primary",
+              }}
+            >
+              Liên kết nhanh
+            </Typography>
+            <Stack spacing={1}>
+              {quickLinks.map((link) => (
+                <MuiLink
+                  key={link.path}
+                  component={Link}
+                  to={link.path}
+                  underline="hover"
                   sx={{
-                    color: (theme) => theme.palette.text.secondary,
-                    fontSize: "0.9rem",
-                    transition: "0.25s",
-                    "&:hover": { color: (theme) => theme.palette.primary.main },
+                    color: "text.secondary",
+                    fontSize: "0.875rem",
+                    "&:hover": { color: "primary.main" },
+                    display: "block",
                   }}
                 >
-                  {item.label}
-                </Link>
+                  {link.label}
+                </MuiLink>
               ))}
             </Stack>
           </Grid>
 
-          {/* cột thứ 3 s*/}
-          <Grid size={{ xs: 12, md: 4 }} sx={{ maxWidth: 350 }}>
+          {/* Column 4: Contact Info */}
+          <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                mb: 2,
+                fontSize: "1rem",
+                color: "text.primary",
+              }}
+            >
+              Liên hệ
+            </Typography>
             <Stack spacing={1.5}>
-              <Typography
-                variant="subtitle1"
-                fontWeight={700}
-                color="text.primary"
-                sx={{ mb: 0.5 }}
-              >
-                Liên hệ
-              </Typography>
-              <Stack direction="row" spacing={1.2} alignItems="center">
-                <EmailOutlinedIcon
-                  sx={{ fontSize: 20, color: "primary.main" }}
-                />
-                <Typography variant="body2">
-                  <Link
-                    href="mailto:library@hbh.libsys.me"
-                    underline="hover"
-                    sx={{
-                      color: (theme) => theme.palette.text.secondary,
-                      "&:hover": {
-                        color: (theme) => theme.palette.primary.main,
-                      },
-                    }}
-                  >
-                    library@hbh.libsys.me
-                  </Link>
-                </Typography>
-              </Stack>
-              <Stack direction="row" spacing={1.2} alignItems="center">
-                <LocationOnOutlinedIcon
-                  sx={{ fontSize: 20, color: "primary.main" }}
-                />
-                <Typography variant="body2">
-                  419/17/16 Vĩnh Hưng, Hoàng Mai, Hà Nội - Trường ĐH HBH
-                </Typography>
-              </Stack>
+              {contactInfo.map((info, index) => (
+                <Box
+                  key={index}
+                  sx={{ display: "flex", gap: 1, alignItems: "flex-start" }}
+                >
+                  <Box sx={{ color: "primary.main", mt: 0.25 }}>
+                    {info.icon}
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    {info.text}
+                  </Typography>
+                </Box>
+              ))}
             </Stack>
           </Grid>
+
+          {/* Column 5: Google Map */}
+          <Grid size={{ xs: 12, sm: 12, md: 2.4 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                mb: 2,
+                fontSize: "1rem",
+                color: "text.primary",
+              }}
+            >
+              Vị trí
+            </Typography>
+            <Box
+              sx={{
+                width: "100%",
+                height: 200,
+                borderRadius: 1,
+                overflow: "hidden",
+                border: 1,
+                borderColor: "divider",
+              }}
+            >
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.6157759!2d105.8774839!3d20.9837105!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135aea030ef16d7%3A0xd4eb55fd5fb08f7b!2z0JHQuNCx0LvQuNC-0YLQtdC60LAg0JHQkNCd0JrQuNC90LMgdGjhu6Ugdmnhu4duIMSRw6BpIGjhu41jIMSQw6AgTuG6tW5n!5e0!3m2!1svi!2s!4v1734777777777!5m2!1svi!2s"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Vị trí Thư viện HBH"
+              />
+            </Box>
+          </Grid>
         </Grid>
+
         <Divider sx={{ my: { xs: 3, md: 4 } }} />
+
         <Typography
           component={motion.p}
           initial={shouldAnimate ? { opacity: 0, y: 10 } : false}
@@ -162,7 +248,7 @@ export default function Footer(): React.ReactElement {
           variant="body2"
           textAlign="center"
           sx={{
-            color: (theme) => theme.palette.text.secondary,
+            color: "text.secondary",
             fontSize: "0.8rem",
             lineHeight: 1.6,
           }}
@@ -173,7 +259,7 @@ export default function Footer(): React.ReactElement {
             href="https://github.com/hoaug-tran"
             target="_blank"
             sx={{
-              color: (theme) => theme.palette.primary.main,
+              color: "primary.main",
               fontWeight: 600,
               textDecoration: "none",
               "&:hover": { textDecoration: "underline" },

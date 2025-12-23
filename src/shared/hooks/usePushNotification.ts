@@ -26,7 +26,6 @@ export function usePushNotification(options: UsePushNotificationOptions = {}) {
       if (sub) {
         setSubscription(sub);
         setIsSubscribed(true);
-        logger.info("[Push Hook] Subscribed successfully");
         return sub;
       } else {
         throw new Error("Failed to subscribe to push notifications");
@@ -72,7 +71,6 @@ export function usePushNotification(options: UsePushNotificationOptions = {}) {
       if (success) {
         setSubscription(null);
         setIsSubscribed(false);
-        logger.info("[Push Hook] Unsubscribed successfully");
         return true;
       }
       return false;
@@ -89,7 +87,6 @@ export function usePushNotification(options: UsePushNotificationOptions = {}) {
   const showNotification = useCallback(async (options: NotificationOptions) => {
     try {
       await pushNotificationService.showNotification(options);
-      logger.info("[Push Hook] Notification shown");
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : String(err);
       logger.error("[Push Hook] Failed to show notification:", errMsg);
@@ -100,7 +97,6 @@ export function usePushNotification(options: UsePushNotificationOptions = {}) {
   const requestPermission = useCallback(async () => {
     try {
       const permission = await pushNotificationService.requestPermission();
-      logger.info("[Push Hook] Permission requested:", permission);
       return permission;
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : String(err);

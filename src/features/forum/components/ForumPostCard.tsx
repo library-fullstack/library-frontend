@@ -41,142 +41,172 @@ export const ForumPostCard: React.FC<ForumPostCardProps> = ({ post }) => {
       onClick={handlePostClick}
       sx={{
         cursor: "pointer",
-        transition: "all 0.3s ease",
+        transition: "all 0.2s ease",
+        border: post.status === "PENDING" ? 2 : 0,
+        borderColor: post.status === "PENDING" ? "warning.main" : "transparent",
+        bgcolor:
+          post.status === "PENDING"
+            ? theme.palette.mode === "dark"
+              ? "rgba(255, 167, 38, 0.08)"
+              : "rgba(255, 167, 38, 0.05)"
+            : "background.paper",
         "&:hover": {
-          boxShadow: `0 12px 24px ${
+          boxShadow: `0 4px 12px ${
             theme.palette.mode === "dark"
-              ? "rgba(79, 70, 229, 0.15)"
-              : "rgba(79, 70, 229, 0.1)"
+              ? "rgba(79, 70, 229, 0.2)"
+              : "rgba(79, 70, 229, 0.12)"
           }`,
-          transform: "translateY(-2px)",
+          transform: "translateY(-1px)",
         },
       }}
     >
-      <Box sx={{ p: 2, display: "flex", gap: 1.5, alignItems: "flex-start" }}>
-        <Avatar
-          src={post.userAvatar}
-          alt={post.userName}
-          sx={{ width: 40, height: 40, flexShrink: 0 }}
-        >
-          {post.userName?.charAt(0).toUpperCase() || "U"}
-        </Avatar>
-
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Box
+      <Box sx={{ p: { xs: 2, sm: 2.5 } }}>
+        <Box sx={{ display: "flex", gap: 1.5, mb: 2 }}>
+          <Avatar
+            src={post.userAvatar}
+            alt={post.userName}
             sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              gap: 1,
+              width: { xs: 42, sm: 46 },
+              height: { xs: 42, sm: 46 },
+              flexShrink: 0,
             }}
           >
-            <Box>
-              <Typography
-                variant="subtitle2"
-                sx={{ fontWeight: 600, color: theme.palette.text.primary }}
-              >
-                {post.userName || "Anonymous"}
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{ color: theme.palette.text.secondary }}
-              >
-                {formatDistanceToNow(
-                  parseBackendTimestamp(
-                    post.createdAt || post.created_at || ""
-                  ),
-                  {
-                    locale: vi,
-                    addSuffix: true,
-                  }
-                )}
-              </Typography>
+            {post.userName?.charAt(0).toUpperCase() || "U"}
+          </Avatar>
+
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                gap: 1,
+              }}
+            >
+              <Box>
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: { xs: "0.95rem", sm: "1rem" },
+                    color: theme.palette.text.primary,
+                  }}
+                >
+                  {post.userName || "Anonymous"}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    fontSize: { xs: "0.8rem", sm: "0.85rem" },
+                  }}
+                >
+                  {formatDistanceToNow(
+                    parseBackendTimestamp(
+                      post.createdAt || post.created_at || ""
+                    ),
+                    { locale: vi, addSuffix: true }
+                  )}
+                </Typography>
+              </Box>
+              {post.category && (
+                <Chip
+                  label={post.category.name}
+                  size="small"
+                  variant="outlined"
+                  sx={{
+                    borderColor: theme.palette.primary.main,
+                    color: theme.palette.primary.main,
+                    fontWeight: 600,
+                    fontSize: { xs: "0.75rem", sm: "0.8rem" },
+                  }}
+                />
+              )}
             </Box>
-            {post.category && (
-              <Chip
-                label={post.category.name}
-                size="small"
-                variant="outlined"
-                sx={{
-                  borderColor: theme.palette.primary.main,
-                  color: theme.palette.primary.main,
-                }}
-              />
-            )}
           </Box>
         </Box>
-      </Box>
 
-      <Box sx={{ px: 2, pb: 1, display: "flex", alignItems: "center", gap: 1 }}>
-        {post.pinned && (
-          <PinIcon
-            size={18}
-            style={{ transform: "rotate(45deg)", flexShrink: 0 }}
-            color={theme.palette.primary.main}
-          />
-        )}
-        {post.is_locked && (
-          <LockIcon
-            size={16}
-            style={{ flexShrink: 0 }}
-            color={theme.palette.text.secondary}
-          />
-        )}
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 700,
-            color: theme.palette.text.primary,
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-            flex: 1,
-          }}
-        >
-          {post.title}
-        </Typography>
-      </Box>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
+          {post.status === "PENDING" && (
+            <Chip
+              label="Chờ duyệt"
+              size="small"
+              color="warning"
+              sx={{ fontWeight: 600, fontSize: "0.75rem" }}
+            />
+          )}
+          {post.pinned && (
+            <PinIcon
+              size={18}
+              style={{
+                transform: "rotate(45deg)",
+                flexShrink: 0,
+              }}
+              color={theme.palette.primary.main}
+            />
+          )}
+          {post.is_locked && (
+            <LockIcon
+              size={16}
+              style={{ flexShrink: 0 }}
+              color={theme.palette.text.secondary}
+            />
+          )}
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 700,
+              fontSize: { xs: "1.05rem", sm: "1.15rem" },
+              color: theme.palette.text.primary,
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              lineHeight: 1.4,
+              flex: 1,
+            }}
+          >
+            {post.title}
+          </Typography>
+        </Box>
 
-      <Box sx={{ px: 2, pb: 2 }}>
         <Typography
           variant="body2"
           sx={{
             color: theme.palette.text.secondary,
+            fontSize: { xs: "0.9rem", sm: "0.95rem" },
             display: "-webkit-box",
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
             overflow: "hidden",
+            lineHeight: 1.6,
+            mb: 2,
           }}
         >
           {excerpt}
           {post.content.length > 150 && "..."}
         </Typography>
-      </Box>
 
-      {/* Stats footer */}
-      <Box
-        sx={{
-          px: 2,
-          py: 1.5,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          borderTop: `1px solid ${theme.palette.divider}`,
-          fontSize: "0.875rem",
-        }}
-      >
-        <Stack direction="row" spacing={2}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <Eye size={16} />
+        <Stack
+          direction="row"
+          spacing={{ xs: 2, sm: 3 }}
+          sx={{
+            pt: 1.5,
+            borderTop: `1px solid ${theme.palette.divider}`,
+            color: theme.palette.text.secondary,
+            fontSize: { xs: "0.85rem", sm: "0.9rem" },
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+            <Eye size={18} />
             <span>{post.views_count || 0}</span>
           </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <MessageCircle size={16} />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+            <MessageCircle size={18} />
             <span>{post.comments_count || 0}</span>
           </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <Heart size={16} />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+            <Heart size={18} />
             <span>{post.likes_count || 0}</span>
           </Box>
         </Stack>

@@ -1,5 +1,4 @@
 import axios from "axios";
-import logger from "../lib/logger";
 import StorageUtil from "../lib/storage";
 
 const axiosClient = axios.create({
@@ -95,20 +94,12 @@ const isPublicRoute = (url: string): boolean => {
 
 axiosClient.interceptors.response.use(
   (response) => {
-    if (response.status === 304) {
-      logger.warn(
-        "[axiosClient] Received 304 Not Modified - may need to reload data"
-      );
-    }
     return response;
   },
   async (error) => {
     const originalRequest = error.config;
 
-    logger.error("[axiosClient] Error:", error);
-
     if (error.code === "ECONNABORTED") {
-      logger.error("[axiosClient] Request timeout");
       return Promise.reject(error);
     }
 
@@ -118,23 +109,19 @@ axiosClient.interceptors.response.use(
       !originalRequest._retry
     ) {
       if (originalRequest.url?.includes("/auth/login")) {
-        logger.warn("[axiosClient] Login failed with 401");
         return Promise.reject(error);
       }
 
       if (originalRequest.url?.includes("/auth/refresh")) {
-        logger.warn("[axiosClient] Refresh token failed, logging out");
         StorageUtil.removeItem("token");
         StorageUtil.removeItem("user");
-        window.location.href = "/auth/login";
+        setTimeout(() => {
+          window.location.href = "/auth/login";
+        }, 100);
         return Promise.reject(error);
       }
 
       if (isPublicRoute(originalRequest.url)) {
-        logger.warn(
-          "[axiosClient] 401 on public route, rejecting without redirect:",
-          originalRequest.url
-        );
         StorageUtil.removeItem("token");
         StorageUtil.removeItem("user");
         return Promise.reject(error);
@@ -181,16 +168,13 @@ axiosClient.interceptors.response.use(
           StorageUtil.removeItem("token");
           StorageUtil.removeItem("user");
           isRefreshing = false;
-
           window.dispatchEvent(new Event("auth-logout"));
 
-          window.location.href = "/auth/login";
+          setTimeout(() => {
+            window.location.href = "/auth/login";
+          }, 100);
           return Promise.reject(err);
         });
-    }
-
-    if (error.response?.status === 403) {
-      logger.warn("[axiosClient] Forbidden - insufficient permissions");
     }
 
     return Promise.reject(error);

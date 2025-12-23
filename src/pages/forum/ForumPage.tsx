@@ -63,7 +63,6 @@ const ForumPage = () => {
   );
   const limit = 12;
 
-  // Derive selected category from URL slug
   useEffect(() => {
     if (categorySlug) {
       const category = categories.find((c) => c.slug === categorySlug);
@@ -83,7 +82,6 @@ const ForumPage = () => {
     }
   }, [categorySlug, categories]);
 
-  // Reset to page 1 when category changes
   useEffect(() => {
     startTransition(() => {
       setPage(1);
@@ -98,33 +96,16 @@ const ForumPage = () => {
     searchQuery
   );
 
-  // Refetch posts when page becomes visible or on interval
   useEffect(() => {
-    // Invalidate + refetch immediately on mount/when dependencies change
-    queryClient.invalidateQueries({
-      queryKey: ["forum"],
-    });
-    queryClient.refetchQueries({
-      queryKey: ["forum"],
-    });
-
-    // Also refetch every 3 seconds
     const interval = setInterval(() => {
       queryClient.invalidateQueries({
-        queryKey: ["forum"],
+        queryKey: ["forum", "posts"],
       });
-      queryClient.refetchQueries({
-        queryKey: ["forum"],
-      });
-    }, 3000);
+    }, 5000);
 
-    // Refetch when window regains focus
     const handleFocus = () => {
       queryClient.invalidateQueries({
-        queryKey: ["forum"],
-      });
-      queryClient.refetchQueries({
-        queryKey: ["forum"],
+        queryKey: ["forum", "posts"],
       });
     };
     window.addEventListener("focus", handleFocus);
@@ -177,72 +158,115 @@ const ForumPage = () => {
         <Grid size={{ xs: 12, md: 3 }}>
           <Paper
             sx={{
-              p: 2,
+              p: { xs: 2, sm: 2.5 },
               position: "sticky",
               top: 100,
               backgroundColor: theme.palette.background.paper,
-              borderRadius: 1,
+              borderRadius: 2,
+              border: `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-              <FilterIcon
-                size={18}
-                style={{ marginRight: 8, verticalAlign: "middle" }}
-              />
-              Bộ lọc
-            </Typography>
+            <Box
+              sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2.5 }}
+            >
+              <FilterIcon size={20} color={theme.palette.primary.main} />
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: { xs: "1.05rem", sm: "1.1rem" },
+                }}
+              >
+                Bộ lọc
+              </Typography>
+            </Box>
 
-            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 500 }}>
+            <Typography
+              variant="subtitle2"
+              sx={{
+                mb: 1.5,
+                fontWeight: 600,
+                fontSize: { xs: "0.85rem", sm: "0.9rem" },
+              }}
+            >
               Chủ đề
             </Typography>
 
-            <Stack spacing={1} sx={{ mb: 3 }}>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2.5 }}>
               <Chip
                 label="Tất cả"
                 onClick={() => handleCategoryChange(null)}
                 variant={selectedCategory === null ? "filled" : "outlined"}
+                size="medium"
                 sx={{
                   cursor: "pointer",
-                  backgroundColor:
+                  bgcolor:
                     selectedCategory === null
                       ? theme.palette.primary.main
                       : "transparent",
-                  color: selectedCategory === null ? "#fff" : "inherit",
-                  justifyContent: "flex-start",
+                  color:
+                    selectedCategory === null
+                      ? "#fff"
+                      : theme.palette.text.primary,
+                  fontWeight: selectedCategory === null ? 600 : 500,
+                  fontSize: { xs: "0.8rem", sm: "0.85rem" },
+                  "&:hover": {
+                    bgcolor:
+                      selectedCategory === null
+                        ? theme.palette.primary.dark
+                        : theme.palette.action.hover,
+                  },
                 }}
               />
-            </Stack>
 
-            {categoriesLoading ? (
-              <Stack spacing={1}>
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Skeleton key={i} height={40} variant="rectangular" />
-                ))}
-              </Stack>
-            ) : (
-              <Stack spacing={1} sx={{ mb: 3 }}>
-                {categories.map((category: ForumPostCategory) => (
-                  <Chip
-                    key={category.id}
-                    label={category.name}
-                    onClick={() => handleCategoryChange(category.id)}
-                    variant={
-                      selectedCategory === category.id ? "filled" : "outlined"
-                    }
-                    sx={{
-                      cursor: "pointer",
-                      backgroundColor:
-                        selectedCategory === category.id
-                          ? theme.palette.primary.main
-                          : "transparent",
-                      color:
-                        selectedCategory === category.id ? "#fff" : "inherit",
-                      justifyContent: "flex-start",
-                    }}
-                  />
-                ))}
-              </Stack>
-            )}
+              {categoriesLoading ? (
+                <>
+                  {[1, 2, 3, 4].map((i) => (
+                    <Skeleton
+                      key={i}
+                      width={80}
+                      height={32}
+                      variant="rectangular"
+                      sx={{ borderRadius: 4 }}
+                    />
+                  ))}
+                </>
+              ) : (
+                <>
+                  {categories.map((category: ForumPostCategory) => (
+                    <Chip
+                      key={category.id}
+                      label={category.name}
+                      onClick={() => handleCategoryChange(category.id)}
+                      variant={
+                        selectedCategory === category.id ? "filled" : "outlined"
+                      }
+                      size="medium"
+                      sx={{
+                        cursor: "pointer",
+                        bgcolor:
+                          selectedCategory === category.id
+                            ? theme.palette.primary.main
+                            : "transparent",
+                        color:
+                          selectedCategory === category.id
+                            ? "#fff"
+                            : theme.palette.text.primary,
+                        fontWeight:
+                          selectedCategory === category.id ? 600 : 500,
+                        fontSize: { xs: "0.8rem", sm: "0.85rem" },
+                        "&:hover": {
+                          bgcolor:
+                            selectedCategory === category.id
+                              ? theme.palette.primary.dark
+                              : theme.palette.action.hover,
+                        },
+                      }}
+                    />
+                  ))}
+                </>
+              )}
+            </Box>
 
             <FormControl fullWidth size="small">
               <InputLabel>Sắp xếp</InputLabel>
@@ -250,6 +274,9 @@ const ForumPage = () => {
                 value={sortBy}
                 label="Sắp xếp"
                 onChange={handleSortChange}
+                sx={{
+                  fontSize: { xs: "0.85rem", sm: "0.9rem" },
+                }}
               >
                 <MenuItem value="newest">Mới nhất</MenuItem>
                 <MenuItem value="trending">Xu hướng</MenuItem>

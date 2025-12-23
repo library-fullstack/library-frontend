@@ -21,13 +21,14 @@ import {
   BarChart3,
   Settings,
   Tag,
-  Building2,
+  // Building2,
   ArrowLeft,
   Image,
   Activity,
   MessageSquare,
   AlertCircle,
   ChevronDown,
+  Lock,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Logo from "../../shared/ui/icons/Logo";
@@ -98,31 +99,25 @@ export default function AdminSidebar({
       title: "Thống kê & Báo cáo",
       icon: <BarChart3 size={20} />,
       path: "/admin/analytics",
-      roles: ["ADMIN", "LIBRARIAN"],
-    },
-    {
-      title: "Danh mục & Thể loại",
-      icon: <Tag size={20} />,
-      path: "/admin/categories",
-      roles: ["ADMIN", "LIBRARIAN"],
-    },
-    {
-      title: "Nhà xuất bản",
-      icon: <Building2 size={20} />,
-      path: "/admin/publishers",
-      roles: ["ADMIN", "LIBRARIAN"],
+      roles: ["ADMIN"],
     },
     {
       title: "Quản lý Banner",
       icon: <Image size={20} />,
       path: "/admin/banners",
-      roles: ["ADMIN"],
+      roles: ["ADMIN", "LIBRARIAN"],
+    },
+    {
+      title: "Tin tức & Sự kiện",
+      icon: <MessageSquare size={20} />,
+      path: "/admin/content",
+      roles: ["ADMIN", "LIBRARIAN"],
     },
     {
       title: "Giám sát hiệu suất",
       icon: <Activity size={20} />,
       path: "/admin/performance",
-      roles: ["ADMIN"],
+      roles: ["ADMIN", "LIBRARIAN"],
     },
     {
       title: "Diễn đàn",
@@ -161,19 +156,17 @@ export default function AdminSidebar({
         },
       ],
     },
-    {
-      title: "Cài đặt hệ thống",
-      icon: <Settings size={20} />,
-      path: "/admin/settings",
-      roles: ["ADMIN"],
-    },
   ];
 
-  const filteredMenuItems = menuItems.filter((item) =>
-    item.roles.includes(user?.role || "")
-  );
+  // Check if user has access to a menu item
+  const hasAccess = (item: MenuItem) => {
+    return item.roles.includes(user?.role || "");
+  };
 
-  const handleNavigation = (path: string) => {
+  const handleNavigation = (path: string, item: MenuItem) => {
+    if (!hasAccess(item)) {
+      return; // Don't navigate if no access
+    }
     navigate(path);
     if (mobileOpen) {
       handleDrawerToggle();
@@ -245,20 +238,23 @@ export default function AdminSidebar({
             transition: "all 300ms cubic-bezier(0.4, 0, 0.2, 1)",
           }}
         >
-          {filteredMenuItems.map((item) => {
+          {menuItems.map((item) => {
             const isExpanded = expandedItems.includes(item.title);
             const isActive = location.pathname === item.path;
             const hasSubItems = item.subItems && item.subItems.length > 0;
+            const hasAccessToItem = hasAccess(item);
 
             const button = (
               <ListItemButton
                 onClick={() => {
+                  if (!hasAccessToItem) return;
                   if (hasSubItems) {
                     toggleExpand(item.title);
                   } else {
-                    handleNavigation(item.path!);
+                    handleNavigation(item.path!, item);
                   }
                 }}
+                disabled={!hasAccessToItem}
                 disableRipple
                 sx={{
                   borderRadius: 2,
@@ -268,6 +264,8 @@ export default function AdminSidebar({
                   px: isCollapsed ? 0 : 2,
                   py: isCollapsed ? 0 : 1.25,
                   minHeight: isCollapsed ? 0 : 44,
+                  opacity: hasAccessToItem ? 1 : 0.5,
+                  cursor: hasAccessToItem ? "pointer" : "not-allowed",
                   bgcolor: isActive
                     ? theme.palette.mode === "dark"
                       ? "rgba(129, 140, 248, 0.15)"
@@ -277,15 +275,17 @@ export default function AdminSidebar({
                   fontWeight: isActive ? 600 : 400,
                   transition:
                     "all 250ms cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease",
-                  "&:hover": {
-                    bgcolor: isActive
-                      ? theme.palette.mode === "dark"
-                        ? "rgba(129, 140, 248, 0.25)"
-                        : "rgba(79, 70, 229, 0.12)"
-                      : theme.palette.mode === "dark"
-                      ? "rgba(255, 255, 255, 0.05)"
-                      : "rgba(0, 0, 0, 0.04)",
-                  },
+                  "&:hover": hasAccessToItem
+                    ? {
+                        bgcolor: isActive
+                          ? theme.palette.mode === "dark"
+                            ? "rgba(129, 140, 248, 0.25)"
+                            : "rgba(79, 70, 229, 0.12)"
+                          : theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.05)"
+                          : "rgba(0, 0, 0, 0.04)",
+                      }
+                    : {},
 
                   ...(isCollapsed && {
                     width: 45,
@@ -297,9 +297,11 @@ export default function AdminSidebar({
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    "&:hover": {
-                      transform: "scale(1.05)",
-                    },
+                    "&:hover": hasAccessToItem
+                      ? {
+                          transform: "scale(1.05)",
+                        }
+                      : {},
                   }),
                 }}
               >
@@ -316,7 +318,7 @@ export default function AdminSidebar({
                     }),
                   }}
                 >
-                  {item.icon}
+                  {!hasAccessToItem ? <Lock size={20} /> : item.icon}
                 </ListItemIcon>
 
                 {!isCollapsed && (
@@ -362,12 +364,24 @@ export default function AdminSidebar({
                     transition: "all 300ms cubic-bezier(0.4, 0, 0.2, 1)",
                   }}
                 >
-                  {isCollapsed && hasSubItems ? (
-                    <Tooltip title={item.title} placement="right" arrow>
+                  {isCollapsed ? (
+                    <Tooltip
+                      title={
+                        hasAccessToItem
+                          ? item.title
+                          : `${item.title} - Bạn không có quyền truy cập`
+                      }
+                      placement="right"
+                      arrow
+                    >
                       {button}
                     </Tooltip>
-                  ) : isCollapsed ? (
-                    <Tooltip title={item.title} placement="right" arrow>
+                  ) : !hasAccessToItem ? (
+                    <Tooltip
+                      title="Bạn không có quyền truy cập tính năng này"
+                      placement="top"
+                      arrow
+                    >
                       {button}
                     </Tooltip>
                   ) : (
@@ -380,57 +394,84 @@ export default function AdminSidebar({
                     <List sx={{ pl: 2, pt: 0.5, pb: 0.5 }}>
                       {item.subItems?.map((subItem) => {
                         const isSubActive = location.pathname === subItem.path;
+                        const hasSubAccess = hasAccess(subItem);
+                        const subButton = (
+                          <ListItemButton
+                            onClick={() =>
+                              hasSubAccess &&
+                              handleNavigation(subItem.path!, subItem)
+                            }
+                            disabled={!hasSubAccess}
+                            disableRipple
+                            sx={{
+                              borderRadius: 1.5,
+                              pl: 2,
+                              pr: 2,
+                              py: 0.75,
+                              minHeight: 36,
+                              opacity: hasSubAccess ? 1 : 0.5,
+                              cursor: hasSubAccess ? "pointer" : "not-allowed",
+                              bgcolor: isSubActive
+                                ? theme.palette.mode === "dark"
+                                  ? "rgba(129, 140, 248, 0.1)"
+                                  : "rgba(79, 70, 229, 0.05)"
+                                : "transparent",
+                              color: isSubActive
+                                ? "primary.main"
+                                : "text.secondary",
+                              fontWeight: isSubActive ? 500 : 400,
+                              "&:hover": hasSubAccess
+                                ? {
+                                    bgcolor:
+                                      theme.palette.mode === "dark"
+                                        ? "rgba(129, 140, 248, 0.08)"
+                                        : "rgba(79, 70, 229, 0.04)",
+                                  }
+                                : {},
+                            }}
+                          >
+                            <ListItemIcon
+                              sx={{
+                                minWidth: 28,
+                                color: isSubActive
+                                  ? "primary.main"
+                                  : "text.secondary",
+                              }}
+                            >
+                              {!hasSubAccess ? (
+                                <Lock size={16} />
+                              ) : (
+                                subItem.icon
+                              )}
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={subItem.title}
+                              primaryTypographyProps={{
+                                fontSize: "0.8125rem",
+                                fontWeight: isSubActive ? 500 : 400,
+                                noWrap: true,
+                              }}
+                            />
+                          </ListItemButton>
+                        );
+
                         return (
                           <ListItem
                             key={subItem.path}
                             disablePadding
                             sx={{ mb: 0.25 }}
                           >
-                            <ListItemButton
-                              onClick={() => handleNavigation(subItem.path!)}
-                              disableRipple
-                              sx={{
-                                borderRadius: 1.5,
-                                pl: 2,
-                                pr: 2,
-                                py: 0.75,
-                                minHeight: 36,
-                                bgcolor: isSubActive
-                                  ? theme.palette.mode === "dark"
-                                    ? "rgba(129, 140, 248, 0.1)"
-                                    : "rgba(79, 70, 229, 0.05)"
-                                  : "transparent",
-                                color: isSubActive
-                                  ? "primary.main"
-                                  : "text.secondary",
-                                fontWeight: isSubActive ? 500 : 400,
-                                "&:hover": {
-                                  bgcolor:
-                                    theme.palette.mode === "dark"
-                                      ? "rgba(129, 140, 248, 0.08)"
-                                      : "rgba(79, 70, 229, 0.04)",
-                                },
-                              }}
-                            >
-                              <ListItemIcon
-                                sx={{
-                                  minWidth: 28,
-                                  color: isSubActive
-                                    ? "primary.main"
-                                    : "text.secondary",
-                                }}
+                            {!hasSubAccess ? (
+                              <Tooltip
+                                title="Bạn không có quyền truy cập"
+                                placement="right"
+                                arrow
                               >
-                                {subItem.icon}
-                              </ListItemIcon>
-                              <ListItemText
-                                primary={subItem.title}
-                                primaryTypographyProps={{
-                                  fontSize: "0.8125rem",
-                                  fontWeight: isSubActive ? 500 : 400,
-                                  noWrap: true,
-                                }}
-                              />
-                            </ListItemButton>
+                                {subButton}
+                              </Tooltip>
+                            ) : (
+                              subButton
+                            )}
                           </ListItem>
                         );
                       })}

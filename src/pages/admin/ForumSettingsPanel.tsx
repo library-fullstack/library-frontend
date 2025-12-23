@@ -45,7 +45,9 @@ export default function ForumSettingsPanel() {
 
   const updateMutation = useMutation({
     mutationFn: (data: ForumSettings) =>
-      Promise.resolve(forumApi.updateForumSettings(data)),
+      Promise.resolve(
+        forumApi.updateForumSettings(data as Partial<ForumSettings>)
+      ),
     onSuccess: () => {
       setHasChanged(false);
     },
@@ -57,7 +59,9 @@ export default function ForumSettingsPanel() {
       JSON.stringify(settings) !== JSON.stringify(fetchedSettings)
     ) {
       const timer = setTimeout(() => {
-        setSettings(fetchedSettings);
+        if (fetchedSettings) {
+          setSettings(fetchedSettings as unknown as ForumSettings);
+        }
       }, 0);
       return () => clearTimeout(timer);
     }
@@ -219,7 +223,9 @@ export default function ForumSettingsPanel() {
         <Button
           variant="outlined"
           onClick={() => {
-            setSettings(fetchedSettings);
+            if (fetchedSettings) {
+              setSettings(fetchedSettings as unknown as ForumSettings);
+            }
             setHasChanged(false);
           }}
           disabled={!hasChanged}

@@ -67,6 +67,7 @@ const BannerManagement: React.FC = () => {
     subtitleColor: "rgba(255,255,255,0.9)",
     buttonColor: "#ED553B",
     buttonText: "Xem thêm",
+    buttonLink: "",
     eventType: "DEFAULT",
     startDate: "",
     endDate: "",
@@ -142,6 +143,7 @@ const BannerManagement: React.FC = () => {
         subtitleColor: banner.subtitleColor,
         buttonColor: banner.buttonColor,
         buttonText: banner.buttonText,
+        buttonLink: banner.buttonLink || "",
         eventType: banner.eventType,
         startDate: formatDateForInput(banner.startDate),
         endDate: formatDateForInput(banner.endDate),
@@ -208,12 +210,15 @@ const BannerManagement: React.FC = () => {
     []
   );
 
-  const handleColorChange = useCallback((name: string) => (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  }, []);
+  const handleColorChange = useCallback(
+    (name: string) => (value: string) => {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    },
+    []
+  );
 
   const handleSave = async () => {
     if (!formData.title || !formData.subtitle || !formData.image) {
@@ -246,7 +251,6 @@ const BannerManagement: React.FC = () => {
       loadBanners();
 
       const bc = new BroadcastChannel("banner-sync");
-      logger.log("[BannerManagement] Đang phát tín hiệu REFRESH_BANNER");
       bc.postMessage("REFRESH_BANNER");
       bc.close();
     } catch (err) {
@@ -261,9 +265,6 @@ const BannerManagement: React.FC = () => {
         loadBanners();
 
         const bc = new BroadcastChannel("banner-sync");
-        logger.log(
-          "[BannerManagement] Đang phát tín hiệu REFRESH_BANNER (xoá)"
-        );
         bc.postMessage("REFRESH_BANNER");
         bc.close();
       } catch (err) {
@@ -274,16 +275,20 @@ const BannerManagement: React.FC = () => {
 
   const handleToggleStatus = async (id: string, currentStatus: boolean) => {
     try {
+      setBanners((prevBanners) =>
+        prevBanners.map((banner) =>
+          banner.id === id ? { ...banner, isActive: !currentStatus } : banner
+        )
+      );
+
       await bannerApi.toggleBannerStatus(id, !currentStatus);
       loadBanners();
 
       const bc = new BroadcastChannel("banner-sync");
-      logger.log(
-        "[BannerManagement] Đang phát tín hiệu REFRESH_BANNER (toggle)"
-      );
       bc.postMessage("REFRESH_BANNER");
       bc.close();
     } catch (err) {
+      loadBanners();
       setError(parseApiError(err));
     }
   };
@@ -846,6 +851,28 @@ const BannerFormDialog = React.memo(function BannerFormDialog({
                 fontSize: { xs: "0.75rem", sm: "0.875rem" },
               }}
             >
+              Link nút (không bắt buộc)
+            </Typography>
+            <TextField
+              name="buttonLink"
+              fullWidth
+              size="small"
+              placeholder="VD: /catalog hoặc https://example.com"
+              value={formData.buttonLink || ""}
+              onChange={onInputChange}
+            />
+          </Box>
+
+          <Box>
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                mb: 0.75,
+                fontWeight: 600,
+                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+              }}
+            >
               Sự kiện
             </Typography>
             <Select
@@ -914,7 +941,7 @@ const BannerFormDialog = React.memo(function BannerFormDialog({
                 onChange={onColorChange("titleColor")}
                 debounceMs={100}
                 slotProps={{
-                  htmlInput: { style: { cursor: "pointer", height: 40 } }
+                  htmlInput: { style: { cursor: "pointer", height: 40 } },
                 }}
               />
             </Box>
@@ -938,7 +965,7 @@ const BannerFormDialog = React.memo(function BannerFormDialog({
                 onChange={onColorChange("buttonColor")}
                 debounceMs={100}
                 slotProps={{
-                  htmlInput: { style: { cursor: "pointer", height: 40 } }
+                  htmlInput: { style: { cursor: "pointer", height: 40 } },
                 }}
               />
             </Box>
@@ -971,7 +998,7 @@ const BannerFormDialog = React.memo(function BannerFormDialog({
                 onChange={onColorChange("subtitleColor")}
                 debounceMs={100}
                 slotProps={{
-                  htmlInput: { style: { cursor: "pointer", height: 40 } }
+                  htmlInput: { style: { cursor: "pointer", height: 40 } },
                 }}
               />
             </Box>
