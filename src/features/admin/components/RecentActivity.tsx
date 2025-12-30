@@ -13,13 +13,22 @@ import { Clock, BookOpen } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 
+type BorrowStatus =
+  | "PENDING"
+  | "CONFIRMED"
+  | "APPROVED"
+  | "ACTIVE"
+  | "OVERDUE"
+  | "RETURNED"
+  | "CANCELLED";
+
 interface Activity {
   id: number;
   book_title: string;
   user_name: string;
   borrowed_at: string;
   due_date: string;
-  status: string;
+  status: BorrowStatus;
 }
 
 interface RecentActivityProps {
@@ -31,7 +40,7 @@ const getStatusColor = (
   status: string
 ): "primary" | "success" | "error" | "default" => {
   switch (status.toUpperCase()) {
-    case "BORROWED":
+    case "ACTIVE":
       return "primary";
     case "RETURNED":
       return "success";
@@ -44,7 +53,7 @@ const getStatusColor = (
 
 const getStatusLabel = (status: string) => {
   switch (status.toUpperCase()) {
-    case "BORROWED":
+    case "ACTIVE":
       return "Đang mượn";
     case "RETURNED":
       return "Đã trả";

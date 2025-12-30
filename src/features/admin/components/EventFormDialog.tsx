@@ -11,6 +11,8 @@ import {
   FormControl,
   InputLabel,
   Box,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -41,6 +43,7 @@ interface FormData {
   end_time: Date | null;
   status: EventStatus;
   thumbnail_url: string;
+  send_email?: boolean;
 }
 
 export default function EventFormDialog({
@@ -57,6 +60,7 @@ export default function EventFormDialog({
       end_time: null,
       status: EventStatus.UPCOMING,
       thumbnail_url: "",
+      send_email: false,
     },
   });
 
@@ -225,6 +229,21 @@ export default function EventFormDialog({
                 />
               )}
             />
+
+            {!editingId && (
+              <Controller
+                name="send_email"
+                control={control}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox {...field} checked={field.value || false} />
+                    }
+                    label="Gửi email thông báo cho sinh viên"
+                  />
+                )}
+              />
+            )}
           </Box>
         </DialogContent>
         <DialogActions>

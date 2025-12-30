@@ -26,6 +26,8 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Plus as PlusIcon,
+  Lock as LockIcon,
+  LockOpen as LockOpenIcon,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { forumApi } from "../../features/forum/api/forum.api";
@@ -208,7 +210,13 @@ export default function ForumCategoriesPanel() {
                     ))}
                   </Box>
                 </TableCell>
-                <TableCell>{category.is_locked ? "✓" : "✗"}</TableCell>
+                <TableCell>
+                  {category.is_locked ? (
+                    <LockIcon size={20} />
+                  ) : (
+                    <LockOpenIcon size={20} />
+                  )}
+                </TableCell>
                 <TableCell>
                   <IconButton
                     size="small"

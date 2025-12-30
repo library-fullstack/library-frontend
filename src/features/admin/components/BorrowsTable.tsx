@@ -19,11 +19,17 @@ import {
   Typography,
   Box,
   Stack,
-  Avatar,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
+  useTheme,
 } from "@mui/material";
 import { MoreVertical, Calendar, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import { borrowApi } from "@/features/borrow/api/borrow.api";
+import type { BorrowPreviewData } from "@/features/borrow/api/borrow.api";
+import type { ReturnReason } from "@/features/borrow/types/borrow.types";
 
 interface BorrowData {
   id: number;
@@ -46,7 +52,11 @@ interface BorrowData {
 
 interface BorrowsTableProps {
   borrows: BorrowData[];
-  onStatusUpdate: (borrowId: number, newStatus: string) => void;
+  onStatusUpdate: (
+    borrowId: number,
+    newStatus: string,
+    reasons?: string[]
+  ) => void;
   pagination: {
     page: number;
     limit: number;
@@ -57,29 +67,42 @@ interface BorrowsTableProps {
   onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
+const RETURN_REASON_LABELS: Record<string, string> = {
+  GOOD_CONDITION: "Sách còn tốt",
+  DAMAGED: "Sách hư hỏng",
+  LOST: "Sách bị mất",
+  WORN: "Sách rách / mềm",
+  WATER_DAMAGED: "Sách bị nước",
+  WRITTEN_ON: "Sách bị viết",
+  STAINED: "Sách bị bẩn",
+  DETERIORATED: "Sách mục",
+  OTHER: "Khác",
+};
+
 export default function BorrowsTable({
   borrows,
   onStatusUpdate,
   pagination,
   onPageChange,
   onRowsPerPageChange,
-}: BorrowsTableProps): React.ReactElement {
+}: BorrowsTableProps) {
+  const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedBorrow, setSelectedBorrow] = useState<BorrowData | null>(null);
-  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
-  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
-  const [newStatus, setNewStatus] = useState("");
 
-  const getStatusColor = (
-    status: string
-  ):
-    | "default"
-    | "primary"
-    | "secondary"
-    | "success"
-    | "error"
-    | "info"
-    | "warning" => {
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [statusOpen, setStatusOpen] = useState(false);
+  const [returnOpen, setReturnOpen] = useState(false);
+
+  const [newStatus, setNewStatus] = useState("");
+  const [selectedReturnReasons, setSelectedReturnReasons] = useState<string[]>(
+    []
+  );
+  const [previewData, setPreviewData] = useState<BorrowPreviewData | null>(
+    null
+  );
+
+  const getStatusColor = (status: string) => {
     switch (status) {
       case "PENDING":
         return "warning";
@@ -92,7 +115,6 @@ export default function BorrowsTable({
       case "RETURNED":
         return "success";
       case "OVERDUE":
-        return "error";
       case "CANCELLED":
         return "error";
       default:
@@ -100,7 +122,7 @@ export default function BorrowsTable({
     }
   };
 
-  const getStatusLabel = (status: string): string => {
+  const getStatusLabel = (status: string) => {
     switch (status) {
       case "PENDING":
         return "Chờ xác nhận";
@@ -112,49 +134,17 @@ export default function BorrowsTable({
         return "Đang mượn";
       case "RETURNED":
         return "Đã trả";
-      case "CANCELLED":
-        return "Đã hủy";
       case "OVERDUE":
         return "Quá hạn";
+      case "CANCELLED":
+        return "Đã hủy";
       default:
         return status;
     }
   };
 
-  const handleMenuOpen = (
-    event: React.MouseEvent<HTMLElement>,
-    borrow: BorrowData
-  ) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedBorrow(borrow);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleViewDetail = () => {
-    setDetailDialogOpen(true);
-    handleMenuClose();
-  };
-
-  const handleChangeStatus = () => {
-    if (selectedBorrow) {
-      setNewStatus(selectedBorrow.status);
-      setStatusDialogOpen(true);
-    }
-    handleMenuClose();
-  };
-
-  const handleSaveStatus = () => {
-    if (selectedBorrow && newStatus) {
-      onStatusUpdate(selectedBorrow.id, newStatus);
-      setStatusDialogOpen(false);
-    }
-  };
-
-  const getAvailableStatuses = (currentStatus: string): string[] => {
-    switch (currentStatus) {
+  const getAvailableStatuses = (status: string) => {
+    switch (status) {
       case "PENDING":
         return ["CONFIRMED", "CANCELLED"];
       case "CONFIRMED":
@@ -168,6 +158,55 @@ export default function BorrowsTable({
       default:
         return [];
     }
+  };
+
+  const handleMenuOpen = (
+    e: React.MouseEvent<HTMLElement>,
+    borrow: BorrowData
+  ) => {
+    setAnchorEl(e.currentTarget);
+    setSelectedBorrow(borrow);
+  };
+
+  const closeMenu = () => setAnchorEl(null);
+
+  const handleViewDetail = async () => {
+    if (!selectedBorrow) return;
+
+    try {
+      const res = await borrowApi.getBorrowPreview(selectedBorrow.id);
+
+      if (res.success) {
+        setPreviewData(res.data);
+        setDetailOpen(true);
+      }
+    } catch (error) {
+      console.error("Error fetching borrow preview:", error);
+      alert("Không thể tải chi tiết phiếu mượn. Vui lòng thử lại.");
+    }
+
+    closeMenu();
+  };
+
+  const handleChangeStatus = () => {
+    if (!selectedBorrow) return;
+    setNewStatus(selectedBorrow.status);
+    setStatusOpen(true);
+    closeMenu();
+  };
+
+  const handleSaveStatus = () => {
+    if (!selectedBorrow || !newStatus) return;
+
+    if (selectedBorrow.status === "ACTIVE" && newStatus === "RETURNED") {
+      setStatusOpen(false);
+      setReturnOpen(true);
+      setSelectedReturnReasons([]);
+      return;
+    }
+
+    onStatusUpdate(selectedBorrow.id, newStatus);
+    setStatusOpen(false);
   };
 
   return (
@@ -186,78 +225,41 @@ export default function BorrowsTable({
             </TableRow>
           </TableHead>
           <TableBody>
-            {borrows.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} align="center">
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ py: 4 }}
-                  >
-                    Không có dữ liệu
-                  </Typography>
+            {borrows.map((b) => (
+              <TableRow key={b.id} hover>
+                <TableCell>BRW-{String(b.id).padStart(6, "0")}</TableCell>
+                <TableCell>
+                  <Stack spacing={0.5}>
+                    <Typography fontWeight={600}>{b.fullname}</Typography>
+                    {b.student_id && (
+                      <Typography variant="caption">{b.student_id}</Typography>
+                    )}
+                    <Typography variant="caption">{b.email}</Typography>
+                  </Stack>
+                </TableCell>
+                <TableCell>{b.items?.length || 0} quyển</TableCell>
+                <TableCell>
+                  {format(new Date(b.borrow_date), "dd/MM/yyyy", {
+                    locale: vi,
+                  })}
+                </TableCell>
+                <TableCell>
+                  {format(new Date(b.due_date), "dd/MM/yyyy", { locale: vi })}
+                </TableCell>
+                <TableCell>
+                  <Chip
+                    size="small"
+                    label={getStatusLabel(b.status)}
+                    color={getStatusColor(b.status)}
+                  />
+                </TableCell>
+                <TableCell align="center">
+                  <IconButton onClick={(e) => handleMenuOpen(e, b)}>
+                    <MoreVertical size={18} />
+                  </IconButton>
                 </TableCell>
               </TableRow>
-            ) : (
-              borrows.map((borrow) => (
-                <TableRow key={borrow.id} hover>
-                  <TableCell>
-                    <Typography variant="body2" fontWeight={600}>
-                      BRW-{String(borrow.id).padStart(6, "0")}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Stack spacing={0.5}>
-                      <Typography variant="body2" fontWeight={600}>
-                        {borrow.fullname}
-                      </Typography>
-                      {borrow.student_id && (
-                        <Typography variant="caption" color="text.secondary">
-                          {borrow.student_id}
-                        </Typography>
-                      )}
-                      <Typography variant="caption" color="text.secondary">
-                        {borrow.email}
-                      </Typography>
-                    </Stack>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {borrow.items?.length || 0} quyển
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {format(new Date(borrow.borrow_date), "dd/MM/yyyy", {
-                        locale: vi,
-                      })}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {format(new Date(borrow.due_date), "dd/MM/yyyy", {
-                        locale: vi,
-                      })}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={getStatusLabel(borrow.status)}
-                      color={getStatusColor(borrow.status)}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell align="center">
-                    <IconButton
-                      size="small"
-                      onClick={(e) => handleMenuOpen(e, borrow)}
-                    >
-                      <MoreVertical size={18} />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
@@ -269,168 +271,221 @@ export default function BorrowsTable({
         onPageChange={onPageChange}
         rowsPerPage={pagination.limit}
         onRowsPerPageChange={onRowsPerPageChange}
-        rowsPerPageOptions={[5, 10, 25, 50]}
-        labelRowsPerPage="Số hàng mỗi trang:"
-        labelDisplayedRows={({ from, to, count }) =>
-          `${from}-${to} trong ${count}`
-        }
       />
 
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
-      >
+      <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={closeMenu}>
         <MenuItem onClick={handleViewDetail}>
-          <FileText size={18} style={{ marginRight: 8 }} />
-          Xem chi tiết
+          <FileText size={16} /> &nbsp; Xem chi tiết
         </MenuItem>
         {selectedBorrow &&
           getAvailableStatuses(selectedBorrow.status).length > 0 && (
             <MenuItem onClick={handleChangeStatus}>
-              <Calendar size={18} style={{ marginRight: 8 }} />
-              Đổi trạng thái
+              <Calendar size={16} /> &nbsp; Đổi trạng thái
             </MenuItem>
           )}
-        {selectedBorrow && selectedBorrow.status === "ACTIVE" && (
-          <MenuItem
-            onClick={() => {
-              handleMenuClose();
-              if (window.confirm("Gia hạn phiếu mượn này thêm 7 ngày?")) {
-                // TODO: Admin có thể gia hạn cho user
-                alert(
-                  "Tính năng đang phát triển - Admin sẽ có API riêng để gia hạn cho user"
-                );
-              }
-            }}
-          >
-            <Calendar size={18} style={{ marginRight: 8 }} />
-            Gia hạn (+7 ngày)
-          </MenuItem>
-        )}
       </Menu>
 
       <Dialog
-        open={detailDialogOpen}
-        onClose={() => setDetailDialogOpen(false)}
+        open={detailOpen}
+        onClose={() => setDetailOpen(false)}
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>Chi tiết phiếu mượn</DialogTitle>
-        <DialogContent>
-          {selectedBorrow && (
-            <Stack spacing={3}>
+        <DialogTitle sx={{ fontWeight: 600 }}>Chi tiết phiếu mượn</DialogTitle>
+
+        <DialogContent dividers>
+          {previewData && (
+            <Stack spacing={4}>
               <Box>
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  gutterBottom
-                >
+                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
                   Thông tin người mượn
                 </Typography>
+
                 <Stack spacing={1}>
-                  <Typography variant="body2">
-                    <strong>Họ tên:</strong> {selectedBorrow.fullname}
+                  <Typography>
+                    <b>Họ tên:</b> {previewData.fullname}
                   </Typography>
-                  {selectedBorrow.student_id && (
-                    <Typography variant="body2">
-                      <strong>Mã SV:</strong> {selectedBorrow.student_id}
+                  {previewData.student_id && (
+                    <Typography>
+                      <b>Mã SV:</b> {previewData.student_id}
                     </Typography>
                   )}
-                  <Typography variant="body2">
-                    <strong>Email:</strong> {selectedBorrow.email}
+                  <Typography>
+                    <b>Email:</b> {previewData.email}
+                  </Typography>
+                  <Typography>
+                    <b>Ngày mượn:</b>{" "}
+                    {format(new Date(previewData.borrow_date), "dd/MM/yyyy", {
+                      locale: vi,
+                    })}
+                  </Typography>
+                  <Typography>
+                    <b>Hạn trả:</b>{" "}
+                    {format(new Date(previewData.due_date), "dd/MM/yyyy", {
+                      locale: vi,
+                    })}
                   </Typography>
                 </Stack>
               </Box>
 
               <Box>
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  gutterBottom
-                >
-                  Danh sách sách
+                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                  Danh sách sách mượn
                 </Typography>
+
                 <Stack spacing={1}>
-                  {selectedBorrow.items?.map((item, index) => (
-                    <Box
-                      key={item.copy_id}
-                      sx={{ display: "flex", gap: 1, alignItems: "center" }}
-                    >
-                      {item.thumbnail_url && (
-                        <Avatar
-                          src={item.thumbnail_url}
-                          variant="rounded"
-                          sx={{ width: 40, height: 60 }}
-                        />
-                      )}
-                      <Typography variant="body2">
-                        {index + 1}. {item.book_title}
-                      </Typography>
-                    </Box>
-                  ))}
+                  {previewData.items && previewData.items.length > 0 ? (
+                    previewData.items.map((item, idx) => (
+                      <Box
+                        key={item.copy_id}
+                        sx={{
+                          px: 2,
+                          py: 1,
+                          borderRadius: 1,
+                          backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+                          border: "1px solid",
+                          borderColor: theme.palette.divider,
+                        }}
+                      >
+                        <Typography>
+                          {idx + 1}. {item.book_title}
+                        </Typography>
+                      </Box>
+                    ))
+                  ) : (
+                    <Typography color="text.secondary">
+                      Không có sách
+                    </Typography>
+                  )}
                 </Stack>
               </Box>
 
-              {selectedBorrow.signature && (
-                <Box>
-                  <Typography
-                    variant="subtitle2"
-                    color="text.secondary"
-                    gutterBottom
-                  >
-                    Chữ ký
+              <Box>
+                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                  Tình trạng khi trả sách
+                </Typography>
+
+                {previewData.status === 'RETURNED' ? (
+                  <FormGroup>
+                    {Object.entries(RETURN_REASON_LABELS).map(
+                      ([value, label]) => {
+                        const reason = value as ReturnReason;
+
+                        return (
+                          <FormControlLabel
+                            key={value}
+                            control={
+                              <Checkbox
+                                checked={
+                                  previewData.return_reasons?.includes(
+                                    reason
+                                  ) || false
+                                }
+                                disabled
+                              />
+                            }
+                            label={label}
+                          />
+                        );
+                      }
+                    )}
+                  </FormGroup>
+                ) : (
+                  <Typography color="text.secondary">
+                    Chưa có thông tin tình trạng (chưa trả sách)
                   </Typography>
-                  <Typography variant="body2">
-                    {selectedBorrow.signature}
-                  </Typography>
-                </Box>
-              )}
+                )}
+              </Box>
             </Stack>
           )}
         </DialogContent>
+
         <DialogActions>
-          <Button onClick={() => setDetailDialogOpen(false)}>Đóng</Button>
+          <Button onClick={() => setDetailOpen(false)}>Đóng</Button>
         </DialogActions>
       </Dialog>
 
       <Dialog
-        open={statusDialogOpen}
-        onClose={() => setStatusDialogOpen(false)}
+        open={statusOpen}
+        onClose={() => setStatusOpen(false)}
+        maxWidth="sm"
+        fullWidth
       >
-        <DialogTitle>Đổi trạng thái phiếu mượn</DialogTitle>
+        <DialogTitle>Đổi trạng thái</DialogTitle>
         <DialogContent>
-          <Stack spacing={2} sx={{ minWidth: 300, pt: 1 }}>
-            <Typography variant="body2">Chọn trạng thái mới:</Typography>
+          <Stack spacing={1} sx={{ minWidth: 320 }}>
             {selectedBorrow &&
-              getAvailableStatuses(selectedBorrow.status).map((status) => (
+              getAvailableStatuses(selectedBorrow.status).map((s) => (
                 <Button
-                  key={status}
-                  variant={newStatus === status ? "contained" : "outlined"}
-                  onClick={() => setNewStatus(status)}
-                  fullWidth
+                  key={s}
+                  variant={newStatus === s ? "contained" : "outlined"}
+                  onClick={() => setNewStatus(s)}
                 >
-                  {getStatusLabel(status)}
+                  {getStatusLabel(s)}
                 </Button>
               ))}
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setStatusDialogOpen(false)}>Hủy</Button>
-          <Button
-            onClick={handleSaveStatus}
-            variant="contained"
-            disabled={!newStatus}
-          >
+          <Button onClick={() => setStatusOpen(false)}>Hủy</Button>
+          <Button onClick={handleSaveStatus} variant="contained">
             Lưu
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={returnOpen}
+        onClose={() => setReturnOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Xác nhận trả sách</DialogTitle>
+        <DialogContent>
+          <FormGroup>
+            {Object.entries(RETURN_REASON_LABELS).map(([v, l]) => (
+              <FormControlLabel
+                key={v}
+                control={
+                  <Checkbox
+                    checked={selectedReturnReasons.includes(v)}
+                    onChange={(e) =>
+                      setSelectedReturnReasons((prev) =>
+                        e.target.checked
+                          ? [...prev, v]
+                          : prev.filter((x) => x !== v)
+                      )
+                    }
+                  />
+                }
+                label={l}
+                sx={{
+                  px: 1,
+                  py: 0.5,
+                  borderRadius: 1,
+                  "&:hover": { backgroundColor: "action.hover" },
+                }}
+              />
+            ))}
+          </FormGroup>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setReturnOpen(false)}>Hủy</Button>
+          <Button
+            variant="contained"
+            disabled={!selectedReturnReasons.length}
+            onClick={() => {
+              if (!selectedBorrow) return;
+              onStatusUpdate(
+                selectedBorrow.id,
+                "RETURNED",
+                selectedReturnReasons
+              );
+              setReturnOpen(false);
+              setSelectedReturnReasons([]);
+            }}
+          >
+            Xác nhận
           </Button>
         </DialogActions>
       </Dialog>

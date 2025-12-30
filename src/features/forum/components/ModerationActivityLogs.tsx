@@ -101,7 +101,7 @@ const ActivityLogsList: React.FC<ActivityLogsProps> = () => {
       {logs.length === 0 ? (
         <Alert severity="info">Không có hoạt động nào được ghi lại</Alert>
       ) : (
-        <Stack spacing={2}>
+        <Stack spacing={1}>
           {logs.map((log) => (
             <Card key={log.id} variant="outlined">
               <CardContent>

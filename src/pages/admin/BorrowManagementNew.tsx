@@ -85,17 +85,27 @@ export default function BorrowManagement(): React.ReactElement {
     setPagination((prev) => ({ ...prev, page: 0 }));
   };
 
-  const handleStatusUpdate = async (borrowId: number, newStatus: string) => {
+  const handleStatusUpdate = async (
+    borrowId: number,
+    newStatus: string,
+    reasons?: string[]
+  ) => {
     try {
-      await axiosClient.patch(`/borrows/admin/${borrowId}/status`, {
-        status: newStatus,
-      });
+      if (newStatus === "RETURNED") {
+        await axiosClient.post(`/borrows/${borrowId}/return`, {
+          returnReasons: reasons,
+        });
+      } else {
+        await axiosClient.patch(`/borrows/admin/status/${borrowId}`, {
+          status: newStatus,
+        });
+      }
+
       setError("");
       fetchBorrows();
     } catch (err) {
-      const errorMsg = parseApiError(err);
-      setError(errorMsg);
-      alert(`Lỗi: ${errorMsg}`);
+      const msg = parseApiError(err);
+      setError(msg);
     }
   };
 

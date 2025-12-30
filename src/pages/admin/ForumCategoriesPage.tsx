@@ -4,7 +4,7 @@ import ForumCategoriesPanel from "./ForumCategoriesPanel";
 
 export default function ForumCategoriesPage() {
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ marginLeft: 0, marginRight: 0 }}>
       <Suspense
         fallback={
           <Box

@@ -4,7 +4,7 @@ import ModerationPendingPosts from "../../features/forum/components/ModerationPe
 
 export default function ForumPendingPostsPage() {
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth={false} disableGutters sx={{ py: 4 }}>
       <Suspense
         fallback={
           <Box

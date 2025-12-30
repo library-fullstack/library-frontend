@@ -1,8 +1,5 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState } from "react";
 import {
-  Box,
-  Typography,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -10,168 +7,103 @@ import {
   TableHead,
   TableRow,
   TablePagination,
-  TextField,
   Chip,
   IconButton,
   Menu,
   MenuItem,
-  InputAdornment,
-  Select,
-  FormControl,
-  InputLabel,
-  Skeleton,
-  Alert,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Button,
+  Typography,
+  Stack,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
-import { Search, MoreVertical, CheckCircle, Clock } from "lucide-react";
-import { statisticsApi } from "../../features/admin/api/statistics.api";
-import { parseApiError } from "../../shared/lib/errorHandler";
-import { format, formatDistanceToNow } from "date-fns";
+import { MoreVertical, Calendar } from "lucide-react";
+import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import logger from "@/shared/lib/logger";
 
-interface Borrow {
-  id: string | number;
-  book_id: string | number;
-  book_title: string;
-  user_id: string | number;
-  user_name: string;
-  student_id: string;
-  borrowed_at: string;
+interface BorrowData {
+  id: number;
+  user_id: string;
+  fullname: string;
+  email: string;
+  student_id?: string;
+  borrow_date: string;
   due_date: string;
-  returned_at: string | null;
+  return_date?: string;
   status: string;
+  signature?: string;
+  items?: Array<{
+    copy_id: number;
+    book_id: number;
+    book_title: string;
+    thumbnail_url?: string;
+  }>;
 }
 
-export default function BorrowManagement() {
-  const [borrows, setBorrows] = useState<Borrow[]>([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+interface BorrowsTableProps {
+  borrows: BorrowData[];
+  onStatusUpdate: (
+    borrowId: number,
+    newStatus: string,
+    reasons?: string[]
+  ) => void;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  onPageChange: (event: unknown, newPage: number) => void;
+  onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+const RETURN_REASONS = [
+  { value: "GOOD_CONDITION", label: "Sách còn tốt" },
+  { value: "DAMAGED", label: "Sách hư hỏng (phí 30%)" },
+  { value: "LOST", label: "Sách mất (phí 100%)" },
+  { value: "WORN", label: "Sách rách / mềm bìa (phí 15%)" },
+  { value: "WATER_DAMAGED", label: "Sách bị nước (phí 50%)" },
+  { value: "WRITTEN_ON", label: "Sách bị viết vào (phí 20%)" },
+  { value: "STAINED", label: "Sách bị dịch / dấu vết (phí 10%)" },
+  { value: "DETERIORATED", label: "Sách mục nát (phí 40%)" },
+  { value: "OTHER", label: "Khác (liên hệ quản lý)" },
+];
+
+export default function BorrowsTable({
+  borrows,
+  onStatusUpdate,
+  pagination,
+  onPageChange,
+  onRowsPerPageChange,
+}: BorrowsTableProps): React.ReactElement {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedBorrow, setSelectedBorrow] = useState<Borrow | null>(null);
+  const [selectedBorrow, setSelectedBorrow] = useState<BorrowData | null>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const [returnDialogOpen, setReturnDialogOpen] = useState(false);
   const [newStatus, setNewStatus] = useState("");
+  const [selectedReturnReasons, setSelectedReturnReasons] = useState<string[]>(
+    []
+  );
 
-  const createMockBorrows = useCallback((): Borrow[] => {
-    const statuses = ["ACTIVE", "RETURNED", "APPROVED"];
-    const mockData: Borrow[] = [];
-    for (let i = 1; i <= rowsPerPage; i++) {
-      const status = statuses[i % statuses.length];
-      const borrowDate = new Date(Date.now() - (i + 10) * 24 * 60 * 60 * 1000);
-      const dueDate = new Date(borrowDate.getTime() + 14 * 24 * 60 * 60 * 1000);
-      const returnDate =
-        status === "RETURNED"
-          ? new Date(dueDate.getTime() - 2 * 24 * 60 * 60 * 1000)
-          : null;
-
-      mockData.push({
-        id: i + page * rowsPerPage,
-        book_id: Math.floor(Math.random() * 1000) + 1,
-        book_title: `Sách ${i + page * rowsPerPage}`,
-        user_id: Math.floor(Math.random() * 500) + 1,
-        user_name: `Người dùng ${i}`,
-        student_id: `SV${String(i + page * rowsPerPage).padStart(6, "0")}`,
-        borrowed_at: borrowDate.toISOString(),
-        due_date: dueDate.toISOString(),
-        returned_at: returnDate ? returnDate.toISOString() : null,
-        status,
-      });
-    }
-    return mockData;
-  }, [page, rowsPerPage]);
-
-  const fetchBorrows = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const response = await statisticsApi.getBorrowManagement({
-        page: page + 1,
-        limit: rowsPerPage,
-        search: search || undefined,
-        status: statusFilter || undefined,
-      });
-      setBorrows(response.data.borrows || []);
-      setTotal(response.data.total || 0);
-    } catch (err) {
-      const errorMessage = parseApiError(err);
-      setError(errorMessage);
-      setBorrows(createMockBorrows());
-      setTotal(rowsPerPage * 10);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, rowsPerPage, search, statusFilter, createMockBorrows]);
-
-  useEffect(() => {
-    fetchBorrows();
-  }, [fetchBorrows]);
-
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const handleMenuOpen = (
-    event: React.MouseEvent<HTMLElement>,
-    borrow: Borrow
-  ) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedBorrow(borrow);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedBorrow(null);
-  };
-
-  const handleChangeStatus = () => {
-    if (selectedBorrow) {
-      setNewStatus(selectedBorrow.status);
-      setStatusDialogOpen(true);
-    }
-    handleMenuClose();
-  };
-
-  const handleSaveStatus = async () => {
-    if (selectedBorrow) {
-      try {
-        await statisticsApi.updateBorrowStatus(selectedBorrow.id, newStatus);
-        fetchBorrows();
-      } catch (err) {
-        logger.error("Lỗi khi cập nhật trạng thái:", err);
-      }
-    }
-    setStatusDialogOpen(false);
-  };
-
-  const getStatusColor = (
-    status: string
-  ): "primary" | "success" | "error" | "warning" | "default" => {
-    switch (status.toUpperCase()) {
-      case "ACTIVE":
-        return "primary";
-      case "APPROVED":
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "PENDING":
         return "warning";
       case "CONFIRMED":
-        return "warning";
+        return "info";
+      case "APPROVED":
+        return "primary";
+      case "ACTIVE":
+        return "secondary";
       case "RETURNED":
         return "success";
       case "OVERDUE":
+      case "CANCELLED":
         return "error";
       default:
         return "default";
@@ -179,316 +111,255 @@ export default function BorrowManagement() {
   };
 
   const getStatusLabel = (status: string) => {
-    switch (status.toUpperCase()) {
+    switch (status) {
+      case "PENDING":
+        return "Chờ xác nhận";
+      case "CONFIRMED":
+        return "Đã xác nhận";
+      case "APPROVED":
+        return "Đã duyệt";
       case "ACTIVE":
         return "Đang mượn";
-      case "APPROVED":
-        return "Duyệt xong";
-      case "CONFIRMED":
-        return "Xác nhận";
       case "RETURNED":
         return "Đã trả";
       case "OVERDUE":
         return "Quá hạn";
+      case "CANCELLED":
+        return "Đã hủy";
       default:
         return status;
     }
   };
 
-  const isOverdue = (dueDate: string, status: string) => {
-    if (status === "RETURNED") return false;
-    return new Date(dueDate) < new Date();
+  const getAvailableStatuses = (currentStatus: string): string[] => {
+    switch (currentStatus) {
+      case "PENDING":
+        return ["CONFIRMED", "CANCELLED"];
+      case "CONFIRMED":
+        return ["APPROVED", "CANCELLED"];
+      case "APPROVED":
+        return ["ACTIVE", "CANCELLED"];
+      case "ACTIVE":
+        return ["RETURNED", "OVERDUE", "CANCELLED"];
+      case "OVERDUE":
+        return ["RETURNED", "CANCELLED"];
+      default:
+        return [];
+    }
+  };
+
+  const handleMenuOpen = (
+    event: React.MouseEvent<HTMLElement>,
+    borrow: BorrowData
+  ) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedBorrow(borrow);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleChangeStatus = () => {
+    if (!selectedBorrow) return;
+    setNewStatus(selectedBorrow.status);
+    setStatusDialogOpen(true);
+    handleMenuClose();
+  };
+
+  const handleSaveStatus = () => {
+    if (!selectedBorrow || !newStatus) return;
+
+    if (selectedBorrow.status === "ACTIVE" && newStatus === "RETURNED") {
+      setStatusDialogOpen(false);
+      setReturnDialogOpen(true);
+      setSelectedReturnReasons([]);
+      return;
+    }
+
+    onStatusUpdate(selectedBorrow.id, newStatus);
+    setStatusDialogOpen(false);
   };
 
   return (
-    <Box sx={{ maxWidth: "100%", px: { xs: 0, sm: 0 } }}>
-      <Box>
-        <Box sx={{ mb: { xs: 2, sm: 3, md: 4 } }}>
-          <Typography
-            variant="h4"
-            fontWeight={800}
-            gutterBottom
-            sx={{ fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" } }}
-          >
-            Quản lý mượn trả
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Theo dõi và quản lý các giao dịch mượn sách
-          </Typography>
-        </Box>
-
-        {error && (
-          <Alert severity="info" sx={{ mb: 3 }}>
-            Đang sử dụng dữ liệu mẫu. {error}
-          </Alert>
-        )}
-
-        <Paper elevation={0} sx={{ mb: 3 }}>
-          <Box
-            sx={{
-              p: { xs: 2, sm: 3 },
-              display: "flex",
-              gap: { xs: 1.5, sm: 2 },
-              flexWrap: "wrap",
-            }}
-          >
-            <TextField
-              placeholder="Tìm kiếm theo sách hoặc người dùng..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              sx={{
-                flex: { xs: "1 1 100%", sm: "1 1 auto" },
-                minWidth: { xs: "100%", sm: 250 },
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search size={20} />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <FormControl sx={{ minWidth: { xs: "100%", sm: 150 } }}>
-              <InputLabel>Trạng thái</InputLabel>
-              <Select
-                value={statusFilter}
-                label="Trạng thái"
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <MenuItem value="">Tất cả</MenuItem>
-                <MenuItem value="ACTIVE">Đang mượn</MenuItem>
-                <MenuItem value="APPROVED">Duyệt xong</MenuItem>
-                <MenuItem value="CONFIRMED">Xác nhận</MenuItem>
-                <MenuItem value="RETURNED">Đã trả</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-        </Paper>
-
-        <TableContainer component={Paper} elevation={0}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: "action.hover" }}>
-                <TableCell sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
-                  Mã GD
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
-                  Sách
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
-                  Người mượn
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
-                  MSSV
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
-                  Ngày mượn
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
-                  Hạn trả
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
-                  Ngày trả
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
-                  Trạng thái
-                </TableCell>
-                <TableCell
-                  sx={{ fontWeight: 700, whiteSpace: "nowrap" }}
-                  align="right"
-                >
-                  Thao tác
+    <>
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Mã phiếu</TableCell>
+              <TableCell>Người mượn</TableCell>
+              <TableCell>Số sách</TableCell>
+              <TableCell>Ngày mượn</TableCell>
+              <TableCell>Hạn trả</TableCell>
+              <TableCell>Trạng thái</TableCell>
+              <TableCell align="center">Thao tác</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {borrows.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} align="center">
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ py: 4 }}
+                  >
+                    Không có dữ liệu
+                  </Typography>
                 </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {loading ? (
-                Array.from({ length: rowsPerPage }).map((_, index) => (
-                  <TableRow key={index}>
-                    {Array.from({ length: 9 }).map((_, cellIndex) => (
-                      <TableCell key={cellIndex}>
-                        <Skeleton />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : borrows.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={9} align="center" sx={{ py: 8 }}>
-                    <Clock
-                      size={48}
-                      style={{ opacity: 0.3, marginBottom: 16 }}
-                    />
-                    <Typography variant="body2" color="text.secondary">
-                      Không tìm thấy giao dịch nào
+            ) : (
+              borrows.map((borrow) => (
+                <TableRow key={borrow.id} hover>
+                  <TableCell>
+                    <Typography variant="body2" fontWeight={600}>
+                      BRW-{String(borrow.id).padStart(6, "0")}
                     </Typography>
                   </TableCell>
-                </TableRow>
-              ) : (
-                borrows.map((borrow) => {
-                  const overdueStatus = isOverdue(
-                    borrow.due_date,
-                    borrow.status
-                  );
-                  return (
-                    <TableRow
-                      key={borrow.id}
-                      hover
-                      sx={{
-                        "&:hover": {
-                          bgcolor: "action.hover",
-                        },
-                        bgcolor: overdueStatus
-                          ? (theme) =>
-                              theme.palette.mode === "dark"
-                                ? "rgba(248, 113, 113, 0.08)"
-                                : "rgba(239, 68, 68, 0.04)"
-                          : "transparent",
-                      }}
-                    >
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>
-                        <Typography variant="body2" fontWeight={600}>
-                          #{borrow.id}
-                        </Typography>
-                      </TableCell>
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            maxWidth: 200,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {borrow.book_title}
-                        </Typography>
-                      </TableCell>
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>
-                        {borrow.user_name}
-                      </TableCell>
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>
-                        {borrow.student_id}
-                      </TableCell>
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>
-                        <Typography variant="body2">
-                          {format(new Date(borrow.borrowed_at), "dd/MM/yyyy")}
-                        </Typography>
+                  <TableCell>
+                    <Stack spacing={0.5}>
+                      <Typography variant="body2" fontWeight={600}>
+                        {borrow.fullname}
+                      </Typography>
+                      {borrow.student_id && (
                         <Typography variant="caption" color="text.secondary">
-                          {formatDistanceToNow(new Date(borrow.borrowed_at), {
-                            addSuffix: true,
-                            locale: vi,
-                          })}
+                          {borrow.student_id}
                         </Typography>
-                      </TableCell>
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>
-                        <Typography
-                          variant="body2"
-                          color={overdueStatus ? "error.main" : "text.primary"}
-                          fontWeight={overdueStatus ? 600 : 400}
-                        >
-                          {format(new Date(borrow.due_date), "dd/MM/yyyy")}
-                        </Typography>
-                      </TableCell>
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>
-                        {borrow.returned_at ? (
-                          <Typography variant="body2" color="success.main">
-                            {format(new Date(borrow.returned_at), "dd/MM/yyyy")}
-                          </Typography>
-                        ) : (
-                          <Typography variant="body2" color="text.secondary">
-                            Chưa trả
-                          </Typography>
-                        )}
-                      </TableCell>
-                      <TableCell sx={{ whiteSpace: "nowrap" }}>
-                        <Chip
-                          label={getStatusLabel(borrow.status)}
-                          size="small"
-                          color={getStatusColor(borrow.status)}
-                          sx={{ fontWeight: 600 }}
-                        />
-                      </TableCell>
-                      <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
-                        <IconButton
-                          size="small"
-                          onClick={(e) => handleMenuOpen(e, borrow)}
-                        >
-                          <MoreVertical size={18} />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
-          <TablePagination
-            component="div"
-            count={total}
-            page={page}
-            onPageChange={handleChangePage}
-            rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            rowsPerPageOptions={[5, 10, 25, 50]}
-            labelRowsPerPage="Số dòng mỗi trang:"
-            labelDisplayedRows={({ from, to, count }) =>
-              `${from}-${to} trong tổng số ${count}`
-            }
-          />
-        </TableContainer>
+                      )}
+                      <Typography variant="caption" color="text.secondary">
+                        {borrow.email}
+                      </Typography>
+                    </Stack>
+                  </TableCell>
+                  <TableCell>{borrow.items?.length || 0} quyển</TableCell>
+                  <TableCell>
+                    {format(new Date(borrow.borrow_date), "dd/MM/yyyy", {
+                      locale: vi,
+                    })}
+                  </TableCell>
+                  <TableCell>
+                    {format(new Date(borrow.due_date), "dd/MM/yyyy", {
+                      locale: vi,
+                    })}
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={getStatusLabel(borrow.status)}
+                      color={getStatusColor(borrow.status)}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell align="center">
+                    <IconButton
+                      size="small"
+                      onClick={(e) => handleMenuOpen(e, borrow)}
+                    >
+                      <MoreVertical size={18} />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleMenuClose}
-          disableScrollLock={true}
-        >
-          <MenuItem onClick={handleChangeStatus}>
-            <CheckCircle size={18} style={{ marginRight: 8 }} />
-            Đổi trạng thái
-          </MenuItem>
-          {selectedBorrow?.status !== "RETURNED" && (
-            <MenuItem
-              onClick={() => {
-                setNewStatus("RETURNED");
-                handleSaveStatus();
-              }}
-              sx={{ color: "success.main" }}
-            >
-              <CheckCircle size={18} style={{ marginRight: 8 }} />
-              Xác nhận đã trả
-            </MenuItem>
-          )}
-        </Menu>
+      <TablePagination
+        component="div"
+        count={pagination.total}
+        page={pagination.page}
+        onPageChange={onPageChange}
+        rowsPerPage={pagination.limit}
+        onRowsPerPageChange={onRowsPerPageChange}
+        rowsPerPageOptions={[5, 10, 25, 50]}
+      />
 
-        <Dialog
-          open={statusDialogOpen}
-          onClose={() => setStatusDialogOpen(false)}
-        >
-          <DialogTitle>Đổi trạng thái giao dịch</DialogTitle>
-          <DialogContent sx={{ minWidth: 300, pt: 2 }}>
-            <FormControl fullWidth>
-              <InputLabel>Trạng thái mới</InputLabel>
-              <Select
-                value={newStatus}
-                label="Trạng thái mới"
-                onChange={(e) => setNewStatus(e.target.value)}
-              >
-                <MenuItem value="BORROWED">Đang mượn</MenuItem>
-                <MenuItem value="RETURNED">Đã trả</MenuItem>
-                <MenuItem value="OVERDUE">Quá hạn</MenuItem>
-              </Select>
-            </FormControl>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setStatusDialogOpen(false)}>Hủy</Button>
-            <Button variant="contained" onClick={handleSaveStatus}>
-              Lưu
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Box>
-    </Box>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleChangeStatus}>
+          <Calendar size={18} style={{ marginRight: 8 }} />
+          Đổi trạng thái
+        </MenuItem>
+      </Menu>
+
+      <Dialog
+        open={statusDialogOpen}
+        onClose={() => setStatusDialogOpen(false)}
+      >
+        <DialogTitle>Đổi trạng thái</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2}>
+            {selectedBorrow &&
+              getAvailableStatuses(selectedBorrow.status).map((status) => (
+                <Button
+                  key={status}
+                  variant={newStatus === status ? "contained" : "outlined"}
+                  onClick={() => setNewStatus(status)}
+                >
+                  {getStatusLabel(status)}
+                </Button>
+              ))}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setStatusDialogOpen(false)}>Hủy</Button>
+          <Button onClick={handleSaveStatus} variant="contained">
+            Lưu
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={returnDialogOpen}
+        onClose={() => setReturnDialogOpen(false)}
+      >
+        <DialogTitle>Xác nhận trả sách</DialogTitle>
+        <DialogContent>
+          <FormGroup>
+            {RETURN_REASONS.map((r) => (
+              <FormControlLabel
+                key={r.value}
+                control={
+                  <Checkbox
+                    checked={selectedReturnReasons.includes(r.value)}
+                    onChange={(e) =>
+                      setSelectedReturnReasons((prev) =>
+                        e.target.checked
+                          ? [...prev, r.value]
+                          : prev.filter((x) => x !== r.value)
+                      )
+                    }
+                  />
+                }
+                label={r.label}
+              />
+            ))}
+          </FormGroup>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setReturnDialogOpen(false)}>Hủy</Button>
+          <Button
+            variant="contained"
+            disabled={selectedReturnReasons.length === 0}
+            onClick={() => {
+              if (!selectedBorrow) return;
+              onStatusUpdate(
+                selectedBorrow.id,
+                "RETURNED",
+                selectedReturnReasons
+              );
+              setReturnDialogOpen(false);
+              setSelectedReturnReasons([]);
+            }}
+          >
+            Xác nhận
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }

@@ -122,7 +122,10 @@ const ReportsList: React.FC<ReportsListProps> = ({ onReportUpdated }) => {
       ) : (
         <>
           {reports.map((report) => (
-            <Card key={report.id} sx={{ mb: 2 }}>
+            <Card
+              key={report.id}
+              sx={{ mb: 1.5, "&:not(:last-child)": { mb: 1.5 } }}
+            >
               <CardContent>
                 <Stack direction="row" justifyContent="space-between" mb={1}>
                   <Typography variant="h6">

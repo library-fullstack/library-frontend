@@ -3,6 +3,7 @@ import type {
   CreateBorrowRequest,
   CreateBorrowResponse,
 } from "../types/borrow.types";
+import { BorrowStatus, ReturnReason } from "../types/borrow.types";
 
 export interface BorrowRequest {
   book_id: string;
@@ -17,7 +18,7 @@ export interface BorrowRecord {
   borrow_date: string;
   expected_return_date: string;
   actual_return_date?: string;
-  status: "BORROWED" | "RETURNED" | "OVERDUE";
+  status: BorrowStatus;
   book?: {
     title: string;
     author: string;
@@ -34,6 +35,7 @@ export interface BorrowPreviewData {
   fullname: string;
   email: string;
   student_id?: string;
+  return_reasons?: ReturnReason[];
   items?: Array<{
     copy_id: number;
     book_id: number;
@@ -75,7 +77,8 @@ export const borrowApi = {
 
   getMyBorrows: () => axiosClient.get<BorrowRecord[]>("/borrows/my"),
 
-  returnBook: (id: string) => axiosClient.patch(`/borrows/${id}/return`),
+  returnBorrow: (id: number, reasons: ReturnReason[]) =>
+    axiosClient.post(`/borrows/${id}/return`, { returnReasons: reasons }),
 
   renewBook: (id: string) => axiosClient.patch(`/borrows/${id}/renew`),
 
