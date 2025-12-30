@@ -4,7 +4,7 @@ import ModerationReports from "../../features/forum/components/ModerationReports
 
 export default function ForumReportsPage() {
   return (
-    <Box>
+    <Box sx={{ pl: 4, marginLeft: 0, marginRight: 0 }}>
       <Suspense
         fallback={
           <Box

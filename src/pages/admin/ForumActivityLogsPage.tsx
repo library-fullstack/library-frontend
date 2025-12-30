@@ -4,7 +4,7 @@ import ModerationActivityLogs from "../../features/forum/components/ModerationAc
 
 export default function ForumActivityLogsPage() {
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ marginLeft: 0, marginRight: 0 }}>
       <Suspense
         fallback={
           <Box

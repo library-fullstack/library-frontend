@@ -138,11 +138,23 @@ const ModerationDashboard: React.FC = () => {
         </Box>
       )}
 
-      <Box flex={1} overflow="auto" p={{ xs: 2, md: 3 }}>
-        <Typography variant="h4" mb={3}>
-          {tabs.find((t) => t.id === activeTab)?.label}
-        </Typography>
-        {renderContent()}
+      <Box
+        flex={1}
+        overflow="auto"
+        sx={{ display: "flex", flexDirection: "column" }}
+      >
+        <Box sx={{ px: { xs: 2, md: 2.5 }, pt: { xs: 2, md: 2.5 }, pb: 0 }}>
+          <Typography variant="h4" fontWeight={800} sx={{ mb: 0 }}>
+            {tabs.find((t) => t.id === activeTab)?.label}
+          </Typography>
+        </Box>
+        <Box
+          flex={1}
+          overflow="auto"
+          sx={{ px: { xs: 2, md: 2.5 }, py: { xs: 2, md: 2.5 } }}
+        >
+          {renderContent()}
+        </Box>
       </Box>
     </Box>
   );

@@ -104,7 +104,10 @@ const PendingPostsList: React.FC<PendingPostsProps> = ({ onPostUpdated }) => {
       ) : (
         <>
           {posts.map((post) => (
-            <Card key={post.id} sx={{ mb: 2 }}>
+            <Card
+              key={post.id}
+              sx={{ mb: 1.5, "&:not(:last-child)": { mb: 1.5 } }}
+            >
               <CardContent>
                 <Typography variant="h6" gutterBottom>
                   {post.title}

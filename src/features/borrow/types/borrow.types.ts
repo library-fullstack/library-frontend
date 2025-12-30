@@ -36,3 +36,42 @@ export interface CreateBorrowResponse {
     note: string;
   };
 }
+
+export type ReturnReason =
+  | "GOOD_CONDITION"
+  | "DAMAGED"
+  | "LOST"
+  | "WORN"
+  | "WATER_DAMAGED"
+  | "WRITTEN_ON"
+  | "STAINED"
+  | "DETERIORATED"
+  | "OTHER";
+
+export type BorrowStatus =
+  | "PENDING"
+  | "CONFIRMED"
+  | "APPROVED"
+  | "ACTIVE"
+  | "OVERDUE"
+  | "RETURNED"
+  | "CANCELLED";
+
+export interface BorrowData {
+  id: number;
+  user_id: string;
+  fullname: string;
+  email: string;
+  student_id?: string;
+  borrow_date: string;
+  due_date: string;
+  return_date?: string;
+  status: BorrowStatus;
+  signature?: string;
+  items?: Array<{
+    copy_id: number;
+    book_id: number;
+    book_title: string;
+    thumbnail_url?: string;
+  }>;
+}

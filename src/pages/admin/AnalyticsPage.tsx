@@ -11,6 +11,13 @@ import {
   LinearProgress,
   Divider,
   Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Avatar,
 } from "@mui/material";
 import { motion } from "framer-motion";
 import {
@@ -25,8 +32,49 @@ import { statisticsApi } from "../../features/admin/api/statistics.api";
 import type { DashboardStatistics } from "../../features/admin/api/statistics.api";
 import { parseApiError } from "../../shared/lib/errorHandler";
 
+interface TopBook {
+  id: number;
+  title: string;
+  borrow_count: number;
+}
+
+interface TopCategory {
+  id: number;
+  name: string;
+  borrow_count: number;
+}
+
+interface TopUser {
+  id: string;
+  full_name: string;
+  borrow_count: number;
+  avatar_url?: string;
+}
+
+interface TopBookApi {
+  book_id: number;
+  title: string;
+  borrow_count: number;
+}
+
+interface TopCategoryApi {
+  category_id: number;
+  category_name: string;
+  borrow_count: number;
+}
+
+interface TopBorrowingUserApi {
+  user_id: string;
+  full_name: string;
+  borrow_count: number;
+  avatar_url?: string;
+}
+
 export default function AnalyticsPage() {
   const [stats, setStats] = useState<DashboardStatistics | null>(null);
+  const [topBooks, setTopBooks] = useState<TopBook[]>([]);
+  const [topCategories, setTopCategories] = useState<TopCategory[]>([]);
+  const [topUsers, setTopUsers] = useState<TopUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -34,11 +82,48 @@ export default function AnalyticsPage() {
     setLoading(true);
     setError("");
     try {
-      const response = await statisticsApi.getDashboardStats();
-      setStats(response.data);
+      const [statsRes, booksRes, categoriesRes, usersRes] = await Promise.all([
+        statisticsApi.getDashboardStats(),
+        statisticsApi.getTopBorrowedBooks(10),
+        statisticsApi.getTopBorrowedCategories(10),
+        statisticsApi.getTopBorrowingUsers(10),
+      ]);
+
+      setStats(statsRes.data);
+      setTopBooks(
+        (booksRes.data.data ?? []).map(
+          (b: TopBookApi): TopBook => ({
+            id: b.book_id,
+            title: b.title,
+            borrow_count: b.borrow_count,
+          })
+        )
+      );
+      setTopCategories(
+        (categoriesRes.data.data ?? []).map(
+          (c: TopCategoryApi): TopCategory => ({
+            id: c.category_id,
+            name: c.category_name,
+            borrow_count: c.borrow_count,
+          })
+        )
+      );
+      setTopUsers(
+        (usersRes.data.data ?? []).map(
+          (u: TopBorrowingUserApi): TopUser => ({
+            id: u.user_id,
+            full_name: u.full_name,
+            borrow_count: u.borrow_count,
+            avatar_url: u.avatar_url,
+          })
+        )
+      );
     } catch (err) {
       setError(parseApiError(err));
       setStats(createMockStats());
+      setTopBooks([]);
+      setTopCategories([]);
+      setTopUsers([]);
     } finally {
       setLoading(false);
     }
@@ -98,6 +183,14 @@ export default function AnalyticsPage() {
       storageUsage: 45,
       apiResponseTime: 150,
     },
+    borrowTrends: [
+      { month: "T7", borrows: 120, returns: 95 },
+      { month: "T8", borrows: 140, returns: 130 },
+      { month: "T9", borrows: 160, returns: 150 },
+      { month: "T10", borrows: 180, returns: 165 },
+      { month: "T11", borrows: 200, returns: 190 },
+      { month: "T12", borrows: 210, returns: 205 },
+    ],
   });
 
   const displayStats = stats || createMockStats();
@@ -621,6 +714,195 @@ export default function AnalyticsPage() {
                 </Box>
               )}
             </Paper>
+          </Grid>
+
+          <Grid size={12}>
+            <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
+              Top 10 Sách Mượn Nhiều Nhất
+            </Typography>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead sx={{ backgroundColor: "action.hover" }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 700 }}>Sách</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700 }}>
+                      Lần mượn
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {loading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell>
+                          <Skeleton width="60%" />
+                        </TableCell>
+                        <TableCell align="right">
+                          <Skeleton width={40} />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : topBooks.length > 0 ? (
+                    topBooks.map((book) => (
+                      <TableRow key={book.id} hover>
+                        <TableCell>{book.title}</TableCell>
+                        <TableCell align="right">
+                          <Chip
+                            label={book.borrow_count}
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={2} align="center" sx={{ py: 3 }}>
+                        Chưa có dữ liệu
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Grid>
+
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
+              Top 10 Danh Mục Mượn Nhiều
+            </Typography>
+            <TableContainer component={Paper}>
+              <Table size="small">
+                <TableHead sx={{ backgroundColor: "action.hover" }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 700 }}>Danh mục</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700 }}>
+                      Lần mượn
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {loading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell>
+                          <Skeleton width="70%" />
+                        </TableCell>
+                        <TableCell align="right">
+                          <Skeleton width={40} />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : topCategories.length > 0 ? (
+                    topCategories.map((cat) => (
+                      <TableRow key={cat.id} hover>
+                        <TableCell>{cat.name}</TableCell>
+                        <TableCell align="right">
+                          <Chip
+                            label={cat.borrow_count}
+                            size="small"
+                            color="success"
+                            variant="outlined"
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={2} align="center" sx={{ py: 2 }}>
+                        Chưa có dữ liệu
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Grid>
+
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
+              Top 10 Người Mượn Nhiều Nhất
+            </Typography>
+            <TableContainer component={Paper}>
+              <Table size="small">
+                <TableHead sx={{ backgroundColor: "action.hover" }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 700 }}>Người dùng</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700 }}>
+                      Số phiếu
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {loading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                            }}
+                          >
+                            <Skeleton
+                              variant="circular"
+                              width={32}
+                              height={32}
+                            />
+                            <Skeleton width="60%" />
+                          </Box>
+                        </TableCell>
+                        <TableCell align="right">
+                          <Skeleton width={40} />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : topUsers.length > 0 ? (
+                    topUsers.map((user) => (
+                      <TableRow key={user.id} hover>
+                        <TableCell>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                            }}
+                          >
+                            <Avatar
+                              src={user.avatar_url}
+                              sx={{ width: 32, height: 32 }}
+                            >
+                              {user.full_name.charAt(0)}
+                            </Avatar>
+                            <Box>
+                              <Typography variant="body2" fontWeight={600}>
+                                {user.full_name}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </TableCell>
+                        <TableCell align="right">
+                          <Chip
+                            label={user.borrow_count}
+                            size="small"
+                            color="warning"
+                            variant="outlined"
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={2} align="center" sx={{ py: 2 }}>
+                        Chưa có dữ liệu
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Grid>
         </Grid>
       </motion.div>

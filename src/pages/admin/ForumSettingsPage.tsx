@@ -4,7 +4,7 @@ import ForumSettingsPanel from "./ForumSettingsPanel";
 
 export default function ForumSettingsPage() {
   return (
-    <Box>
+    <Box sx={{ pl: 4, marginLeft: 0, marginRight: 0 }}>
       <Suspense
         fallback={
           <Box

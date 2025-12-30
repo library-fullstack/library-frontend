@@ -168,12 +168,14 @@ export default function AdminDashboard() {
     usersJoinedLastMonth: 52,
     borrowsLastMonth: 178,
     overdueLastMonth: 15,
+
     growthRates: {
       books: 3.6,
       users: 7.8,
       borrows: -2.4,
       overdue: -15.7,
     },
+
     popularCategories: [
       { category_id: 1, category_name: "Khoa học", book_count: 287 },
       { category_id: 2, category_name: "Văn học", book_count: 245 },
@@ -181,44 +183,18 @@ export default function AdminDashboard() {
       { category_id: 4, category_name: "Kinh tế", book_count: 176 },
       { category_id: 5, category_name: "Nghệ thuật", book_count: 154 },
     ],
+
     recentBorrows: [
       {
         id: 1,
         book_title: "Clean Code",
         user_name: "Nguyễn Văn A",
-        borrowed_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        due_date: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000).toISOString(),
-        status: "BORROWED",
-      },
-      {
-        id: 2,
-        book_title: "Introduction to Algorithms",
-        user_name: "Trần Thị B",
-        borrowed_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-        due_date: new Date(Date.now() + 11 * 24 * 60 * 60 * 1000).toISOString(),
-        status: "BORROWED",
-      },
-      {
-        id: 3,
-        book_title: "Design Patterns",
-        user_name: "Lê Văn C",
-        borrowed_at: new Date(
-          Date.now() - 1 * 24 * 60 * 60 * 1000
-        ).toISOString(),
-        due_date: new Date(Date.now() + 13 * 24 * 60 * 60 * 1000).toISOString(),
-        status: "BORROWED",
-      },
-      {
-        id: 4,
-        book_title: "The Pragmatic Programmer",
-        user_name: "Phạm Thị D",
-        borrowed_at: new Date(
-          Date.now() - 3 * 24 * 60 * 60 * 1000
-        ).toISOString(),
-        due_date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-        status: "OVERDUE",
+        borrowed_at: new Date().toISOString(),
+        due_date: new Date().toISOString(),
+        status: "ACTIVE",
       },
     ],
+
     monthlyStats: [
       { month: "T7", books: 32, users: 45 },
       { month: "T8", books: 38, users: 52 },
@@ -227,6 +203,16 @@ export default function AdminDashboard() {
       { month: "T11", books: 47, users: 69 },
       { month: "T12", books: 45, users: 67 },
     ],
+
+    borrowTrends: [
+      { month: "T7", borrows: 156, returns: 142 },
+      { month: "T8", borrows: 178, returns: 165 },
+      { month: "T9", borrows: 192, returns: 175 },
+      { month: "T10", borrows: 215, returns: 198 },
+      { month: "T11", borrows: 234, returns: 210 },
+      { month: "T12", borrows: 189, returns: 176 },
+    ],
+
     systemHealth: {
       databaseStatus: "healthy",
       storageUsage: 45,
@@ -235,18 +221,6 @@ export default function AdminDashboard() {
   });
 
   const displayStats = stats || createMockStats();
-
-  const borrowTrendData = React.useMemo(
-    () => [
-      { month: "T7", borrows: 156, returns: 142 },
-      { month: "T8", borrows: 178, returns: 165 },
-      { month: "T9", borrows: 192, returns: 175 },
-      { month: "T10", borrows: 215, returns: 198 },
-      { month: "T11", borrows: 234, returns: 210 },
-      { month: "T12", borrows: 189, returns: 176 },
-    ],
-    []
-  );
 
   const categoryData = React.useMemo(
     () =>
@@ -381,7 +355,7 @@ export default function AdminDashboard() {
                 }}
               >
                 <React.Suspense fallback={null}>
-                  <TrendChart data={borrowTrendData} />
+                  <TrendChart data={displayStats.borrowTrends} />
                 </React.Suspense>
               </Box>
             )}

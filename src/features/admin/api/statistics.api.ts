@@ -1,4 +1,8 @@
 import axiosClient from "../../../shared/api/axiosClient";
+import {
+  ReturnReason,
+  BorrowStatus,
+} from "@/features/borrow/types/borrow.types";
 
 export interface DashboardStatistics {
   totalBooks: number;
@@ -33,7 +37,7 @@ export interface DashboardStatistics {
     user_name: string;
     borrowed_at: string;
     due_date: string;
-    status: string;
+    status: BorrowStatus;
   }>;
   monthlyStats: Array<{
     month: string;
@@ -45,6 +49,11 @@ export interface DashboardStatistics {
     storageUsage: number;
     apiResponseTime: number;
   };
+  borrowTrends: Array<{
+    month: string;
+    borrows: number;
+    returns: number;
+  }>;
 }
 
 export interface UserManagementData {
@@ -88,9 +97,28 @@ export interface BorrowManagementData {
     borrowed_at: string;
     due_date: string;
     returned_at: string | null;
-    status: string;
+    status: BorrowStatus;
   }>;
   total: number;
+}
+
+export interface TopBorrowedBook {
+  book_id: number;
+  title: string;
+  borrow_count: number;
+}
+
+export interface TopBorrowedCategory {
+  category_id: number;
+  category_name: string;
+  borrow_count: number;
+}
+
+export interface TopBorrowingUser {
+  user_id: string;
+  full_name: string;
+  student_id: string;
+  borrow_count: number;
 }
 
 export const statisticsApi = {
@@ -129,6 +157,31 @@ export const statisticsApi = {
 
   deleteUser: (userId: string) => axiosClient.delete(`/admin/${userId}`),
 
-  updateBorrowStatus: (borrowId: string | number, status: string) =>
-    axiosClient.patch(`/statistics/borrows/${borrowId}`, { status }),
+  updateBorrowStatus: (borrowId: string | number, status: BorrowStatus) =>
+    axiosClient.patch(`/borrows/admin/status/${borrowId}`, { status }),
+
+  returnBorrow: async (borrowId: number, returnReason: ReturnReason) => {
+    const res = await axiosClient.post(`/borrows/${borrowId}/return`, {
+      returnReason,
+    });
+    return res.data;
+  },
+
+  getTopBorrowedBooks: (limit = 10) =>
+    axiosClient.get<{
+      success: boolean;
+      data: TopBorrowedBook[];
+    }>("/borrows/analytics/top-books", { params: { limit } }),
+
+  getTopBorrowedCategories: (limit = 10) =>
+    axiosClient.get<{
+      success: boolean;
+      data: TopBorrowedCategory[];
+    }>("/borrows/analytics/top-categories", { params: { limit } }),
+
+  getTopBorrowingUsers: (limit = 10) =>
+    axiosClient.get<{
+      success: boolean;
+      data: TopBorrowingUser[];
+    }>("/borrows/analytics/top-users", { params: { limit } }),
 };
