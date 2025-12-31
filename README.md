@@ -315,13 +315,6 @@ We welcome contributions! Please:
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Contact & Support
-
-- Author: Trần Kính Hoàng (hoaug)
-- Email: [your-email@example.com]
-- GitHub: [your-github-profile]
-- Issues: Please report bugs via GitHub Issues
-
 ## Acknowledgments
 
 - Built with React and Vite
@@ -329,9 +322,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - TanStack for data fetching
 - Vercel for hosting and analytics
 - Thanks to the open source community
-
----
-
-Last Updated: December 31, 2025
-Language: Professional English
-Status: Ready for Production
