@@ -230,7 +230,9 @@ export default function BorrowsTable({
                 <TableCell>BRW-{String(b.id).padStart(6, "0")}</TableCell>
                 <TableCell>
                   <Stack spacing={0.5}>
-                    <Typography fontWeight={600}>{b.fullname}</Typography>
+                    <Typography variant="body2" fontWeight={500}>
+                      {b.fullname}
+                    </Typography>
                     {b.student_id && (
                       <Typography variant="caption">{b.student_id}</Typography>
                     )}
@@ -342,7 +344,10 @@ export default function BorrowsTable({
                           px: 2,
                           py: 1,
                           borderRadius: 1,
-                          backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+                          backgroundColor:
+                            theme.palette.mode === "dark"
+                              ? "rgba(255, 255, 255, 0.05)"
+                              : "rgba(0, 0, 0, 0.02)",
                           border: "1px solid",
                           borderColor: theme.palette.divider,
                         }}
@@ -365,7 +370,7 @@ export default function BorrowsTable({
                   Tình trạng khi trả sách
                 </Typography>
 
-                {previewData.status === 'RETURNED' ? (
+                {previewData.status === "RETURNED" ? (
                   <FormGroup>
                     {Object.entries(RETURN_REASON_LABELS).map(
                       ([value, label]) => {
@@ -392,7 +397,7 @@ export default function BorrowsTable({
                   </FormGroup>
                 ) : (
                   <Typography color="text.secondary">
-                    Chưa có thông tin tình trạng (chưa trả sách)
+                    Chưa có thông tin tình trạng.
                   </Typography>
                 )}
               </Box>
